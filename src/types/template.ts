@@ -126,9 +126,9 @@ export interface BaseElement {
   dataKey?: string;
   visibleDataKey?: string; // Logic hiển thị (VD: "isLive")
   fallback?: string;       // Giá trị dự phòng nếu dataKey rỗng
-  format?: string;         // Format pipeline (VD: "uppercase | prefix:VS ")
+  formatters?: string[];   // Array of formatter pipelines (VD: ["uppercase", "shorten:10"])
   
-  // Transform & Bounds
+  // Legacy / existing formatting (keep for backward compatibility)
   position: Coordinates;
   size?: Dimensions; // Line có thể không có size mà dùng points
   scale?: Coordinates;
@@ -147,6 +147,7 @@ export interface ImageElement extends BaseElement {
 
 export interface TextElement extends BaseElement {
   type: "Text";
+  dataType?: "string" | "number" | "boolean" | "array" | "object" | "date" | "time";
   text?: string;
   style: ElementStyle;
   transform?: "none" | "uppercase" | "lowercase";

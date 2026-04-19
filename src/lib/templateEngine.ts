@@ -1,9 +1,21 @@
 import { Match, TemplateElement } from '../types/template';
 import { getContrastColor } from './colorUtils';
+import { format as formatDate, parseISO } from 'date-fns';
 
 // Hỗ trợ truy xuất dữ liệu từ object dựa trên dấu chấm (e.g. "homeTeam.assets.logo")
 const getByPath = (obj: any, path: string) => {
   if (!path) return undefined;
+  
+  // Smart fallback for team colors to support legacy records
+  if (path.endsWith('.colors.primary')) {
+    const standardVal = path.split('.').reduce((acc, part) => acc && acc[part], obj);
+    if (standardVal !== undefined) return standardVal;
+    
+    // Fallback to .color
+    const fallbackPath = path.replace('.colors.primary', '.color');
+    return fallbackPath.split('.').reduce((acc, part) => acc && acc[part], obj);
+  }
+
   return path.split('.').reduce((acc, part) => {
     if (acc === null || acc === undefined) return undefined;
     return acc[part];
@@ -12,14 +24,73 @@ const getByPath = (obj: any, path: string) => {
 
 const applyPipes = (value: any, pipes: string[]): any => {
   let result = value;
-  for (const pipe of pipes) {
-    const p = pipe.trim().toLowerCase();
-    if (p === 'contrast') {
-      result = getContrastColor(String(result));
-    } else if (p === 'uppercase') {
+  for (const pipeStr of pipes) {
+    const trimmed = pipeStr.trim();
+    if (!trimmed) continue;
+
+    const firstColIdx = trimmed.indexOf(':');
+    let pName = trimmed.toLowerCase();
+    let pArgs = '';
+    
+    if (firstColIdx !== -1) {
+       pName = trimmed.substring(0, firstColIdx).trim().toLowerCase();
+       pArgs = trimmed.substring(firstColIdx + 1).trim();
+    }
+
+    if (pName === 'contrast') {
+      result = result ? getContrastColor(String(result)) : "#000000";
+    } else if (pName === 'uppercase') {
       result = String(result).toUpperCase();
-    } else if (p === 'lowercase') {
+    } else if (pName === 'lowercase') {
       result = String(result).toLowerCase();
+    } else if (pName === 'titlecase') {
+       if (result) {
+         result = String(result).replace(
+           /\w\S*/g,
+           (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
+         );
+       }
+    } else if (pName === 'shorten') {
+      const len = parseInt(pArgs, 10);
+      if (!isNaN(len) && typeof result === 'string' && result.length > len) {
+        result = result.substring(0, len).trim() + '...';
+      }
+    } else if (pName === 'date' || pName === 'time') {
+      if (result) {
+        try {
+          const d = typeof result === 'string' ? parseISO(result) : new Date(result);
+          if (!isNaN(d.getTime())) {
+            const fmtStr = pArgs || (pName === 'time' ? 'HH:mm' : 'dd/MM/yyyy');
+            result = formatDate(d, fmtStr);
+          }
+        } catch (e) {
+          // keep original if invalid
+        }
+      }
+    } else if (pName === 'replace') {
+      const secondColIdx = pArgs.indexOf(':');
+      if (secondColIdx !== -1 && result) {
+         const oldStr = pArgs.substring(0, secondColIdx);
+         const newStr = pArgs.substring(secondColIdx + 1);
+         result = String(result).split(oldStr).join(newStr);
+      }
+    } else if (pName === 'number') {
+      const num = Number(result);
+      if (!isNaN(num)) result = new Intl.NumberFormat('en-US').format(num);
+    } else if (pName === 'boolean') {
+      const truthyVal = pArgs.split(':')[0] || 'Yes';
+      const falsyVal = pArgs.split(':')[1] || 'No';
+      result = result ? truthyVal : falsyVal;
+    } else if (pName === 'json') {
+      try {
+        result = JSON.stringify(result, null, 2);
+      } catch (e) {
+        // keep original if invalid
+      }
+    } else if (pName === 'prefix') {
+      result = pArgs + String(result || "");
+    } else if (pName === 'suffix') {
+      result = String(result || "") + pArgs;
     }
   }
   return result;
@@ -31,12 +102,13 @@ export const isAutoResolved = (dataKey: string, match: Match | null) => {
   // Với cơ chế mới, nếu dataKey tồn tại trong match struct (hoặc bắt đầu bằng match.) 
   // thì nó được tính là auto resolved. 
   // Chúng ta parse dataKey linh hoạt thay vì fix cứng.
-  const cleanKey = dataKey.replace(/^match\./, '');
+  const keyWithoutPipes = dataKey.split('|')[0].trim();
+  const cleanKey = keyWithoutPipes.replace(/^match\./, '');
   const value = getByPath(match, cleanKey);
   
   // Hardcoded fallbacks for backwards compatibility or computed fields
   const computedKeys = ["date", "time", "round", "competition.name"];
-  return value !== undefined || computedKeys.includes(dataKey);
+  return value !== undefined || computedKeys.includes(keyWithoutPipes);
 }
 
 export const resolveBoundData = (
@@ -71,7 +143,21 @@ export const resolveBoundData = (
   let finalDataKey = overrides?.dataKey !== undefined ? overrides.dataKey : element.dataKey;
   
   if (finalDataKey || element.dataKey) {
-    const isAuto = isAutoResolved(finalDataKey || element.dataKey, match);
+    let keyWithoutPipes = finalDataKey || element.dataKey;
+    let parts: string[] = [];
+    if (keyWithoutPipes.includes('|')) {
+      parts = keyWithoutPipes.split('|');
+      keyWithoutPipes = parts[0].trim();
+    }
+    
+    // Evaluate formatters from props
+    let parsedFormatters: string[] = [];
+    if (overrides?.formatters !== undefined) {
+      parsedFormatters = Array.isArray(overrides.formatters) ? overrides.formatters : [overrides.formatters];
+    } else if (element.formatters !== undefined) {
+      parsedFormatters = Array.isArray(element.formatters) ? element.formatters : [element.formatters];
+    }
+    const isAuto = isAutoResolved(keyWithoutPipes, match);
 
     if (element.type === "Text" || element.type === "text") {
       let overrideTextVal = overrides?.text !== undefined ? overrides.text : undefined;
@@ -79,30 +165,32 @@ export const resolveBoundData = (
       if (overrideTextVal !== undefined) {
          resolvedElement.text = overrideTextVal;
          // Allow static pipes execution inside standard text override if people type {{homeTeam.name | uppercase}} static text.
-         resolvedElement.text = processStyleValue(resolvedElement.text); 
+         resolvedElement.text = processStyleValue(resolvedElement.text);
+         if (parsedFormatters.length > 0) {
+            resolvedElement.text = applyPipes(resolvedElement.text, parsedFormatters);
+         }
       } else if (finalDataKey) {
         if (!isAuto) {
            resolvedElement.text = manualInputs[finalDataKey] !== undefined ? manualInputs[finalDataKey] : `{{${finalDataKey}}}`;
         } else if (match) {
-            const cleanKey = finalDataKey.replace(/^match\./, '');
+            const cleanKey = keyWithoutPipes.replace(/^match\./, '');
             const val = getByPath(match, cleanKey);
             
             if (val !== undefined) {
                resolvedElement.text = String(val);
             } else {
                // Computed / Alias resolving
-               if (finalDataKey === "competition.name") resolvedElement.text = match.league;
-               else if (finalDataKey === "date") resolvedElement.text = new Date(match.date).toLocaleDateString("en-GB", { day: 'numeric', month: '2-digit', year: 'numeric' });
-               else if (finalDataKey === "time") resolvedElement.text = "19:45"; // mock
-               else if (finalDataKey === "round") resolvedElement.text = "Final"; // mock
+               if (cleanKey === "competition.name") resolvedElement.text = match.league;
+               else if (cleanKey === "date") resolvedElement.text = match.date; // Native ISO parsed by pipe, or used as is
+               else if (cleanKey === "time") resolvedElement.text = match.date; // Pipe time:HH:mm will parse it
+               else if (cleanKey === "round") resolvedElement.text = "Final"; // mock
                else resolvedElement.text = `{{${finalDataKey}}}`;
             }
             
-            // Allow applying pipes directly to the data fields if the engine dataKey has a pipe explicitly
-            if (finalDataKey.includes('|')) {
-                const parts = finalDataKey.split('|');
-                const pipes = parts.slice(1);
-                resolvedElement.text = applyPipes(resolvedElement.text, pipes);
+            // Allow applying custom formatters combined with legacy explicit pipeline string
+            const combinedPipes = [...parts.slice(1), ...parsedFormatters];
+            if (combinedPipes.length > 0) {
+                resolvedElement.text = applyPipes(resolvedElement.text, combinedPipes);
             }
         }
       }
@@ -139,47 +227,53 @@ export const resolveBoundData = (
   }
 
   // 3. Editor Override logic (applied last)
-  if (overrides) {
-    if (overrides.x !== undefined || overrides.y !== undefined) {
-      resolvedElement.position = {
-        ...resolvedElement.position,
-        x: overrides.x !== undefined ? overrides.x : resolvedElement.position?.x,
-        y: overrides.y !== undefined ? overrides.y : resolvedElement.position?.y
-      };
-    }
-    if (overrides.width !== undefined || overrides.height !== undefined) {
-      resolvedElement.size = {
-        ...resolvedElement.size,
-        width: overrides.width !== undefined ? overrides.width : resolvedElement.size?.width,
-        height: overrides.height !== undefined ? overrides.height : resolvedElement.size?.height
-      };
-    }
-    
-    // Apply nested style overrides directly to the style object
-    if (overrides.align || overrides.fill || overrides.fontFamily || overrides.fontSize) {
-      resolvedElement.style = {
-        ...resolvedElement.style,
-        align: overrides.align !== undefined ? overrides.align : resolvedElement.style?.align,
-        fill: overrides.fill !== undefined ? overrides.fill : resolvedElement.style?.fill,
-        fontFamily: overrides.fontFamily !== undefined ? overrides.fontFamily : resolvedElement.style?.fontFamily,
-        fontSize: overrides.fontSize !== undefined ? overrides.fontSize : resolvedElement.style?.fontSize,
-      }
-    }
-
-    // Apply root properties like 'opacity', 'dataKey', 'text'
-    resolvedElement = {
-      ...resolvedElement,
-      ...overrides,
-      // If the template specifies legacy root fields instead of style object (e.g. text align vs style align)
-      align: overrides.align !== undefined ? overrides.align : resolvedElement.align || resolvedElement.style?.align,
-      fill: overrides.fill !== undefined ? processStyleValue(overrides.fill) : resolvedElement.fill || resolvedElement.style?.fill,
-      fontFamily: overrides.fontFamily !== undefined ? overrides.fontFamily : resolvedElement.fontFamily || resolvedElement.style?.fontFamily,
-      fontSize: overrides.fontSize !== undefined ? overrides.fontSize : resolvedElement.fontSize || resolvedElement.style?.fontSize,
-      
-      // But prevent style object from being overwritten directly if it wasn't cloned properly
-      style: resolvedElement.style
+  const actualOverrides = overrides || {};
+  
+  if (actualOverrides.x !== undefined || actualOverrides.y !== undefined) {
+    resolvedElement.position = {
+      ...resolvedElement.position,
+      x: actualOverrides.x !== undefined ? actualOverrides.x : resolvedElement.position?.x,
+      y: actualOverrides.y !== undefined ? actualOverrides.y : resolvedElement.position?.y
     };
   }
+  if (actualOverrides.width !== undefined || actualOverrides.height !== undefined) {
+    resolvedElement.size = {
+      ...resolvedElement.size,
+      width: actualOverrides.width !== undefined ? actualOverrides.width : resolvedElement.size?.width,
+      height: actualOverrides.height !== undefined ? actualOverrides.height : resolvedElement.size?.height
+    };
+  }
+  
+  // Apply nested style overrides directly to the style object
+  if (actualOverrides.align || actualOverrides.fill || actualOverrides.fontFamily || actualOverrides.fontSize) {
+    resolvedElement.style = {
+      ...resolvedElement.style,
+      align: actualOverrides.align !== undefined ? actualOverrides.align : resolvedElement.style?.align,
+      fill: actualOverrides.fill !== undefined ? actualOverrides.fill : resolvedElement.style?.fill,
+      fontFamily: actualOverrides.fontFamily !== undefined ? actualOverrides.fontFamily : resolvedElement.style?.fontFamily,
+      fontSize: actualOverrides.fontSize !== undefined ? actualOverrides.fontSize : resolvedElement.style?.fontSize,
+    }
+  }
+
+  // Clean up undefined values from actualOverrides so they don't break the spread operator
+  const cleanOverrides = Object.entries(actualOverrides).reduce((acc, [key, value]) => {
+    if (value !== undefined) acc[key] = value;
+    return acc;
+  }, {} as Record<string, any>);
+
+    // Apply root properties like 'opacity', 'dataKey', 'text'
+  resolvedElement = {
+    ...resolvedElement,
+    ...cleanOverrides,
+    // Fix Fallback parsing - check actualOverrides first, then element.align, then element.style.align
+    align: actualOverrides.align !== undefined ? actualOverrides.align : (resolvedElement.align !== undefined ? resolvedElement.align : resolvedElement.style?.align),
+    fill: actualOverrides.fill !== undefined ? processStyleValue(actualOverrides.fill) : (resolvedElement.fill !== undefined ? processStyleValue(resolvedElement.fill) : resolvedElement.style?.fill),
+    fontFamily: actualOverrides.fontFamily !== undefined ? actualOverrides.fontFamily : (resolvedElement.fontFamily !== undefined ? resolvedElement.fontFamily : resolvedElement.style?.fontFamily),
+    fontSize: actualOverrides.fontSize !== undefined ? actualOverrides.fontSize : (resolvedElement.fontSize !== undefined ? resolvedElement.fontSize : resolvedElement.style?.fontSize),
+    
+    // But prevent style object from being overwritten directly if it wasn't cloned properly
+    style: resolvedElement.style
+  };
 
   return resolvedElement;
 };

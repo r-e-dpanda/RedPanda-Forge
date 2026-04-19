@@ -268,6 +268,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                              placeholder={(el as any).dataKey ? (() => {
                                const resolvedText = resolveBoundData(el, match, manualInputs, { ...overrides, text: undefined }).text;
                                if (!resolvedText || resolvedText === `{{${(el as any).dataKey}}}`) return "Not found in Data - Will not render";
+                               
+                               const activeFormatters = overrides.formatters !== undefined ? overrides.formatters : ((el as any).formatters || []);
+                               const dataKeyHasPipes = (el as any).dataKey?.includes('|');
+                               if (activeFormatters.length > 0 || dataKeyHasPipes) {
+                                  return `Parsed: ${resolvedText}`;
+                               }
                                return `Bound: ${resolvedText}`;
                              })() : ((el as any).text || "Static text...")}
                              className="w-full bg-app-bg border border-app-border rounded-[4px] p-2 text-app-text text-[12px] outline-none focus:border-app-accent disabled:opacity-50 h-8"
@@ -336,8 +342,81 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           />
                           <span className="bg-app-card text-app-muted px-2 py-1.5 text-[11px] font-mono border-l border-app-border flex items-center">&#125;&#125;</span>
                         </div>
-                        {isText && <p className="text-[9px] text-app-muted">Pipes: | uppercase, | lowercase, | contrast (in style)</p>}
                       </div>
+
+                      {isText && (
+                        <div className="space-y-1.5 bg-app-card border border-app-border rounded-md p-3 pb-4 relative mt-2">
+                           <label className="text-[10px] uppercase tracking-[1px] text-app-muted font-[600] flex justify-between">
+                             Text Formatting
+                             {((overrides.formatters !== undefined ? overrides.formatters : (el as any).formatters) || []).length > 0 && (
+                               <button 
+                                 onClick={() => handleOverride(el.id, { formatters: [] })}
+                                 className="text-[9px] text-app-accent hover:underline lowercase"
+                               >
+                                 Clear All
+                               </button>
+                             )}
+                           </label>
+                           <div className="flex flex-col gap-2 mt-2">
+                             {((overrides.formatters !== undefined ? overrides.formatters : (el as any).formatters) || []).map((fmt: string, idx: number) => (
+                               <div key={idx} className="flex bg-app-bg border border-app-border rounded-[4px] text-[11px] items-center px-2 py-1">
+                                  <span className="text-cyan-400 font-mono text-[10px] select-none mr-2">|</span>
+                                  <span className="truncate flex-1 font-mono">{fmt}</span>
+                                  <button onClick={() => {
+                                      const arr = [...(overrides.formatters || (el as any).formatters || [])];
+                                      arr.splice(idx, 1);
+                                      handleOverride(el.id, { formatters: arr });
+                                  }} className="text-red-400 hover:text-red-300 ml-2">×</button>
+                               </div>
+                             ))}
+                           </div>
+                           
+                           <select 
+                             className="w-full bg-app-bg border border-app-border rounded-[4px] p-1.5 text-app-text text-[11px] outline-none focus:border-app-accent mt-2 cursor-pointer"
+                             onChange={(e) => {
+                               if (!e.target.value) return;
+                               const current = overrides.formatters !== undefined ? overrides.formatters : ((el as any).formatters || []);
+                               handleOverride(el.id, { formatters: [...current, e.target.value] });
+                               e.target.value = "";
+                             }}
+                           >
+                             <option value="">+ Add Formatter...</option>
+                             {((el as any).dataType === "date" || (el as any).dataType === "time" || (el as any).dataKey?.toLowerCase().includes("date") || (el as any).dataKey?.toLowerCase().includes("time")) ? (
+                               <>
+                                 <option value="date:dd/MM/yyyy">25/04/2026 (dd/MM/yyyy)</option>
+                                 <option value="date:dd MMM yyyy">25 Apr 2026 (dd MMM yyyy)</option>
+                                 <option value="date:dd MMMM yyyy">25 April 2026 (dd MMMM yyyy)</option>
+                                 <option value="time">19:45 (HH:mm)</option>
+                                 <option value="date:hh:mm a">07:45 PM (hh:mm a)</option>
+                                 <option value="uppercase">ABC Uppercase</option>
+                                 <option value="lowercase">abc Lowercase</option>
+                                 <option value="titlecase">Abc Titlecase</option>
+                               </>
+                             ) : (el as any).dataType === "boolean" ? (
+                               <>
+                                 <option value="boolean:Yes:No">Yes / No</option>
+                                 <option value="boolean:True:False">True / False</option>
+                               </>
+                             ) : (el as any).dataType === "array" || (el as any).dataType === "object" ? (
+                               <>
+                                 <option value="json">Format as JSON</option>
+                               </>
+                             ) : (el as any).dataType === "number" ? (
+                               <>
+                                 <option value="number">1,234 Number</option>
+                               </>
+                             ) : (
+                               <>
+                                 <option value="uppercase">ABC Uppercase</option>
+                                 <option value="lowercase">abc Lowercase</option>
+                                 <option value="titlecase">Abc Titlecase</option>
+                                 {!(el as any).dataType && <option value="number">1,234 Number</option>}
+                                 {!(el as any).dataType && <option value="boolean:Yes:No">Yes/No (Boolean)</option>}
+                               </>
+                             )}
+                           </select>
+                        </div>
+                      )}
                     </div>
 
                     {/* Position */}
@@ -470,38 +549,64 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                             type="color" 
                             disabled={!isEditable('fill')}
                             value={(() => {
-                              const val = overrides.fill !== undefined ? overrides.fill : (el as any).style?.fill || (el as any).fill || '#ffffff';
-                              return (typeof val === 'string' && val.startsWith('#')) ? val : '#ffffff';
+                              const resolved = resolveBoundData(el, match, manualInputs, overrides);
+                              const finalColor = resolved.style?.fill || resolved.fill || '#ffffff';
+                              return (typeof finalColor === 'string' && finalColor.startsWith('#')) ? finalColor.substring(0, 7) : '#ffffff';
                             })()}
                             onChange={e => handleOverride(el.id, { fill: e.target.value })}
-                            className="w-8 h-8 rounded border-none outline-none cursor-pointer bg-transparent shadow-[0_0_0_1px_var(--app-border)] p-0"
+                            className="w-8 h-8 rounded border-none outline-none cursor-pointer bg-transparent shadow-[0_0_0_1px_var(--app-border)] p-0 shrink-0"
                           />
                           <input 
                             type="text"
                             placeholder={(() => {
-                               const originalFill = (el as any).style?.fill || (el as any).fill;
-                               if (typeof originalFill === 'string' && originalFill.includes('{{')) {
-                                   const resolved = resolveBoundData(el, match, manualInputs, { ...overrides, fill: undefined });
-                                   const finalColor = resolved.style?.fill || resolved.fill;
-                                   return `${originalFill} -> ${finalColor || 'undefined'}`;
-                               }
-                               return "e.g. #FFFFFF or {{path}}";
+                               const resolved = resolveBoundData(el, match, manualInputs, overrides);
+                               const finalColor = resolved.style?.fill || resolved.fill;
+                               if (typeof finalColor === 'string' && finalColor.startsWith('#')) return `Bound: ${finalColor.substring(0, 7)}`;
+                               return "e.g. #FFFFFF";
                             })()}
-                            value={overrides.fill !== undefined ? overrides.fill : ""}
+                            value={(() => {
+                              const val = overrides.fill !== undefined ? overrides.fill : (el as any).style?.fill;
+                              console.log("Input text read:", (el as any).id, "val=", val);
+                              return (typeof val === 'string' && !val.includes('{{')) ? val : "";
+                            })()}
                             onChange={e => {
-                               // If user clears the input completely, consider it resetting to undefined
                                if (e.target.value === "") {
                                    handleOverride(el.id, { fill: undefined });
                                } else {
                                    handleOverride(el.id, { fill: e.target.value });
                                }
                             }}
-                            className="flex-1 bg-app-bg border border-app-border rounded-[4px] p-1.5 text-app-text text-[11px] outline-none focus:border-app-accent disabled:opacity-50 font-mono"
+                            className="flex-1 bg-app-bg border border-app-border rounded-[4px] p-2 text-app-text text-[12px] outline-none focus:border-app-accent disabled:opacity-50 font-mono h-8"
                           />
                         </div>
-                        {((el as any).style?.fill || (el as any).fill)?.includes('{{') && overrides.fill === undefined && (
-                            <p className="text-[9px] text-app-muted italic">Currently bound. Type HEX to override.</p>
-                        )}
+                        
+                        <div className="space-y-1.5 mt-2">
+                           <label className="text-[9px] uppercase tracking-[1px] text-app-muted font-[600]">Fill Data Binding Path</label>
+                           <div className="flex bg-app-bg border border-app-border rounded-[4px] focus-within:border-app-accent overflow-hidden">
+                              <span className="bg-app-card text-app-muted px-2 py-1.5 text-[11px] font-mono border-r border-app-border flex items-center">&#123;&#123;</span>
+                              <input 
+                                type="text"
+                                placeholder=""
+                                value={(() => {
+                                  const val = overrides.fill !== undefined ? overrides.fill : (el as any).style?.fill;
+                                  if (typeof val === 'string' && val.includes('{{')) {
+                                      return val.replace('{{', '').replace('}}', '').trim();
+                                  }
+                                  return "";
+                                })()}
+                                onChange={e => {
+                                  if (e.target.value) {
+                                      handleOverride(el.id, { fill: `{{${e.target.value}}}` });
+                                  } else {
+                                      handleOverride(el.id, { fill: undefined });
+                                  }
+                                }}
+                                disabled={!isEditable('fill')}
+                                className="w-full bg-transparent p-1.5 text-app-text text-[12px] outline-none font-mono disabled:opacity-50"
+                              />
+                              <span className="bg-app-card text-app-muted px-2 py-1.5 text-[11px] font-mono border-l border-app-border flex items-center">&#125;&#125;</span>
+                           </div>
+                        </div>
 
                         <div className="flex flex-wrap gap-2 mt-2">
                            {['#FFFFFF', '#000000', '#FACC15', '#3B82F6', '#EF4444', '#10B981'].map(color => (
@@ -511,7 +616,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                onClick={() => handleOverride(el.id, { fill: color })}
                                className={cn(
                                  "w-6 h-6 rounded-[4px] border-2 disabled:opacity-50 transition-transform hover:scale-110",
-                                 (overrides.fill || (el as any).style?.fill || (el as any).fill) === color ? "border-app-accent" : "border-transparent shadow-[0_0_0_1px_var(--app-border)] outline-none"
+                                 ((() => {
+                                    const resolved = resolveBoundData(el, match, manualInputs, overrides);
+                                    return resolved.style?.fill || resolved.fill;
+                                 })() === color) ? "border-app-accent" : "border-transparent shadow-[0_0_0_1px_var(--app-border)] outline-none"
                                )}
                                style={{ backgroundColor: color }}
                              />

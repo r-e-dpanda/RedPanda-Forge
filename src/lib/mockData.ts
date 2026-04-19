@@ -155,11 +155,13 @@ export const MOCK_TEMPLATES: Template[] = [
           {
             id: "home_name",
             type: "Text",
+            dataType: "string",
             name: "Home Team Name",
             dataKey: "homeTeam.name",
             text: "HOME TEAM",
             visible: true, zIndex: 2, position: {x: 200, y: 760}, size: {width: 800, height: 60}, rotation: 0, opacity: 1,
-            style: { fill: "{{homeTeam.colors.primary | contrast}}", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center" }
+            style: { fill: "{{homeTeam.colors.primary}}", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center" },
+            formatters: ["uppercase"]
           },
           {
             id: "away_logo",
@@ -172,11 +174,13 @@ export const MOCK_TEMPLATES: Template[] = [
           {
             id: "away_name",
             type: "Text",
+            dataType: "string",
             name: "Away Team Name",
             dataKey: "awayTeam.name",
             text: "AWAY TEAM",
             visible: true, zIndex: 4, position: {x: 920, y: 760}, size: {width: 800, height: 60}, rotation: 0, opacity: 1,
-            style: { fill: "{{awayTeam.colors.primary}}", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center" }
+            style: { fill: "{{awayTeam.colors.primary}}", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center" },
+            formatters: ["uppercase"]
           },
           {
             id: "vs_text",
@@ -208,9 +212,11 @@ export const MOCK_TEMPLATES: Template[] = [
           {
             id: "venue_date",
             type: "Text",
+            dataType: "date",
             name: "Date & Time",
             dataKey: "match.date",
             text: "25 APRIL 2026",
+            formatters: ["date:dd MMM yyyy", "uppercase"],
             style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 48, fontWeight: "normal", align: "center" },
             visible: true, zIndex: 2, position: {x: 0, y: 850}, size: {width: 1920, height: 60}, rotation: 0, opacity: 0.8
           }
