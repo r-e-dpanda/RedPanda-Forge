@@ -6,7 +6,7 @@ import { ZoomIn, ZoomOut, PanelRightOpen } from "lucide-react";
 import { useEditorStore } from "../../stores/editorStore";
 import { resolveBoundData } from "../../lib/templateEngine";
 
-const URLImage = ({ imageInfo, commonProps }: { imageInfo: TemplateElement, commonProps: any }) => {
+const URLImage = ({ imageInfo, commonProps }: { imageInfo: any, commonProps: any }) => {
   const [img] = useImage(imageInfo.src || "", "anonymous");
   return (
     <Image
@@ -37,13 +37,18 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
 
+  const sessions = useEditorStore(state => state.sessions);
+  const activeSessionId = useEditorStore(state => state.activeSessionId);
+  const activeSession = sessions.find(s => s.id === activeSessionId);
+  
+  const template = activeSession?.template || null;
+  const match = activeSession?.match || null;
+  const manualInputs = activeSession?.manualInputs || {};
+  const elementOverrides = activeSession?.elementOverrides || {};
+  const selectedElementId = activeSession?.selectedElementId || null;
+  const hoveredElementId = activeSession?.hoveredElementId || null;
+
   const {
-    template,
-    match,
-    manualInputs,
-    elementOverrides,
-    selectedElementId,
-    hoveredElementId,
     setSelectedElementId,
     setElementOverride,
     commitHistory
@@ -68,15 +73,23 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
   }));
 
   useEffect(() => {
-    if (!containerRef.current || !template) return;
+    if (!containerRef.current || !template || !template.canvas) return;
     
-    const containerWidth = containerRef.current.clientWidth;
-    const containerHeight = containerRef.current.clientHeight;
+    const containerWidth = containerRef.current.clientWidth || 800;
+    const containerHeight = containerRef.current.clientHeight || 600;
     
-    const scaleX = (containerWidth - 60) / template.width;
-    const scaleY = (containerHeight - 120) / template.height;
+    const canvasWidth = template.canvas.width || 1920;
+    const canvasHeight = template.canvas.height || 1080;
     
-    setScale(Math.min(scaleX, scaleY));
+    const scaleX = (containerWidth - 60) / canvasWidth;
+    const scaleY = (containerHeight - 120) / canvasHeight;
+    
+    const newScale = Math.min(scaleX, scaleY);
+    if (!isNaN(newScale) && isFinite(newScale) && newScale > 0) {
+      setScale(newScale);
+    } else {
+      setScale(0.5); // Fallback
+    }
   }, [template, rightExpanded]);
 
   if (!template) {
@@ -87,11 +100,23 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
     );
   }
 
-  let flatElements: TemplateElement[] = [];
-  template.layers.forEach(layer => {
+  let flatElements: any[] = [];
+  template.layers.forEach((layer: any) => {
     if (layer.visible !== false) {
-      layer.elements.forEach(el => {
-        if (el.visible !== false) flatElements.push(el);
+      const els = layer.elements || layer.children || [];
+      els.forEach((el: any) => {
+        if (el.visible !== false) {
+          flatElements.push({
+            ...el,
+            x: el.position?.x ?? el.x ?? 0,
+            y: el.position?.y ?? el.y ?? 0,
+            width: el.size?.width ?? el.width ?? 100,
+            height: el.size?.height ?? el.height ?? 100,
+            fill: el.style?.fill ?? el.fill ?? '#ffffff',
+            fontSize: el.style?.fontSize ?? el.fontSize ?? 20,
+            fontFamily: el.style?.fontFamily ?? el.fontFamily ?? 'Inter'
+          });
+        }
       });
     }
   });
@@ -112,17 +137,17 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
       
       <div ref={containerRef} className="flex-1 overflow-auto flex flex-col items-center justify-center bg-[#070707] relative p-8">
         <div style={{ 
-          width: template.width * scale, 
-          height: template.height * scale,
-          backgroundColor: '#111',
+          width: template.canvas.width * scale, 
+          height: template.canvas.height * scale,
+          backgroundColor: template.canvas.backgroundColor || '#111',
           boxShadow: '0 0 40px rgba(0,0,0,0.5)',
           border: '1px solid #333',
           position: 'relative'
         }}>
           <Stage 
             ref={stageRef}
-            width={template.width * scale} 
-            height={template.height * scale}
+            width={template.canvas.width * scale} 
+            height={template.canvas.height * scale}
             scaleX={scale}
             scaleY={scale}
             className="overflow-hidden"
@@ -154,16 +179,18 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
                     setActiveRightTab('editor');
                   },
                   onDragEnd: (e: any) => {
-                    setElementOverride(element.id, { x: Math.round(e.target.x()), y: Math.round(e.target.y()) });
+                    setElementOverride(element.id, { 
+                      position: { x: Math.round(e.target.x()), y: Math.round(e.target.y()) } 
+                    });
                     commitHistory();
                   }
                 };
 
-                if (element.type === "BackgroundImage" || element.type === "Image" || element.type === "image") {
+                if (element.type === "Image" || element.type === "image") {
                   return <URLImage key={element.id} imageInfo={element} commonProps={commonProps} />;
                 }
                 
-                if (element.type === "Shape" || element.type === "rect") {
+                if (element.type === "Shape") {
                   return (
                     <Rect
                       key={element.id}
@@ -183,7 +210,7 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
                   );
                 }
                 
-                if (element.type === "Text" || element.type === "text") {
+                if (element.type === "Text") {
                   return (
                     <Text
                       key={element.id}

@@ -50,7 +50,7 @@ export const MOCK_MATCHES: Match[] = [
   {
     id: "m_te_1",
     sport: "tennis",
-    league: "Wimbledon",
+    league: "ATP Tour - Wimbledon",
     date: "2026-07-12T14:00:00Z",
     venue: "Centre Court",
     liveBadge: true,
@@ -71,46 +71,56 @@ export const MOCK_TEMPLATES: Template[] = [
   {
     id: "tpl_fb_16x9_1",
     name: "Classic Matchday TV",
+    version: "1.0",
     sport: "football",
     ratio: "16:9",
     thumbnail: "https://images.unsplash.com/photo-1518605368461-1ee123cb1171?auto=format&fit=crop&q=80&w=400&h=225",
-    width: 1920,
-    height: 1080,
+    canvas: {
+      width: 1920,
+      height: 1080,
+      backgroundColor: "#000000"
+    },
     layers: [
       {
         id: "l_bg",
+        type: "Group",
         name: "Background Group",
         visible: true,
-        expanded: true,
-        elements: [
+        zIndex: 0,
+        position: { x: 0, y: 0 },
+        children: [
           {
             id: "bg_1",
-            type: "BackgroundImage",
+            type: "Image",
             name: "Stadium Background",
             src: "https://images.unsplash.com/photo-1518605368461-1ee123cb1171?auto=format&fit=crop&q=80&w=1920&h=1080",
-            visible: true, x: 0, y: 0, width: 1920, height: 1080, rotation: 0, opacity: 1
+            visible: true, zIndex: 0, position: {x: 0, y: 0}, size: {width: 1920, height: 1080}, rotation: 0, opacity: 1, objectFit: "cover"
           },
           {
             id: "overlay_1",
             type: "Shape",
             name: "Dark Gradient",
-            visible: true, x: 0, y: 0, width: 1920, height: 1080, rotation: 0, opacity: 0.7, fill: "#000000"
+            shapeType: "rect",
+            style: { fill: "#000000" },
+            visible: true, zIndex: 1, position: {x: 0, y: 0}, size: {width: 1920, height: 1080}, rotation: 0, opacity: 0.7
           }
         ]
       },
       {
         id: "l_teams",
+        type: "Group",
         name: "Teams & Matchup",
         visible: true,
-        expanded: true,
-        elements: [
+        zIndex: 1,
+        position: { x: 0, y: 0 },
+        children: [
           {
             id: "home_logo",
             type: "Image",
             name: "Home Team Logo",
             dataKey: "homeTeam.logo",
-            visible: true, x: 400, y: 340, width: 400, height: 400, rotation: 0, opacity: 1,
-            draggable: true, editableProperties: ["x", "y", "width", "height", "opacity"]
+            visible: true, zIndex: 1, position: {x: 400, y: 340}, size: {width: 400, height: 400}, rotation: 0, opacity: 1, objectFit: "contain",
+            src: ""
           },
           {
             id: "home_name",
@@ -118,17 +128,16 @@ export const MOCK_TEMPLATES: Template[] = [
             name: "Home Team Name",
             dataKey: "homeTeam.name",
             text: "HOME TEAM",
-            visible: true, x: 200, y: 760, width: 800, height: 60, rotation: 0, opacity: 1,
-            fill: "#FFFFFF", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center", textTransform: "uppercase",
-            draggable: true, editableProperties: ["x", "y", "fontSize", "fill", "fontFamily", "opacity"]
+            visible: true, zIndex: 2, position: {x: 200, y: 760}, size: {width: 800, height: 60}, rotation: 0, opacity: 1,
+            style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center" }
           },
           {
             id: "away_logo",
             type: "Image",
             name: "Away Team Logo",
             dataKey: "awayTeam.logo",
-            visible: true, x: 1120, y: 340, width: 400, height: 400, rotation: 0, opacity: 1,
-            draggable: true, editableProperties: ["x", "y", "width", "height", "opacity"]
+            visible: true, zIndex: 3, position: {x: 1120, y: 340}, size: {width: 400, height: 400}, rotation: 0, opacity: 1, objectFit: "contain",
+            src: ""
           },
           {
             id: "away_name",
@@ -136,35 +145,35 @@ export const MOCK_TEMPLATES: Template[] = [
             name: "Away Team Name",
             dataKey: "awayTeam.name",
             text: "AWAY TEAM",
-            visible: true, x: 920, y: 760, width: 800, height: 60, rotation: 0, opacity: 1,
-            fill: "#FFFFFF", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center", textTransform: "uppercase",
-            draggable: true, editableProperties: ["x", "y", "fontSize", "fill", "fontFamily", "opacity"]
+            visible: true, zIndex: 4, position: {x: 920, y: 760}, size: {width: 800, height: 60}, rotation: 0, opacity: 1,
+            style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center" }
           },
           {
             id: "vs_text",
             type: "Text",
             name: "VS Separator",
             text: "VS",
-            fill: "#FFFFFF", fontFamily: "Inter", fontSize: 120, fontWeight: "bold", align: "center",
-            visible: true, x: 860, y: 480, width: 200, height: 150, rotation: 0, opacity: 1,
-            draggable: true, editableProperties: ["x", "y", "fontSize", "fill", "fontFamily", "opacity"]
+            style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 120, fontWeight: "bold", align: "center" },
+            visible: true, zIndex: 5, position: {x: 860, y: 480}, size: {width: 200, height: 150}, rotation: 0, opacity: 1
           }
         ]
       },
       {
         id: "l_info",
+        type: "Group",
         name: "Match Info",
         visible: true,
-        expanded: true,
-        elements: [
+        zIndex: 2,
+        position: { x: 0, y: 0 },
+        children: [
           {
             id: "comp_name",
             type: "Text",
             name: "Competition",
             dataKey: "match.league",
             text: "PREMIER LEAGUE",
-            fill: "#FACC15", fontFamily: "Inter", fontSize: 64, fontWeight: "bold", align: "center", textTransform: "uppercase",
-            visible: true, x: 0, y: 100, width: 1920, height: 80, rotation: 0, opacity: 1
+            style: { fill: "#FACC15", fontFamily: "Inter", fontSize: 64, fontWeight: "bold", align: "center" },
+            visible: true, zIndex: 1, position: {x: 0, y: 100}, size: {width: 1920, height: 80}, rotation: 0, opacity: 1
           },
           {
             id: "venue_date",
@@ -172,26 +181,8 @@ export const MOCK_TEMPLATES: Template[] = [
             name: "Date & Time",
             dataKey: "match.date",
             text: "25 APRIL 2026",
-            fill: "#FFFFFF", fontFamily: "Inter", fontSize: 48, fontWeight: "normal", align: "center", textTransform: "uppercase",
-            visible: true, x: 0, y: 850, width: 1920, height: 60, rotation: 0, opacity: 0.8
-          },
-          {
-            id: "commentator",
-            type: "Text",
-            name: "Commentator Info",
-            dataKey: "commentator",
-            text: "PETER DRURY",
-            fill: "#FFFFFF", fontFamily: "Inter", fontSize: 32, fontWeight: "normal", align: "center",
-            visible: true, x: 0, y: 920, width: 1920, height: 60, rotation: 0, opacity: 0.6
-          },
-          {
-            id: "broadcast_time",
-            type: "Text",
-            name: "Broadcast Time",
-            dataKey: "broadcast_time",
-            text: "20:00 GMT",
-            fill: "#FFFFFF", fontFamily: "Inter", fontSize: 32, fontWeight: "bold", align: "center",
-            visible: true, x: 0, y: 970, width: 1920, height: 60, rotation: 0, opacity: 0.8
+            style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 48, fontWeight: "normal", align: "center" },
+            visible: true, zIndex: 2, position: {x: 0, y: 850}, size: {width: 1920, height: 60}, rotation: 0, opacity: 0.8
           }
         ]
       }
@@ -200,24 +191,30 @@ export const MOCK_TEMPLATES: Template[] = [
   {
     id: "tpl_te_9x16_1",
     name: "Tennis Duel Story",
+    version: "1.0",
     sport: "tennis",
     ratio: "9:16",
     thumbnail: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=225&h=400",
-    width: 1080,
-    height: 1920,
+    canvas: {
+      width: 1080,
+      height: 1920,
+      backgroundColor: "#000000"
+    },
     layers: [
        {
         id: "bg_1",
-        type: "BackgroundImage",
+        type: "Image",
         name: "Court Background",
         src: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=1080&h=1920",
-        zIndex: 0, visible: true, x: 0, y: 0, width: 1080, height: 1920, rotation: 0, opacity: 1
+        zIndex: 0, visible: true, position: {x: 0, y: 0}, size: {width: 1080, height: 1920}, rotation: 0, opacity: 1, objectFit: "cover"
       },
       {
         id: "overlay_1",
         type: "Shape",
         name: "Bottom Gradient",
-        zIndex: 1, visible: true, x: 0, y: 960, width: 1080, height: 960, rotation: 0, opacity: 0.9, fill: "#000000"
+        shapeType: "rect",
+        style: { fill: "#000000" },
+        zIndex: 1, visible: true, position: {x: 0, y: 960}, size: {width: 1080, height: 960}, rotation: 0, opacity: 0.9
       },
       {
         id: "p1_name",
@@ -225,16 +222,16 @@ export const MOCK_TEMPLATES: Template[] = [
         name: "Player 1 Name",
         dataKey: "player1.name",
         text: "N. DJOKOVIC",
-        fill: "#FFFFFF", fontFamily: "Inter", fontSize: 72, fontWeight: "bold", align: "center",
-        zIndex: 3, visible: true, x: 0, y: 1300, width: 1080, height: 100, rotation: 0, opacity: 1
+        style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 72, fontWeight: "bold", align: "center" },
+        zIndex: 3, visible: true, position: {x: 0, y: 1300}, size: {width: 1080, height: 100}, rotation: 0, opacity: 1
       },
       {
         id: "vs_text",
         type: "Text",
         name: "VS",
         text: "VS",
-        fill: "#EAB308", fontFamily: "Inter", fontSize: 60, fontWeight: "normal", align: "center",
-        zIndex: 3, visible: true, x: 0, y: 1420, width: 1080, height: 80, rotation: 0, opacity: 1
+        style: { fill: "#EAB308", fontFamily: "Inter", fontSize: 60, fontWeight: "normal", align: "center" },
+        zIndex: 3, visible: true, position: {x: 0, y: 1420}, size: {width: 1080, height: 80}, rotation: 0, opacity: 1
       },
       {
         id: "p2_name",
@@ -242,8 +239,8 @@ export const MOCK_TEMPLATES: Template[] = [
         name: "Player 2 Name",
         dataKey: "player2.name",
         text: "C. ALCARAZ",
-        fill: "#FFFFFF", fontFamily: "Inter", fontSize: 72, fontWeight: "bold", align: "center",
-        zIndex: 3, visible: true, x: 0, y: 1540, width: 1080, height: 100, rotation: 0, opacity: 1
+        style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 72, fontWeight: "bold", align: "center" },
+        zIndex: 3, visible: true, position: {x: 0, y: 1540}, size: {width: 1080, height: 100}, rotation: 0, opacity: 1
       }
     ]
   }

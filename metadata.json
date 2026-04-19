@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "RedPanda Forge",
+  "description": "A modular sports graphic editor with multi-tab support and batch generation.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

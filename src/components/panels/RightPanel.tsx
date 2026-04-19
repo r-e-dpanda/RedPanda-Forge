@@ -12,18 +12,23 @@ interface RightPanelProps {
 }
 
 const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded, activeRightTab, setActiveRightTab }) => {
+  const sessions = useEditorStore(state => state.sessions);
+  const activeSessionId = useEditorStore(state => state.activeSessionId);
+  const activeSession = sessions.find(s => s.id === activeSessionId);
+
+  const template = activeSession?.template || null;
+  const match = activeSession?.match || null;
+  const manualInputs = activeSession?.manualInputs || {};
+  const elementOverrides = activeSession?.elementOverrides || {};
+  const selectedElementId = activeSession?.selectedElementId || null;
+  const hoveredElementId = activeSession?.hoveredElementId || null;
+  const expandedLayers = activeSession?.expandedLayers || {};
+
   const {
-    template,
-    match,
-    manualInputs,
-    elementOverrides,
-    selectedElementId,
-    hoveredElementId,
     setHoveredElementId,
     setSelectedElementId,
     setElementOverride,
     setManualInput,
-    expandedLayers,
     toggleLayerExpanded,
     commitHistory
   } = useEditorStore();
@@ -32,10 +37,22 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
 
   let flatElements: any[] = [];
   if (template) {
-    template.layers.forEach(layer => {
+    template.layers.forEach((layer: any) => {
       if (layer.visible !== false) {
-        layer.elements.forEach(el => {
-          if (el.visible !== false) flatElements.push(el);
+        const els = layer.elements || layer.children || [];
+        els.forEach((el: any) => {
+          if (el.visible !== false) {
+            flatElements.push({
+              ...el,
+              x: el.position?.x ?? el.x ?? 0,
+              y: el.position?.y ?? el.y ?? 0,
+              width: el.size?.width ?? el.width ?? 100,
+              height: el.size?.height ?? el.height ?? 100,
+              fill: el.style?.fill ?? el.fill ?? '#ffffff',
+              fontSize: el.style?.fontSize ?? el.fontSize ?? 20,
+              fontFamily: el.style?.fontFamily ?? el.fontFamily ?? 'Inter'
+            });
+          }
         });
       }
     });
@@ -156,7 +173,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
               <div className="flex flex-col gap-2">
                 {elementsWithBinding.map(element => {
                    const resolved = resolveBoundData(element, match, manualInputs, elementOverrides[element.id]);
-                   let displayVal = resolved.text || resolved.src || "";
+                   let displayVal = resolved.text || (resolved as any).src || "";
                    const isAuto = isAutoResolved(element.dataKey!, match);
                    
                    return (
@@ -203,7 +220,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
             {selectedElementId ? (() => {
               const el = flatElements.find(e => e.id === selectedElementId);
               if (!el) return null;
-              const overrides = elementOverrides[el.id] || {};
+              const overrides = (elementOverrides[el.id] || {}) as any;
               const isText = el.type === 'Text' || el.type === 'text';
               const editable = el.editableProperties || [];
               
@@ -231,7 +248,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                         <input 
                           type="number" 
                           disabled={!editable.includes('x')}
-                          value={overrides.x !== undefined ? overrides.x : el.x} 
+                          value={overrides.x !== undefined ? overrides.x : (el as any).x} 
                           onChange={e => handleOverride(el.id, { x: Number(e.target.value) })}
                           className="w-full bg-black/50 border border-app-border rounded-[4px] p-2 text-white text-[12px] outline-none focus:border-app-accent disabled:opacity-50"
                         />
@@ -241,7 +258,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                         <input 
                           type="number" 
                           disabled={!editable.includes('y')}
-                          value={overrides.y !== undefined ? overrides.y : el.y} 
+                          value={overrides.y !== undefined ? overrides.y : (el as any).y} 
                           onChange={e => handleOverride(el.id, { y: Number(e.target.value) })}
                           className="w-full bg-black/50 border border-app-border rounded-[4px] p-2 text-white text-[12px] outline-none focus:border-app-accent disabled:opacity-50"
                         />
@@ -254,7 +271,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                         <input 
                           type="number" 
                           disabled={!editable.includes('width')}
-                          value={overrides.width !== undefined ? overrides.width : el.width} 
+                          value={overrides.width !== undefined ? overrides.width : (el as any).width} 
                           onChange={e => handleOverride(el.id, { width: Number(e.target.value) })}
                           className="w-full bg-black/50 border border-app-border rounded-[4px] p-2 text-white text-[12px] outline-none focus:border-app-accent disabled:opacity-50"
                         />
@@ -264,7 +281,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                         <input 
                           type="number" 
                           disabled={!editable.includes('height')}
-                          value={overrides.height !== undefined ? overrides.height : el.height || 0} 
+                          value={overrides.height !== undefined ? overrides.height : (el as any).height || 0} 
                           onChange={e => handleOverride(el.id, { height: Number(e.target.value) })}
                           className="w-full bg-black/50 border border-app-border rounded-[4px] p-2 text-white text-[12px] outline-none focus:border-app-accent disabled:opacity-50"
                         />
@@ -278,7 +295,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           <input 
                             type="number" 
                             disabled={!editable.includes('fontSize')}
-                            value={overrides.fontSize !== undefined ? overrides.fontSize : el.fontSize || 12} 
+                            value={overrides.fontSize !== undefined ? overrides.fontSize : (el as any).fontSize || 12} 
                             onChange={e => handleOverride(el.id, { fontSize: Number(e.target.value) })}
                             className="w-full bg-black/50 border border-app-border rounded-[4px] p-2 text-white text-[12px] outline-none focus:border-app-accent disabled:opacity-50"
                           />
@@ -302,7 +319,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                         <label className="text-[10px] uppercase tracking-[1px] text-app-muted font-[600]">Font</label>
                         <select 
                           disabled={!editable.includes('fontFamily')}
-                          value={overrides.fontFamily !== undefined ? overrides.fontFamily : el.fontFamily || 'Inter'}
+                          value={overrides.fontFamily !== undefined ? overrides.fontFamily : (el as any).fontFamily || 'Inter'}
                           onChange={e => handleOverride(el.id, { fontFamily: e.target.value })}
                           className="w-full bg-black/50 border border-app-border rounded-[4px] p-2 text-white text-[12px] appearance-none outline-none focus:border-app-accent disabled:opacity-50"
                         >
@@ -325,7 +342,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                onClick={() => handleOverride(el.id, { fill: color })}
                                className={cn(
                                  "w-7 h-7 rounded-[4px] border-2 disabled:opacity-50 transition-transform hover:scale-110",
-                                 (overrides.fill || el.fill) === color ? "border-white" : "border-transparent shadow-[0_0_0_1px_rgba(255,255,255,0.1)] outline-none"
+                                 (overrides.fill || (el as any).fill) === color ? "border-white" : "border-transparent shadow-[0_0_0_1px_rgba(255,255,255,0.1)] outline-none"
                                )}
                                style={{ backgroundColor: color }}
                              />
@@ -342,7 +359,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                   <Layers size={14}/> Layer Groups
                 </h3>
                 <div className="space-y-1">
-                  {template.layers.map(layer => {
+                  {template.layers.map((layer: any) => {
                     const isExpanded = expandedLayers[layer.id];
 
                     return (
@@ -365,7 +382,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                            <span className="font-bold text-zinc-300 truncate flex-1">{layer.name}</span>
                         </div>
 
-                        {isExpanded && layer.elements.map(el => {
+                        {isExpanded && (layer.elements || (layer as any).children || []).map((el: any) => {
                             const isText = el.type === 'Text' || el.type === 'text';
                             const isShape = el.type === 'Shape' || el.type === 'rect' || el.type === 'GradientOverlay';
                             const isImage = !isText && !isShape;

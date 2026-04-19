@@ -12,11 +12,11 @@ export const isAutoResolved = (dataKey: string, match: Match | null) => {
 }
 
 export const resolveBoundData = (
-  element: TemplateElement, 
+  element: any, 
   match: Match | null, 
   manualInputs: Record<string, string>,
-  overrides: Partial<TemplateElement> = {}
-): TemplateElement => {
+  overrides: any = {}
+): any => {
   let resolvedElement = { ...element };
   
   // 1. Data Binding logic
@@ -53,6 +53,22 @@ export const resolveBoundData = (
   
   // 2. Editor Override logic (applied last)
   if (overrides) {
+    // Handle nested position/size overrides if they are passed flatly
+    if (overrides.x !== undefined || overrides.y !== undefined) {
+      resolvedElement.position = {
+        ...resolvedElement.position,
+        x: overrides.x !== undefined ? overrides.x : resolvedElement.position?.x,
+        y: overrides.y !== undefined ? overrides.y : resolvedElement.position?.y
+      };
+    }
+    if (overrides.width !== undefined || overrides.height !== undefined) {
+      resolvedElement.size = {
+        ...resolvedElement.size,
+        width: overrides.width !== undefined ? overrides.width : resolvedElement.size?.width,
+        height: overrides.height !== undefined ? overrides.height : resolvedElement.size?.height
+      };
+    }
+
     resolvedElement = {
       ...resolvedElement,
       ...overrides
