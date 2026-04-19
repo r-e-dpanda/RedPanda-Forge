@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { Stage, Layer, Image, Text, Rect } from "react-konva";
+import { Stage, Layer, Image, Text, Rect, Line } from "react-konva";
 import useImage from "use-image";
 import { TemplateElement } from "../../types/template";
 import { ZoomIn, ZoomOut, PanelRightOpen } from "lucide-react";
@@ -200,6 +200,26 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
                       height={element.height}
                       fill={element.fill}
                       rotation={element.rotation}
+                      opacity={element.opacity !== undefined ? element.opacity : 1}
+                      shadowColor={element.shadowColor}
+                      shadowBlur={element.shadowBlur}
+                      shadowOffsetX={element.shadowOffsetX}
+                      shadowOffsetY={element.shadowOffsetY}
+                      {...commonProps}
+                    />
+                  );
+                }
+
+                if (element.type === "Polygon") {
+                  return (
+                    <Line
+                      key={element.id}
+                      x={element.x || 0}
+                      y={element.y || 0}
+                      points={element.points || []}
+                      closed={true}
+                      fill={element.fill}
+                      rotation={element.rotation || 0}
                       opacity={element.opacity !== undefined ? element.opacity : 1}
                       shadowColor={element.shadowColor}
                       shadowBlur={element.shadowBlur}

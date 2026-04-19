@@ -23,13 +23,12 @@ export const LeftSidebar = ({
     m.sport === selectedSport && 
     (selectedLeague === "All" || m.league === selectedLeague)
   );
-  const filteredTemplates = templates.filter((t: any) => t.sport === selectedSport && t.ratio === selectedRatio);
+  const filteredTemplates = templates.filter((t: any) => t.sport === selectedSport && (selectedRatio === "All" || t.ratio === selectedRatio));
   const tab2Templates = templates.filter((t: any) => t.sport === selectedSport);
 
   React.useEffect(() => {
-    if (!activeTemplate && filteredTemplates.length > 0) {
-      setEditorTemplate(filteredTemplates[0]);
-    }
+    // DO NOTHING. The user must manually select a template. 
+    // We shouldn't auto change the template for them just because they filtered.
   }, [activeTemplate, filteredTemplates, setEditorTemplate]);
 
   return (
@@ -62,18 +61,20 @@ export const LeftSidebar = ({
               <span className="text-app-muted font-bold">RATIO</span>
               <select 
                 value={selectedRatio} 
-                onChange={(e) => setSelectedRatio(e.target.value as Ratio)}
+                onChange={(e) => setSelectedRatio(e.target.value as Ratio | "All")}
                 className="bg-app-bg border border-app-border rounded px-2 py-1 flex-1 ml-4 text-app-text outline-none focus:border-app-accent text-[11px]"
               >
+                <option value="All">All Ratios</option>
                 <option value="16:9">16:9 Landscape</option>
                 <option value="9:16">9:16 Portrait</option>
+                <option value="1:1">1:1 Square</option>
               </select>
             </div>
 
             <div className="flex justify-between items-center text-[11px]">
               <span className="text-app-muted font-bold">TEMPLATE</span>
               <select 
-                value={activeTemplate?.id || ""} 
+                value={filteredTemplates.some((t: any) => t.id === activeTemplate?.id) ? (activeTemplate?.id || "") : ""} 
                 onChange={(e) => {
                   const tpl = templates.find((t: any) => t.id === e.target.value);
                   if (tpl) setEditorTemplate(tpl);
@@ -84,9 +85,14 @@ export const LeftSidebar = ({
                 {filteredTemplates.length === 0 ? (
                   <option value="" disabled>No template found</option>
                 ) : (
-                  filteredTemplates.map((t: any) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))
+                  <>
+                    {(!activeTemplate || !filteredTemplates.some((t: any) => t.id === activeTemplate.id)) && (
+                      <option value="" disabled>Select template...</option>
+                    )}
+                    {filteredTemplates.map((t: any) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </>
                 )}
               </select>
             </div>
