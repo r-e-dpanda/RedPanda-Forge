@@ -1,4 +1,4 @@
-import { Match, Template } from "./types";
+import { Match, Template } from "../types/template";
 
 export const MOCK_MATCHES: Match[] = [
   {

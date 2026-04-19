@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Match, Template, Sport, Ratio } from './lib/types';
+import { Match, Template, Sport, Ratio } from './types/template';
 import { MOCK_MATCHES, MOCK_TEMPLATES } from './lib/mockData';
 import EditorWorkspace, { EditorRef } from './components/Editor/EditorWorkspace';
 import PasteTemplateModal from './components/PasteTemplateModal';
-import { LayoutTemplate, Trophy, Calendar, Settings, Image as ImageIcon, Menu, Check, PanelLeftClose, PanelLeftOpen, Upload, Code, Download } from 'lucide-react';
+import { LayoutTemplate, Trophy, Calendar, Settings, Image as ImageIcon, Menu, Check, PanelLeftClose, PanelLeftOpen, Upload, Code, Download, Undo2, Redo2 } from 'lucide-react';
 import { cn } from './lib/utils';
+import { useEditorStore } from './stores/editorStore';
 
 export default function App() {
   const [selectedSport, setSelectedSport] = useState<Sport>("football");
@@ -17,6 +18,10 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const editorRef = useRef<EditorRef>(null);
+
+  const setEditorMatch = useEditorStore(state => state.setMatch);
+  const setEditorTemplate = useEditorStore(state => state.setTemplate);
+  const { undo, redo, canUndo, canRedo } = useEditorStore();
 
   const filteredMatches = MOCK_MATCHES.filter(m => m.sport === selectedSport);
   const filteredTemplates = templates.filter(t => t.sport === selectedSport && t.ratio === selectedRatio);
@@ -31,6 +36,14 @@ export default function App() {
       setSelectedTemplate(null);
     }
   }, [selectedSport, selectedRatio, templates]);
+
+  useEffect(() => {
+    setEditorMatch(selectedMatch);
+  }, [selectedMatch, setEditorMatch]);
+
+  useEffect(() => {
+    setEditorTemplate(selectedTemplate);
+  }, [selectedTemplate, setEditorTemplate]);
 
   return (
     <div className="flex flex-col h-screen bg-app-bg text-app-text font-sans antialiased overflow-hidden selection:bg-app-accent/30">
@@ -68,6 +81,24 @@ export default function App() {
         </div>
         
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 mr-4">
+            <button 
+              onClick={undo}
+              disabled={!canUndo()}
+              className="text-app-muted hover:text-white disabled:opacity-30 disabled:hover:text-app-muted transition-colors p-1"
+              title="Undo"
+            >
+              <Undo2 size={16} />
+            </button>
+            <button 
+              onClick={redo}
+              disabled={!canRedo()}
+              className="text-app-muted hover:text-white disabled:opacity-30 disabled:hover:text-app-muted transition-colors p-1"
+              title="Redo"
+            >
+              <Redo2 size={16} />
+            </button>
+          </div>
           <button className="text-[10px] font-bold text-app-muted hover:text-white px-3 py-1.5 transition-colors uppercase tracking-wider">
             Save
           </button>

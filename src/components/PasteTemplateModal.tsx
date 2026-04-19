@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, FileJson, AlertTriangle } from 'lucide-react';
-import { Template } from '../lib/types';
+import { Template } from '../types/template';
 
 interface PasteTemplateModalProps {
   isOpen: boolean;
