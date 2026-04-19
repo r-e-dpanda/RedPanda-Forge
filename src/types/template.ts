@@ -10,24 +10,60 @@ export type TeamColor = string | {
   accent?: string;
 };
 
+export interface TeamKit {
+  type: "home" | "away" | "third" | "gk";
+  primary?: string; // override color for this kit
+  image?: string;   // optional image pattern for the kit
+}
+
+export interface TeamAssets {
+  logo: string;
+  badge?: string;
+  kit?: {
+    home?: TeamKit;
+    away?: TeamKit;
+    third?: TeamKit;
+  };
+  background?: string;
+}
+
 export interface Team {
   id: string;
   name: string;
   shortName: string;
-  logo: string; // Resolves to an Asset ID ultimately
-  color?: TeamColor;
+  logo: string; // Keep for backwards compatibility
+  color?: TeamColor; // Keep for backwards compatibility
+  colors?: {
+    primary: string;
+    secondary?: string;
+    accent?: string;
+  };
+  assets?: TeamAssets;
 }
 
 export interface Player {
   id: string;
   name: string;
-  flag: string;
+  flag?: string;
+  image?: string; // added player image
+}
+
+export interface MatchCompetition {
+  id: string;
+  name: string;
+  logo?: string;
+  trophy?: string;
+}
+
+export interface MatchTeamOverrides {
+  kit?: TeamKit;
 }
 
 export interface Match {
   id: string;
   sport: Sport;
   league: string;
+  competition?: MatchCompetition; // structured competition
   date: string; // ISO
   venue?: string;
   isLive?: boolean;
@@ -35,6 +71,8 @@ export interface Match {
   liveBadge?: boolean;
   homeTeam?: Team;
   awayTeam?: Team;
+  homeTeamOverrides?: MatchTeamOverrides; // overrides inside match
+  awayTeamOverrides?: MatchTeamOverrides;
   player1?: Player;
   player2?: Player;
 }

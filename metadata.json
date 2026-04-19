@@ -1,6 +1,6 @@
 {
   "name": "RedPanda Forge",
-  "description": "A modular sports graphic editor with multi-tab support and batch generation.",
+  "description": "A desktop-class React application designed to generate high-quality sports graphics, matchday thumbnails, and social media assets. Features a dynamic data-binding engine with a visual canvas editor.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

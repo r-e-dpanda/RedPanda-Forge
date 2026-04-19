@@ -84,34 +84,40 @@ export const SettingsModal = () => {
             
             <section className="space-y-4">
               <div>
-                <h3 className="text-lg font-medium text-white">Storage Locations</h3>
-                <p className="text-sm text-zinc-500 mt-1">Configure where RedPanda Forge saves and loads native assets. Important for Desktop operations.</p>
+                <h3 className="text-lg font-medium text-white">Appearance</h3>
+                <p className="text-sm text-zinc-500 mt-1">Customize the look and feel of the app.</p>
               </div>
-              
-              <InputField label="Assets Root Directory" field="assetsRoot" icon={HardDrive} placeholder="C:/Users/name/Documents/RedPanda Forge" />
-              <InputField label="Templates Database Directory" field="templatesRoot" icon={Folder} placeholder="C:/Users/name/Documents/RedPanda Forge/templates" />
+              <div className="space-y-1.5 flex flex-col">
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Theme</label>
+                <div className="flex gap-3 mt-1">
+                  <button 
+                    onClick={() => setLocalDraft({...localDraft, theme: 'dark'})}
+                    className={`flex-1 py-3 px-4 rounded-lg border flex flex-col items-center justify-center gap-2 transition-all ${localDraft.theme === 'dark' ? 'bg-zinc-800 border-zinc-500 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800/50'}`}
+                  >
+                    <div className="w-6 h-6 rounded-full bg-[#050505] border border-zinc-700"></div>
+                    <span className="text-sm font-medium">Dark (Default)</span>
+                  </button>
+                  <button 
+                    onClick={() => setLocalDraft({...localDraft, theme: 'ice'})}
+                    className={`flex-1 py-3 px-4 rounded-lg border flex flex-col items-center justify-center gap-2 transition-all ${localDraft.theme === 'ice' ? 'bg-slate-50 border-teal-500 text-slate-800' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'}`}
+                  >
+                    <div className="w-6 h-6 rounded-full bg-[#14b8a6] shadow-[0_0_10px_rgba(20,184,166,0.3)]"></div>
+                    <span className="text-sm font-medium">Icy Mint</span>
+                  </button>
+                </div>
+              </div>
             </section>
 
             <div className="w-full h-px bg-zinc-800"></div>
 
             <section className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-white mb-4">Structure Configuration</h3>
-                <div className="grid grid-cols-2 gap-4">
-                   <div className="space-y-1.5">
-                     <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Logos Folder Name</label>
-                     <input type="text" value={localDraft.logosDir} onChange={(e) => setLocalDraft({...localDraft, logosDir: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-sm text-zinc-300 focus:border-cyan-500/50 focus:outline-none" />
-                   </div>
-                   <div className="space-y-1.5">
-                     <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Backgrounds Folder Name</label>
-                     <input type="text" value={localDraft.backgroundsDir} onChange={(e) => setLocalDraft({...localDraft, backgroundsDir: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-sm text-zinc-300 focus:border-cyan-500/50 focus:outline-none" />
-                   </div>
-                   <div className="space-y-1.5">
-                     <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Fonts Folder Name</label>
-                     <input type="text" value={localDraft.fontsDir} onChange={(e) => setLocalDraft({...localDraft, fontsDir: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-sm text-zinc-300 focus:border-cyan-500/50 focus:outline-none" />
-                   </div>
-                </div>
+                <h3 className="text-lg font-medium text-white">Storage Locations</h3>
+                <p className="text-sm text-zinc-500 mt-1">Configure where RedPanda Forge saves and loads native assets. Important for Desktop operations.</p>
               </div>
+              
+              <InputField label="Assets Root Directory" field="assetsRoot" icon={HardDrive} placeholder="C:/Users/name/Documents/RedPanda Forge" />
+              <InputField label="Templates Database Directory" field="templatesRoot" icon={Folder} placeholder="C:/Users/name/Documents/RedPanda Forge/templates" />
             </section>
 
           </div>

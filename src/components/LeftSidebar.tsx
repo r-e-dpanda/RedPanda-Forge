@@ -39,7 +39,7 @@ export const LeftSidebar = ({
           onClick={() => setActiveLeftTab('matches')}
           className={cn(
             "flex-1 text-[12px] font-[700] transition-colors border-b-[2px]",
-            activeLeftTab === 'matches' ? "border-app-accent text-white" : "border-transparent text-app-muted hover:text-white hover:bg-white/5"
+            activeLeftTab === 'matches' ? "border-app-accent text-app-text" : "border-transparent text-app-muted hover:text-app-text hover:bg-app-card"
           )}
         >
           Matches
@@ -48,7 +48,7 @@ export const LeftSidebar = ({
           onClick={() => setActiveLeftTab('templates')}
           className={cn(
             "flex-1 text-[12px] font-[700] transition-colors border-b-[2px]",
-            activeLeftTab === 'templates' ? "border-app-accent text-white" : "border-transparent text-app-muted hover:text-white hover:bg-white/5"
+            activeLeftTab === 'templates' ? "border-app-accent text-app-text" : "border-transparent text-app-muted hover:text-app-text hover:bg-app-card"
           )}
         >
           Templates
@@ -63,7 +63,7 @@ export const LeftSidebar = ({
               <select 
                 value={selectedRatio} 
                 onChange={(e) => setSelectedRatio(e.target.value as Ratio)}
-                className="bg-black border border-app-border rounded px-2 py-1 flex-1 ml-4 text-white outline-none focus:border-app-accent text-[11px]"
+                className="bg-app-bg border border-app-border rounded px-2 py-1 flex-1 ml-4 text-app-text outline-none focus:border-app-accent text-[11px]"
               >
                 <option value="16:9">16:9 Landscape</option>
                 <option value="9:16">9:16 Portrait</option>
@@ -78,7 +78,7 @@ export const LeftSidebar = ({
                   const tpl = templates.find((t: any) => t.id === e.target.value);
                   if (tpl) setEditorTemplate(tpl);
                 }}
-                className="bg-black border border-app-border rounded px-2 py-1 flex-1 ml-4 text-white outline-none focus:border-app-accent text-[11px] max-w-[150px] truncate"
+                className="bg-app-bg border border-app-border rounded px-2 py-1 flex-1 ml-4 text-app-text outline-none focus:border-app-accent text-[11px] max-w-[150px] truncate"
                 disabled={filteredTemplates.length === 0}
               >
                 {filteredTemplates.length === 0 ? (
@@ -99,7 +99,7 @@ export const LeftSidebar = ({
                      className={cn(
                        "p-3 rounded-lg border text-left flex items-center justify-between cursor-pointer transition-all",
                        activeMatch?.id === m.id
-                         ? "bg-app-accent/10 border-app-accent text-white"
+                         ? "bg-app-accent/10 border-app-accent text-app-text"
                          : "bg-app-bg border-app-border hover:border-app-muted text-app-muted"
                      )}
                    >
@@ -113,7 +113,7 @@ export const LeftSidebar = ({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <img src={m.sport === 'tennis' ? m.player1?.flag : m.homeTeam?.logo} className="w-5 h-5 object-contain" alt="" />
-                          <span className={cn("text-[13px] font-[600]", activeMatch?.id === m.id ? "text-white" : "text-[#cdd0d5]")}>
+                          <span className={cn("text-[13px] font-[600]", activeMatch?.id === m.id ? "text-app-text" : "text-app-text opacity-90")}>
                             {m.sport === 'tennis' 
                               ? `${m.player1?.name} vs ${m.player2?.name}`
                               : `${m.homeTeam?.shortName} vs ${m.awayTeam?.shortName}`}
@@ -141,14 +141,14 @@ export const LeftSidebar = ({
             <div className="flex flex-col gap-3">
               {tab2Templates.map((template: any) => (
                 <div key={template.id} className="bg-app-bg border border-app-border rounded-lg overflow-hidden flex flex-col group hover:border-app-accent/50 transition-colors">
-                  <div className="relative h-[120px] bg-black/40 flex items-center justify-center p-2">
+                  <div className="relative h-[120px] bg-app-card flex items-center justify-center p-2">
                     <img src={template.thumbnail} className="max-w-full max-h-full object-contain pointer-events-none drop-shadow-lg" alt="" />
                     <div className="absolute top-2 right-2 flex gap-1">
-                      <span className="bg-black/60 backdrop-blur text-white text-[9px] px-1.5 py-0.5 rounded font-mono border border-white/10 uppercase font-bold tracking-wider">{template.ratio}</span>
+                      <span className="bg-app-bg/60 backdrop-blur text-app-text text-[9px] px-1.5 py-0.5 rounded font-mono border border-app-border uppercase font-bold tracking-wider">{template.ratio}</span>
                     </div>
                   </div>
                   <div className="p-3 text-left">
-                    <h4 className="text-[12px] font-bold text-white mb-1 truncate">{template.name}</h4>
+                    <h4 className="text-[12px] font-bold text-app-text mb-1 truncate">{template.name}</h4>
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[10px] text-app-muted">v{template.version || '1.0'} • Admin</span>
                     </div>

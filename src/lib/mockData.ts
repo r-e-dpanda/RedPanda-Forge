@@ -13,15 +13,45 @@ export const MOCK_MATCHES: Match[] = [
       id: "t_mu",
       name: "Manchester United",
       shortName: "MUN",
-      logo: "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg",
-      color: "#DA291C"
+      logo: "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg", // Keep old field for legacy templates
+      color: "#DA291C", // Keep old field
+      colors: {
+        primary: "#DA291C",
+        secondary: "#000000",
+        accent: "#FBE122"
+      },
+      assets: {
+        logo: "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg",
+        badge: "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg",
+        kit: {
+          home: { type: "home", primary: "#DA291C", image: "" }
+        },
+        background: "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?auto=format&fit=crop&q=80&w=2000" // example stadium
+      }
     },
     awayTeam: {
       id: "t_mc",
       name: "Manchester City",
       shortName: "MCI",
       logo: "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
-      color: "#6CABDD"
+      color: "#6CABDD",
+      colors: {
+        primary: "#6CABDD",
+        secondary: "#FFFFFF",
+        accent: "#1C2C5B"
+      },
+      assets: {
+        logo: "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
+        kit: {
+          away: { type: "away", primary: "#000000", image: "" } // Example 24/25 away kit logic
+        }
+      }
+    },
+    awayTeamOverrides: {
+      kit: {
+        type: "away",
+        primary: "#000000"
+      }
     }
   },
   {
@@ -129,7 +159,7 @@ export const MOCK_TEMPLATES: Template[] = [
             dataKey: "homeTeam.name",
             text: "HOME TEAM",
             visible: true, zIndex: 2, position: {x: 200, y: 760}, size: {width: 800, height: 60}, rotation: 0, opacity: 1,
-            style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center" }
+            style: { fill: "{{homeTeam.colors.primary | contrast}}", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center" }
           },
           {
             id: "away_logo",
@@ -146,7 +176,7 @@ export const MOCK_TEMPLATES: Template[] = [
             dataKey: "awayTeam.name",
             text: "AWAY TEAM",
             visible: true, zIndex: 4, position: {x: 920, y: 760}, size: {width: 800, height: 60}, rotation: 0, opacity: 1,
-            style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center" }
+            style: { fill: "{{awayTeam.colors.primary}}", fontFamily: "Inter", fontSize: 48, fontWeight: "bold", align: "center" }
           },
           {
             id: "vs_text",
