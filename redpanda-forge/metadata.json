@@ -1,6 +1,0 @@
-{
-  "name": "RedPanda Forge",
-  "description": "RedPanda Forge is a desktop-class React application (currently being migrated/setup for Electron) designed to generate high-quality sports graphics, matchday thumbnails, and social media assets. It combines a dynamic data-binding engine with a visual canvas editor.",
-  "requestFramePermissions": [],
-  "majorCapabilities": []
-}
