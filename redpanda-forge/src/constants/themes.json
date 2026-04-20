@@ -1,0 +1,41 @@
+{
+  "dark": {
+    "name": "Dark Iron & Sulfur",
+    "description": "High-contrast, industrial, authoritative.",
+    "colors": {
+      "bg": "#0a0a0a",
+      "sidebar": "#121212",
+      "card": "#181818",
+      "border": "#2a2a2a",
+      "text": "#e4e4e7",
+      "muted": "#71717a",
+      "accent": "#fbbf24"
+    }
+  },
+  "ice": {
+    "name": "Icy Mint (Aqua Light)",
+    "description": "Fresh, high-contrast aqua/mint workspace optimized for focus.",
+    "colors": {
+      "bg": "#f5fffa",
+      "sidebar": "#e0f2f1",
+      "card": "#ffffff",
+      "border": "#b2dfdb",
+      "text": "#1a3a3a",
+      "muted": "#4e7070",
+      "accent": "#20b2aa"
+    }
+  },
+  "light": {
+    "name": "Studio Light",
+    "description": "Minimal, clean, airy editorial look.",
+    "colors": {
+      "bg": "#ffffff",
+      "sidebar": "#f8fafc",
+      "card": "#ffffff",
+      "border": "#e2e8f0",
+      "text": "#0f172a",
+      "muted": "#64748b",
+      "accent": "#3b82f6"
+    }
+  }
+}
