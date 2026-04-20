@@ -4,12 +4,12 @@ import { format as formatDate, parseISO } from 'date-fns';
 
 // Hỗ trợ truy xuất dữ liệu từ object dựa trên dấu chấm (e.g. "homeTeam.assets.logo")
 const getByPath = (obj: any, path: string) => {
-  if (!path) return undefined;
+  if (!path || typeof path !== 'string') return undefined;
   
   // Smart fallback for team colors to support legacy records
   if (path.endsWith('.colors.primary')) {
     const standardVal = path.split('.').reduce((acc, part) => acc && acc[part], obj);
-    if (standardVal !== undefined) return standardVal;
+    if (standardVal !== undefined && standardVal !== null) return standardVal;
     
     // Fallback to .color
     const fallbackPath = path.replace('.colors.primary', '.color');
@@ -24,9 +24,18 @@ const getByPath = (obj: any, path: string) => {
 
 const applyPipes = (value: any, pipes: string[]): any => {
   let result = value;
+  // Handle null/undefined results from previous steps
+  if (result === null || result === undefined) return "";
+
   for (const pipeStr of pipes) {
     const trimmed = pipeStr.trim();
     if (!trimmed) continue;
+    
+    // if result became null/undefined after a pipe
+    if (result === null || result === undefined) {
+      result = "";
+      break;
+    }
 
     const firstColIdx = trimmed.indexOf(':');
     let pName = trimmed.toLowerCase();
@@ -97,7 +106,7 @@ const applyPipes = (value: any, pipes: string[]): any => {
 }
 
 export const isAutoResolved = (dataKey: string, match: Match | null) => {
-  if (!match) return false;
+  if (!match || !dataKey || typeof dataKey !== 'string') return false;
   
   // Với cơ chế mới, nếu dataKey tồn tại trong match struct (hoặc bắt đầu bằng match.) 
   // thì nó được tính là auto resolved. 
@@ -145,7 +154,7 @@ export const resolveBoundData = (
   if (finalDataKey || element.dataKey) {
     let keyWithoutPipes = finalDataKey || element.dataKey;
     let parts: string[] = [];
-    if (keyWithoutPipes.includes('|')) {
+    if (typeof keyWithoutPipes === 'string' && keyWithoutPipes.includes('|')) {
       parts = keyWithoutPipes.split('|');
       keyWithoutPipes = parts[0].trim();
     }
@@ -176,7 +185,7 @@ export const resolveBoundData = (
             const cleanKey = keyWithoutPipes.replace(/^match\./, '');
             const val = getByPath(match, cleanKey);
             
-            if (val !== undefined) {
+            if (val !== undefined && val !== null) {
                resolvedElement.text = String(val);
             } else {
                // Computed / Alias resolving
@@ -268,6 +277,14 @@ export const resolveBoundData = (
     // Fix Fallback parsing - check actualOverrides first, then element.align, then element.style.align
     align: actualOverrides.align !== undefined ? actualOverrides.align : (resolvedElement.align !== undefined ? resolvedElement.align : resolvedElement.style?.align),
     fill: actualOverrides.fill !== undefined ? processStyleValue(actualOverrides.fill) : (resolvedElement.fill !== undefined ? processStyleValue(resolvedElement.fill) : resolvedElement.style?.fill),
+    stroke: actualOverrides.stroke !== undefined ? processStyleValue(actualOverrides.stroke) : (resolvedElement.stroke !== undefined ? processStyleValue(resolvedElement.stroke) : resolvedElement.style?.stroke),
+    strokeWidth: actualOverrides.strokeWidth !== undefined ? actualOverrides.strokeWidth : (resolvedElement.strokeWidth !== undefined ? resolvedElement.strokeWidth : resolvedElement.style?.strokeWidth),
+    strokeEnabled: actualOverrides.strokeEnabled !== undefined ? actualOverrides.strokeEnabled : (resolvedElement.strokeEnabled !== undefined ? resolvedElement.strokeEnabled : (resolvedElement as any).style?.strokeEnabled),
+    shadowEnabled: actualOverrides.shadowEnabled !== undefined ? actualOverrides.shadowEnabled : (resolvedElement.shadowEnabled !== undefined ? resolvedElement.shadowEnabled : (resolvedElement as any).style?.shadowEnabled),
+    shadowColor: actualOverrides.shadowColor !== undefined ? actualOverrides.shadowColor : (resolvedElement.shadowColor !== undefined ? resolvedElement.shadowColor : (resolvedElement as any).style?.shadowColor),
+    shadowBlur: actualOverrides.shadowBlur !== undefined ? actualOverrides.shadowBlur : (resolvedElement.shadowBlur !== undefined ? resolvedElement.shadowBlur : (resolvedElement as any).style?.shadowBlur),
+    shadowOffsetX: actualOverrides.shadowOffsetX !== undefined ? actualOverrides.shadowOffsetX : (resolvedElement.shadowOffsetX !== undefined ? resolvedElement.shadowOffsetX : (resolvedElement as any).style?.shadowOffsetX),
+    shadowOffsetY: actualOverrides.shadowOffsetY !== undefined ? actualOverrides.shadowOffsetY : (resolvedElement.shadowOffsetY !== undefined ? resolvedElement.shadowOffsetY : (resolvedElement as any).style?.shadowOffsetY),
     fontFamily: actualOverrides.fontFamily !== undefined ? actualOverrides.fontFamily : (resolvedElement.fontFamily !== undefined ? resolvedElement.fontFamily : resolvedElement.style?.fontFamily),
     fontSize: actualOverrides.fontSize !== undefined ? actualOverrides.fontSize : (resolvedElement.fontSize !== undefined ? resolvedElement.fontSize : resolvedElement.style?.fontSize),
     

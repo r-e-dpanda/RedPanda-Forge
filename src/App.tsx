@@ -9,6 +9,17 @@ import { LayoutTemplate, Trophy, Calendar, Settings, Image as ImageIcon, Menu, C
 import { cn } from './lib/utils';
 import { useEditorStore } from './stores/editorStore';
 import { LeftSidebar } from './components/LeftSidebar';
+import { applyTheme } from './lib/themeUtils';
+
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 export default function App() {
   const [selectedSport, setSelectedSport] = useState<Sport>("football");
@@ -148,10 +159,10 @@ export default function App() {
     }
   }, [activeSessionId, activeSession, selectedSport]);
 
-  const handleSportChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSport = e.target.value as Sport;
+  const handleSportChange = (e: React.ChangeEvent<HTMLSelectElement> | string) => {
+    const newSport = (typeof e === 'string' ? e : e.target.value) as Sport;
     
-    // Find the first tab that belongs to this sport
+    // 1. Find an existing session for this sport (has a template or match of this sport)
     const existingSession = sessions.find(s => 
       s.template?.sport === newSport || s.match?.sport === newSport
     );
@@ -159,11 +170,19 @@ export default function App() {
     if (existingSession) {
       useEditorStore.getState().setActiveSession(existingSession.id);
     } else {
-      // Find an empty session (no template and no match applied yet)
-      const emptySession = sessions.find(s => !s.template && !s.match);
-      if (emptySession) {
-        useEditorStore.getState().setActiveSession(emptySession.id);
+      // 2. If no specific session, try to find an "Untouched" session to reuse
+      // An untouched session is one with no template, no match, and no history/overrides
+      const untouchedSession = sessions.find(s => 
+        !s.template && 
+        !s.match && 
+        Object.keys(s.elementOverrides).length === 0 &&
+        s.historyIndex === -1
+      );
+
+      if (untouchedSession) {
+        useEditorStore.getState().setActiveSession(untouchedSession.id);
       } else {
+        // 3. Only create a new one if we really have to
         const newSessionId = useEditorStore.getState().addSession();
         useEditorStore.getState().setActiveSession(newSessionId);
       }
@@ -179,7 +198,7 @@ export default function App() {
   const currentTheme = useSettingsStore(state => state.settings?.theme) || 'dark';
   
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', currentTheme);
+    applyTheme(currentTheme);
   }, [currentTheme]);
 
   return (
@@ -193,83 +212,104 @@ export default function App() {
             <span>RedPanda Forge</span>
           </div>
           <div className="w-[1px] h-4 bg-app-border"></div>
-          <div className="flex items-center gap-4 text-[12px]">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-app-muted font-[600]">Sport:</span>
-              <select 
-                value={selectedSport} 
-                onChange={handleSportChange}
-                className="bg-app-card border border-app-border rounded px-2 py-1 text-app-text outline-none focus:border-app-accent text-[11px]"
-              >
-                <option value="football">Football</option>
-                <option value="basketball">Basketball</option>
-                <option value="tennis">Tennis</option>
-                <option value="esports">Esports</option>
-              </select>
+              <span className="text-app-muted font-[600] text-[11px]">Sport:</span>
+              <Select value={selectedSport} onValueChange={handleSportChange}>
+                <SelectTrigger className="h-7 w-[110px] text-[11px] bg-app-card border-app-border capitalize">
+                  <SelectValue placeholder="Select sport" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="football">Football</SelectItem>
+                  <SelectItem value="basketball">Basketball</SelectItem>
+                  <SelectItem value="tennis">Tennis</SelectItem>
+                  <SelectItem value="esports">Esports</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            
             <div className="flex items-center gap-2">
-              <span className="text-app-muted font-[600]">
+              <span className="text-app-muted font-[600] text-[11px]">
                 {selectedSport === 'tennis' ? 'Tour' : 'League'}:
               </span>
-              <select 
-                value={selectedLeague}
-                onChange={(e) => setSelectedLeague(e.target.value)}
-                className="bg-app-card border border-app-border rounded px-2 py-1 text-app-text outline-none focus:border-app-accent text-[11px]"
-              >
-                {availableLeagues.map((league) => (
-                  <option key={league} value={league}>{league}</option>
-                ))}
-              </select>
+              <Select value={selectedLeague} onValueChange={setSelectedLeague}>
+                <SelectTrigger className="h-7 w-[130px] text-[11px] bg-app-card border-app-border">
+                  <SelectValue placeholder="Select league" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableLeagues.map((league) => (
+                    <SelectItem key={league} value={league}>{league}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
-          <button 
+        <div className="flex items-center gap-2">
+          <Button 
+             variant="ghost"
+             size="icon-sm"
              onClick={() => toggleSettingsModal()}
-             className="text-app-muted hover:text-app-text transition-colors p-1.5 mr-2"
+             className="text-app-muted hover:text-app-text"
              title="Settings"
           >
-             <Settings size={18} />
-          </button>
+             <Settings size={16} />
+          </Button>
           
-          <div className="w-px h-4 bg-app-border mx-2"></div>
+          <Separator orientation="vertical" className="h-4 bg-app-border mx-1" />
           
-          <div className="flex items-center gap-2 mr-4">
-            <button 
+          <div className="flex items-center gap-1">
+            <Button 
+              variant="ghost"
+              size="icon-xs"
               onClick={undo}
               disabled={!canUndo()}
-              className="text-app-muted hover:text-app-text disabled:opacity-30 disabled:hover:text-app-muted transition-colors p-1"
+              className="text-app-muted hover:text-app-text"
               title="Undo"
             >
-              <Undo2 size={16} />
-            </button>
-            <button 
+              <Undo2 size={14} />
+            </Button>
+            <Button 
+              variant="ghost"
+              size="icon-xs"
               onClick={redo}
               disabled={!canRedo()}
-              className="text-app-muted hover:text-app-text disabled:opacity-30 disabled:hover:text-app-muted transition-colors p-1"
+              className="text-app-muted hover:text-app-text"
               title="Redo"
             >
-              <Redo2 size={16} />
-            </button>
+              <Redo2 size={14} />
+            </Button>
           </div>
-          <button className="text-[10px] font-bold text-app-muted hover:text-app-text px-3 py-1.5 transition-colors uppercase tracking-wider">
+
+          <Separator orientation="vertical" className="h-4 bg-app-border mx-1" />
+
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="text-[10px] font-bold text-app-muted hover:text-app-text uppercase tracking-wider"
+          >
             Save
-          </button>
-          <button 
+          </Button>
+          
+          <Button 
+            variant="secondary"
+            size="sm"
             onClick={batchGenerate}
             disabled={!activeMatch || filteredTemplates.length === 0}
-            className="text-[10px] font-bold text-app-text bg-app-card hover:bg-app-border disabled:opacity-30 px-4 py-1.5 rounded transition-all uppercase tracking-wider"
+            className="text-[10px] font-bold uppercase tracking-wider h-7"
           >
             Batch Generate
-          </button>
-          <button 
+          </Button>
+          
+          <Button 
             onClick={() => editorRef.current?.exportPNG()}
-            className="text-[10px] font-bold text-white bg-app-accent border border-app-accent-light hover:brightness-110 px-4 py-1.5 rounded transition-all flex items-center gap-1.5 shadow-sm uppercase tracking-wider"
+            size="sm"
+            className="text-[10px] font-bold uppercase tracking-wider h-7 bg-app-accent hover:brightness-105 transition-all flex items-center gap-1.5 shadow-sm border border-white/20"
           >
             <Download size={13} />
             Export PNG
-          </button>
+          </Button>
         </div>
       </div>
 

@@ -78,7 +78,7 @@ export interface Match {
 }
 
 // 2. Definition cho Domain-specific JSON Schema UI Template
-export type ElementType = "Image" | "Text" | "Shape" | "Line" | "Group";
+export type ElementType = "Image" | "Text" | "Shape" | "Line" | "Group" | "Polygon";
 
 export interface Coordinates {
   x: number;
@@ -101,6 +101,7 @@ export interface ElementStyle {
   fill?: string | { type: "linear" | "radial"; colors: string[]; stops: number[] };
   stroke?: string;
   strokeWidth?: number;
+  strokeEnabled?: boolean;
   cornerRadius?: number | number[]; // For shapes
   
   // Drop Shadow
@@ -111,6 +112,11 @@ export interface ElementStyle {
     offsetY: number;
     opacity?: number;
   };
+  shadowColor?: string;
+  shadowBlur?: number;
+  shadowOffsetX?: number;
+  shadowOffsetY?: number;
+  shadowOpacity?: number;
 }
 
 export interface BaseElement {
@@ -162,6 +168,12 @@ export interface ShapeElement extends BaseElement {
   points?: number[]; // Cho Polygon
 }
 
+export interface PolygonElement extends BaseElement {
+  type: "Polygon";
+  points: number[];
+  style: ElementStyle;
+}
+
 export interface LineElement extends BaseElement {
   type: "Line";
   points: number[]; // [x1, y1, x2, y2, ...]
@@ -175,7 +187,7 @@ export interface GroupElement extends BaseElement {
   children: TemplateNode[]; // Hỗ trợ nesting
 }
 
-export type TemplateNode = ImageElement | TextElement | ShapeElement | LineElement | GroupElement;
+export type TemplateNode = ImageElement | TextElement | ShapeElement | LineElement | GroupElement | PolygonElement;
 
 // (Thay vì Layer Group như ngày xưa, chúng ta có thể giữ LayersArray làm root)
 export interface Template {

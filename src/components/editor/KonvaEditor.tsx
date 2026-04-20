@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { Stage, Layer, Image, Text, Rect, Line } from "react-konva";
+import { Stage, Layer, Image, Text, Rect, Line, Group } from "react-konva";
 import useImage from "use-image";
 import { TemplateElement } from "../../types/template";
 import { ZoomIn, ZoomOut, PanelRightOpen } from "lucide-react";
@@ -25,7 +25,7 @@ const URLImage = ({ imageInfo, commonProps }: { imageInfo: any, commonProps: any
 interface KonvaEditorProps {
   rightExpanded: boolean;
   setRightExpanded: (val: boolean) => void;
-  setActiveRightTab: (val: 'match' | 'editor') => void;
+  setActiveRightTab: (val: 'data' | 'design') => void;
 }
 
 export interface EditorRef {
@@ -57,18 +57,28 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
   useImperativeHandle(ref, () => ({
     exportPNG: () => {
       if (!stageRef.current || !template) return;
+      
+      // Save current selection to restore it later
+      const prevSelected = selectedElementId;
       setSelectedElementId(null);
       
+      // Extended timeout to ensure Konva layer redraw is complete
       setTimeout(() => {
+        if (!stageRef.current) return;
         const fallbackId = match?.id || 'nomatch';
         const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
         const link = document.createElement('a');
-        link.download = `thumbnail_${fallbackId}_${template.id}.png`;
+        link.download = `redpanda-${fallbackId}-${Date.now()}.png`;
         link.href = uri;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      }, 50);
+        
+        // Restore selection if there was one
+        if (prevSelected) {
+          setTimeout(() => setSelectedElementId(prevSelected), 50);
+        }
+      }, 150);
     }
   }));
 
@@ -92,6 +102,16 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
     }
   }, [template, rightExpanded]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedElementId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setSelectedElementId]);
+
   if (!template) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-app-muted bg-app-bg p-8 m-[1px]">
@@ -102,10 +122,20 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
 
   let flatElements: any[] = [];
   template.layers.forEach((layer: any) => {
-    if (layer.visible !== false) {
+    // Check layer visibility (template + override)
+    const isLayerVisible = elementOverrides[layer.id]?.visible !== undefined 
+      ? elementOverrides[layer.id].visible 
+      : (layer.visible !== false);
+
+    if (isLayerVisible) {
       const els = layer.elements || layer.children || [];
       els.forEach((el: any) => {
-        if (el.visible !== false) {
+        // Check element visibility (template + override)
+        const isElVisible = elementOverrides[el.id]?.visible !== undefined 
+          ? elementOverrides[el.id].visible 
+          : (el.visible !== false);
+
+        if (isElVisible) {
           flatElements.push({
             ...el,
             x: el.position?.x ?? el.x ?? 0,
@@ -171,12 +201,12 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
                   onClick: (e: any) => {
                     e.cancelBubble = true;
                     setSelectedElementId(element.id);
-                    setActiveRightTab('editor');
+                    setActiveRightTab('design');
                   },
                   onTap: (e: any) => {
                     e.cancelBubble = true;
                     setSelectedElementId(element.id);
-                    setActiveRightTab('editor');
+                    setActiveRightTab('design');
                   },
                   onDragEnd: (e: any) => {
                     setElementOverride(element.id, { 
@@ -191,6 +221,7 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
                 }
                 
                 if (element.type === "Shape") {
+                  const shadowEnabled = element.shadowEnabled && (element.shadowBlur > 0 || element.shadowOffsetX !== 0 || element.shadowOffsetY !== 0);
                   return (
                     <Rect
                       key={element.id}
@@ -201,10 +232,14 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
                       fill={element.fill}
                       rotation={element.rotation}
                       opacity={element.opacity !== undefined ? element.opacity : 1}
-                      shadowColor={element.shadowColor}
+                      shadowColor={shadowEnabled ? element.shadowColor : undefined}
                       shadowBlur={element.shadowBlur}
                       shadowOffsetX={element.shadowOffsetX}
                       shadowOffsetY={element.shadowOffsetY}
+                      shadowOpacity={element.shadowOpacity}
+                      stroke={element.strokeWidth > 0 ? element.stroke : undefined}
+                      strokeWidth={element.strokeWidth}
+                      cornerRadius={element.cornerRadius}
                       {...commonProps}
                     />
                   );
@@ -231,29 +266,51 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
                 }
                 
                 if (element.type === "Text") {
+                  const shadowEnabled = element.shadowEnabled && (element.shadowBlur > 0 || element.shadowOffsetX !== 0 || element.shadowOffsetY !== 0);
+                  const textContent = element.textTransform === "uppercase" ? element.text?.toUpperCase() : 
+                                     element.textTransform === "lowercase" ? element.text?.toLowerCase() :
+                                     element.text;
+                  
                   return (
-                    <Text
-                      key={element.id}
-                      x={element.x}
-                      y={element.y}
-                      width={element.width}
-                      text={element.textTransform === "uppercase" ? element.text?.toUpperCase() : element.text}
-                      fontSize={element.fontSize}
-                      fontFamily={element.fontFamily}
-                      fill={element.fill}
-                      align={element.align}
-                      fontStyle={element.fontStyle || (element.fontWeight === "bold" ? "bold" : "normal")}
-                      rotation={element.rotation}
+                    <Group 
+                      key={element.id} 
+                      x={element.x} 
+                      y={element.y} 
+                      rotation={element.rotation} 
                       opacity={element.opacity !== undefined ? element.opacity : 1}
-                      letterSpacing={element.letterSpacing}
-                      stroke={element.stroke}
-                      strokeWidth={element.strokeWidth}
-                      shadowColor={element.shadowColor}
-                      shadowBlur={element.shadowBlur}
-                      shadowOffsetX={element.shadowOffsetX}
-                      shadowOffsetY={element.shadowOffsetY}
                       {...commonProps}
-                    />
+                    >
+                      {element.bgEnabled && (
+                        <Rect
+                          x={-element.bgPadding}
+                          y={-element.bgPadding}
+                          width={(element.width || 0) + element.bgPadding * 2}
+                          height={element.fontSize * (element.lineHeight || 1.2) + element.bgPadding * 2}
+                          fill={element.bgColor}
+                          cornerRadius={element.bgRadius}
+                        />
+                      )}
+                      <Text
+                        text={textContent}
+                        fontSize={element.fontSize}
+                        fontFamily={element.fontFamily}
+                        fill={element.fill}
+                        width={element.width}
+                        align={element.align}
+                        fontStyle={element.fontWeight === "bold" ? "bold" : (element.fontWeight === "italic" ? "italic" : "normal")}
+                        letterSpacing={element.letterSpacing}
+                        lineHeight={element.lineHeight}
+                        stroke={element.strokeWidth > 0 ? element.stroke : undefined}
+                        strokeWidth={element.strokeWidth}
+                        shadowColor={shadowEnabled ? element.shadowColor : undefined}
+                        shadowBlur={element.shadowBlur}
+                        shadowOffsetX={element.shadowOffsetX}
+                        shadowOffsetY={element.shadowOffsetY}
+                        shadowOpacity={element.shadowOpacity}
+                        x={0}
+                        y={0}
+                      />
+                    </Group>
                   );
                 }
                 
@@ -265,19 +322,52 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
                 if (!targetId) return null;
                 const targetEl = elementsWithData.find(l => l.id === targetId);
                 if (!targetEl) return null;
+                
+                const isSelected = selectedElementId === targetId;
+                const strokeColor = isSelected ? "#3b82f6" : "rgba(59, 130, 246, 0.5)"; // Pro Blue
+                const strokeWidth = 1.5 / scale;
+                const handleSize = 6 / scale;
+
                 return (
-                  <Rect
-                    x={targetEl.x}
-                    y={targetEl.y}
-                    width={targetEl.width}
-                    height={targetEl.height || 0}
-                    rotation={targetEl.rotation}
-                    stroke={selectedElementId === targetId ? "#facc15" : "#22d3ee"} // Yellow if selected, cyan if hovered
-                    strokeWidth={selectedElementId === targetId ? 4 / scale : 4 / scale}
-                    dash={selectedElementId === targetId ? [] : [10 / scale, 5 / scale]}
-                    fill={selectedElementId === targetId ? "transparent" : "rgba(34, 211, 238, 0.1)"}
-                    listening={false}
-                  />
+                  <Group listening={false}>
+                    <Rect
+                      x={targetEl.x}
+                      y={targetEl.y}
+                      width={targetEl.width}
+                      height={targetEl.height || 0}
+                      rotation={targetEl.rotation || 0}
+                      stroke={strokeColor}
+                      strokeWidth={strokeWidth}
+                      dash={isSelected ? [] : [4 / scale, 4 / scale]}
+                      fill="transparent"
+                    />
+                    {isSelected && (
+                      <>
+                        {/* Figma-like handles at corners */}
+                        {[
+                          { x: targetEl.x, y: targetEl.y },
+                          { x: targetEl.x + targetEl.width, y: targetEl.y },
+                          { x: targetEl.x, y: targetEl.y + (targetEl.height || 0) },
+                          { x: targetEl.x + targetEl.width, y: targetEl.y + (targetEl.height || 0) }
+                        ].map((pos, i) => (
+                          <Rect
+                            key={i}
+                            x={pos.x - handleSize / 2}
+                            y={pos.y - handleSize / 2}
+                            width={handleSize}
+                            height={handleSize}
+                            fill="#FFFFFF"
+                            stroke={strokeColor}
+                            strokeWidth={1 / scale}
+                            rotation={targetEl.rotation || 0}
+                            offsetX={targetEl.rotation ? (pos.x - targetEl.x) : 0}
+                            offsetY={targetEl.rotation ? (pos.y - targetEl.y) : 0}
+                            // Simplified rotation handling for handles
+                          />
+                        ))}
+                      </>
+                    )}
+                  </Group>
                 );
               })()}
             </Layer>

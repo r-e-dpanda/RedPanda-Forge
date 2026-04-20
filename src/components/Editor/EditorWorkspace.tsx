@@ -8,7 +8,7 @@ export interface EditorRef {
 
 const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
   const [rightExpanded, setRightExpanded] = useState(true);
-  const [activeRightTab, setActiveRightTab] = useState<'match' | 'editor'>('match');
+  const [activeRightTab, setActiveRightTab] = useState<'data' | 'design'>('data');
   const innerEditorRef = useRef<KonvaEditorRef>(null);
 
   useImperativeHandle(ref, () => ({

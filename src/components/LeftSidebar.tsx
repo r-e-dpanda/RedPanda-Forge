@@ -56,7 +56,7 @@ export const LeftSidebar = ({
 
       <div className="flex-1 overflow-y-auto">
         {activeLeftTab === 'matches' && (
-          <div className="p-4 flex flex-col gap-4">
+          <div className="p-4 flex flex-col gap-4 relative h-full">
             <div className="flex justify-between items-center text-[11px]">
               <span className="text-app-muted font-bold">RATIO</span>
               <select 
@@ -97,40 +97,60 @@ export const LeftSidebar = ({
               </select>
             </div>
 
-            <div className="flex flex-col gap-2">
-              {filteredMatches.map(m => (
-                 <div key={m.id} className="relative group">
-                   <div 
-                     onClick={() => setEditorMatch(m)}
-                     className={cn(
-                       "p-3 rounded-lg border text-left flex items-center justify-between cursor-pointer transition-all",
-                       activeMatch?.id === m.id
-                         ? "bg-app-accent/10 border-app-accent text-app-text"
-                         : "bg-app-bg border-app-border hover:border-app-muted text-app-muted"
-                     )}
-                   >
-                    <div className="flex flex-col flex-1 gap-1">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-app-muted uppercase tracking-wider mb-1">
-                        <span>{m.league}</span>
-                        <span>
-                          {new Date(m.date).toLocaleDateString()} &middot; {new Date(m.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <img src={m.sport === 'tennis' ? m.player1?.flag : m.homeTeam?.logo} className="w-5 h-5 object-contain" alt="" />
-                          <span className={cn("text-[13px] font-[600]", activeMatch?.id === m.id ? "text-app-text" : "text-app-text opacity-90")}>
-                            {m.sport === 'tennis' 
-                              ? `${m.player1?.name} vs ${m.player2?.name}`
-                              : `${m.homeTeam?.shortName} vs ${m.awayTeam?.shortName}`}
-                          </span>
+            <div className="flex flex-col gap-2 relative">
+              <div className="flex items-center justify-between mt-2 mb-1">
+                <h3 className="text-[10px] font-bold text-app-muted uppercase tracking-wider">Available Matches</h3>
+                {!activeTemplate && (
+                  <span className="text-[9px] text-app-accent font-bold uppercase tracking-tighter flex items-center gap-1 animate-pulse">
+                    <LayoutTemplate size={10} />
+                    Select Template First
+                  </span>
+                )}
+              </div>
+              
+              <div className={cn("flex flex-col gap-2", !activeTemplate && "opacity-40 grayscale pointer-events-none select-none")}>
+                {filteredMatches.length === 0 ? (
+                  <div className="p-8 text-center border border-dashed border-app-border rounded-lg">
+                    <p className="text-app-muted text-[11px]">No matches found for the current filters.</p>
+                  </div>
+                ) : (
+                  filteredMatches.map(m => (
+                    <div key={m.id} className="relative group">
+                      <div 
+                        onClick={() => activeTemplate && setEditorMatch(m)}
+                        className={cn(
+                          "p-3 rounded-lg border text-left flex items-center justify-between transition-all",
+                          activeMatch?.id === m.id
+                            ? "bg-app-accent/10 border-app-accent text-app-text shadow-[0_0_15px_rgba(var(--app-accent-rgb),0.1)]"
+                            : "bg-app-bg border-app-border hover:border-app-muted text-app-muted cursor-pointer"
+                        )}
+                      >
+                        <div className="flex flex-col flex-1 gap-1">
+                          <div className="flex justify-between items-center text-[10px] font-bold text-app-muted uppercase tracking-wider mb-1">
+                            <span>{m.league}</span>
+                            <span>
+                              {new Date(m.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 flex items-center justify-center bg-white/5 rounded border border-app-border">
+                                <img src={m.sport === 'tennis' ? m.player1?.flag : m.homeTeam?.logo} className="w-4 h-4 object-contain" alt="" />
+                              </div>
+                              <span className={cn("text-[13px] font-[600]", activeMatch?.id === m.id ? "text-app-text" : "text-app-text/90")}>
+                                {m.sport === 'tennis' 
+                                  ? `${m.player1?.name} vs ${m.player2?.name}`
+                                  : `${m.homeTeam?.shortName} vs ${m.awayTeam?.shortName}`}
+                              </span>
+                            </div>
+                            {activeMatch?.id === m.id && <Check size={16} className="text-app-accent ml-2 shrink-0" />}
+                          </div>
                         </div>
-                        {activeMatch?.id === m.id && <Check size={16} className="text-app-accent ml-2 shrink-0" />}
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  ))
+                )}
+              </div>
             </div>
           </div>
         )}

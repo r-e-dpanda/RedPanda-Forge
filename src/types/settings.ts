@@ -1,6 +1,6 @@
 export interface AppSettings {
   version: string;
-  theme: "dark" | "ice";
+  theme: "dark" | "ice" | "light";
   
   // Thư mục chính do người dùng chọn (Quan trọng nhất)
   assetsRoot: string;

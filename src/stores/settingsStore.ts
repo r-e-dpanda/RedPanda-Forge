@@ -12,8 +12,21 @@ interface SettingsState {
   toggleModal: (open?: boolean) => void;
 }
 
+const getInitialSettings = (): AppSettings => {
+  if (typeof window === 'undefined') return DEFAULT_SETTINGS;
+  const data = localStorage.getItem('redpanda_forge_settings');
+  if (data) {
+    try {
+      return { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
+    } catch (e) {
+      return DEFAULT_SETTINGS;
+    }
+  }
+  return DEFAULT_SETTINGS;
+};
+
 export const useSettingsStore = create<SettingsState>((set, get) => ({
-  settings: DEFAULT_SETTINGS, // Khởi tạo mặc định để ngăn lỗi crash SSR
+  settings: getInitialSettings(),
   isOpen: false,
 
   loadSettings: async () => {

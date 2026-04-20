@@ -96,6 +96,7 @@ export const FORMATTERS = {
  */
 export const applyFormatters = (value: any, pipeline: string) => {
   if (value === undefined || value === null) return "";
+  if (!pipeline || typeof pipeline !== 'string') return value;
   
   const rules = pipeline.split("|").map(s => s.trim()).filter(Boolean);
   let result = value;

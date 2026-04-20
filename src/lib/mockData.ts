@@ -26,7 +26,7 @@ export const MOCK_MATCHES: Match[] = [
         kit: {
           home: { type: "home", primary: "#DA291C", image: "" }
         },
-        background: "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?auto=format&fit=crop&q=80&w=2000" // example stadium
+        background: "https://picsum.photos/seed/mu_stadium/2000/1200" // example stadium
       }
     },
     awayTeam: {
@@ -104,7 +104,7 @@ export const MOCK_TEMPLATES: Template[] = [
     version: "1.0",
     sport: "football",
     ratio: "16:9",
-    thumbnail: "https://images.unsplash.com/photo-1518605368461-1ee123cb1171?auto=format&fit=crop&q=80&w=400&h=225",
+    thumbnail: "https://picsum.photos/seed/fb_tpl1/400/225",
     canvas: {
       width: 1920,
       height: 1080,
@@ -123,7 +123,7 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "bg_1",
             type: "Image",
             name: "Stadium Background",
-            src: "https://images.unsplash.com/photo-1518605368461-1ee123cb1171?auto=format&fit=crop&q=80&w=1920&h=1080",
+            src: "https://picsum.photos/seed/stadium_wider/1920/1080",
             visible: true, zIndex: 0, position: {x: 0, y: 0}, size: {width: 1920, height: 1080}, rotation: 0, opacity: 1, objectFit: "cover"
           },
           {
@@ -219,6 +219,24 @@ export const MOCK_TEMPLATES: Template[] = [
             formatters: ["date:dd MMM yyyy", "uppercase"],
             style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 48, fontWeight: "normal", align: "center" },
             visible: true, zIndex: 2, position: {x: 0, y: 850}, size: {width: 1920, height: 60}, rotation: 0, opacity: 0.8
+          },
+          {
+            id: "stadium_name",
+            type: "Text",
+            name: "Stadium Name",
+            dataKey: "match.venue",
+            text: "STADIUM NAME",
+            formatters: ["uppercase"],
+            style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 32, fontWeight: "bold", align: "center" },
+            visible: true, zIndex: 3, position: {x: 0, y: 920}, size: {width: 1920, height: 40}, rotation: 0, opacity: 0.6
+          },
+          {
+            id: "commentator_name",
+            type: "Text",
+            name: "Commentator",
+            text: "COMMENTARY: PETER DRURY",
+            style: { fill: "#FACC15", fontFamily: "Inter", fontSize: 24, fontWeight: "normal", align: "right" },
+            visible: false, zIndex: 4, position: {x: 1400, y: 1000}, size: {width: 480, height: 40}, rotation: 0, opacity: 0.9
           }
         ]
       }
@@ -230,7 +248,7 @@ export const MOCK_TEMPLATES: Template[] = [
     version: "1.0",
     sport: "football",
     ratio: "9:16",
-    thumbnail: "https://images.unsplash.com/photo-1522778119026-d647f0590c20?auto=format&fit=crop&q=80&w=225&h=400",
+    thumbnail: "https://picsum.photos/seed/fb_story/225/400",
     canvas: {
       width: 1080,
       height: 1920,
@@ -249,7 +267,7 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "stadium_bg",
             type: "Image",
             name: "Stadium Image",
-            src: "https://images.unsplash.com/photo-1522778119026-d647f0590c20?auto=format&fit=crop&q=80&w=1080&h=1920",
+            src: "https://picsum.photos/seed/vertical_stadium/1080/1920",
             visible: true, zIndex: 0, position: {x: 0, y: 0}, size: {width: 1080, height: 1920}, rotation: 0, opacity: 0.8, objectFit: "cover"
           },
           {
@@ -464,7 +482,7 @@ export const MOCK_TEMPLATES: Template[] = [
     version: "1.0",
     sport: "tennis",
     ratio: "9:16",
-    thumbnail: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=225&h=400",
+    thumbnail: "https://picsum.photos/seed/tennis_tpl/225/400",
     canvas: {
       width: 1080,
       height: 1920,
@@ -475,7 +493,7 @@ export const MOCK_TEMPLATES: Template[] = [
         id: "bg_1",
         type: "Image",
         name: "Court Background",
-        src: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=1080&h=1920",
+        src: "https://picsum.photos/seed/tennis_court/1080/1920",
         zIndex: 0, visible: true, position: {x: 0, y: 0}, size: {width: 1080, height: 1920}, rotation: 0, opacity: 1, objectFit: "cover"
       },
       {
