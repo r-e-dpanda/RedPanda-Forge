@@ -8,7 +8,7 @@
     "accent": "#FBE122"
   },
   "assets": {
-    "logo": "@global/soccer/teams/manchester-united/logo.png",
+    "logo": "@global/soccer/teams/manchester-united/logo.svg",
     "kit": {
       "home": { "type": "home", "primary": "#DA291C", "image": "" }
     },

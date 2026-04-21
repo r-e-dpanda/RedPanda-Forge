@@ -114,7 +114,7 @@ export const MOCK_TEMPLATES: Template[] = [
             type: "Image",
             name: "Home Team Logo",
             visible: true, zIndex: 1, position: {x: 400, y: 340}, size: {width: 400, height: 400}, rotation: 0, opacity: 1, objectFit: "contain",
-            src: "@global/soccer/teams/{{match.homeTeam.id}}/logo.png"
+            src: "@global/soccer/teams/{{match.homeTeam.id}}/logo.svg"
           },
           {
             id: "home_name",
@@ -132,7 +132,7 @@ export const MOCK_TEMPLATES: Template[] = [
             type: "Image",
             name: "Away Team Logo",
             visible: true, zIndex: 3, position: {x: 1120, y: 340}, size: {width: 400, height: 400}, rotation: 0, opacity: 1, objectFit: "contain",
-            src: "@global/soccer/teams/{{match.awayTeam.id}}/logo.png"
+            src: "@global/soccer/teams/{{match.awayTeam.id}}/logo.svg"
           },
           {
             id: "away_name",
@@ -277,14 +277,14 @@ export const MOCK_TEMPLATES: Template[] = [
             type: "Image",
             name: "Home Team Visual",
             visible: true, zIndex: 1, position: {x: 50, y: 400}, size: {width: 500, height: 500}, rotation: 0, opacity: 0.95, objectFit: "contain",
-            src: "@global/soccer/teams/{{match.homeTeam.id}}/logo.png"
+            src: "@global/soccer/teams/{{match.homeTeam.id}}/logo.svg"
           },
           {
             id: "away_big_logo",
             type: "Image",
             name: "Away Team Visual",
             visible: true, zIndex: 2, position: {x: 600, y: 650}, size: {width: 450, height: 450}, rotation: 0, opacity: 0.95, objectFit: "contain",
-            src: "@global/soccer/teams/{{match.awayTeam.id}}/logo.png"
+            src: "@global/soccer/teams/{{match.awayTeam.id}}/logo.svg"
           }
         ]
       },
@@ -364,7 +364,7 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "home_logo_small",
             type: "Image",
             name: "Home Logo Small",
-            src: "@global/soccer/teams/{{match.homeTeam.id}}/logo.png",
+            src: "@global/soccer/teams/{{match.homeTeam.id}}/logo.svg",
             visible: true, zIndex: 8, position: {x: 180, y: 1470}, size: {width: 140, height: 140}, rotation: 0, opacity: 1, objectFit: "contain"
           },
           {
@@ -381,7 +381,7 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "away_logo_small",
             type: "Image",
             name: "Away Logo Small",
-            src: "@global/soccer/teams/{{match.awayTeam.id}}/logo.png",
+            src: "@global/soccer/teams/{{match.awayTeam.id}}/logo.svg",
             visible: true, zIndex: 10, position: {x: 750, y: 1470}, size: {width: 140, height: 140}, rotation: 0, opacity: 1, objectFit: "contain"
           },
           {

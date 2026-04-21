@@ -8,7 +8,7 @@
     "accent": "#1C2C5B"
   },
   "assets": {
-    "logo": "@global/soccer/teams/manchester-city/logo.png",
+    "logo": "@global/soccer/teams/manchester-city/logo.svg",
     "kit": {
       "away": { "type": "away", "primary": "#000000", "image": "" }
     }

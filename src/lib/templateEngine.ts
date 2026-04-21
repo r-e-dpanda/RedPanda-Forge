@@ -134,33 +134,38 @@ export const resolveBoundData = (
   // Helper to process {{bindings}} and pipes inside style properties
   const processStyleValue = (val: any) => {
     if (typeof val === 'string' && val.includes('{{') && val.includes('}}')) {
-      const fullKey = val.replace('{{', '').replace('}}', '').trim();
-      const parts = fullKey.split('|');
-      const key = parts[0].trim();
-      const pipes = parts.slice(1);
+      return val.replace(/{{([^}]+)}}/g, (matchStr, p1) => {
+        const parts = p1.split('|');
+        const key = parts[0].trim();
+        const pipes = parts.slice(1);
 
-      const cleanKey = key.replace(/^match\./, '');
-      let boundVal = match ? getByPath(match, cleanKey) : undefined;
-      
-      if (boundVal !== undefined) {
-         boundVal = applyPipes(boundVal, pipes);
-         return boundVal;
-      }
-      return val;
+        const cleanKey = key.replace(/^match\./, '');
+        
+        let boundVal = undefined;
+        if (manualInputs && manualInputs[key] !== undefined) {
+           boundVal = manualInputs[key];
+        } else if (manualInputs && manualInputs[cleanKey] !== undefined) {
+           boundVal = manualInputs[cleanKey];
+        } else if (match) {
+           boundVal = getByPath(match, cleanKey);
+        }
+        
+        if (boundVal !== undefined && boundVal !== null) {
+           boundVal = applyPipes(boundVal, pipes);
+           return String(boundVal);
+        }
+        return matchStr; // Keep original {{key}} unresolved
+      });
     }
     return val;
   };
 
-  // 1. Data Binding logic
+  // 1. Text Data Binding logic (runs regardless of dataKey presence for full string interpolation)
   let finalDataKey = overrides?.dataKey !== undefined ? overrides.dataKey : element.dataKey;
-  
-  if (finalDataKey || element.dataKey) {
-    let keyWithoutPipes = finalDataKey || element.dataKey;
-    let parts: string[] = [];
-    if (typeof keyWithoutPipes === 'string' && keyWithoutPipes.includes('|')) {
-      parts = keyWithoutPipes.split('|');
-      keyWithoutPipes = parts[0].trim();
-    }
+
+  if (element.type === "Text" || element.type === "text") {
+    let overrideTextVal = overrides?.text !== undefined ? overrides.text : undefined;
+    let overrideBindingPath = overrides?.bindingPath !== undefined ? overrides.bindingPath : undefined;
     
     // Evaluate formatters from props
     let parsedFormatters: string[] = [];
@@ -169,76 +174,111 @@ export const resolveBoundData = (
     } else if (element.formatters !== undefined) {
       parsedFormatters = Array.isArray(element.formatters) ? element.formatters : [element.formatters];
     }
-    const isAuto = isAutoResolved(keyWithoutPipes, match);
 
-    if (element.type === "Text" || element.type === "text") {
-      let overrideTextVal = overrides?.text !== undefined ? overrides.text : undefined;
+    if (overrideTextVal !== undefined) {
+       // Manual override 
+       resolvedElement.text = processStyleValue(overrideTextVal);
+    } else if (overrideBindingPath !== undefined) {
+       // Binding Path override
+       resolvedElement.text = processStyleValue(overrideBindingPath);
+       if (parsedFormatters.length > 0) {
+          resolvedElement.text = applyPipes(resolvedElement.text, parsedFormatters);
+       }
+    } else if (finalDataKey) {
+       // Legacy fallback where it uses dataKey directly instead of full string interpolation
+       let keyWithoutPipes = finalDataKey;
+       let parts: string[] = [];
+       if (typeof keyWithoutPipes === 'string' && keyWithoutPipes.includes('|')) {
+         parts = keyWithoutPipes.split('|');
+         keyWithoutPipes = parts[0].trim();
+       }
+       const isAuto = isAutoResolved(keyWithoutPipes, match);
+       
+       if (!isAuto) {
+          resolvedElement.text = manualInputs[finalDataKey] !== undefined ? manualInputs[finalDataKey] : `{{${finalDataKey}}}`;
+       } else if (match) {
+           const cleanKey = keyWithoutPipes.replace(/^match\./, '');
+           const val = getByPath(match, cleanKey);
+           
+           if (val !== undefined && val !== null) {
+              resolvedElement.text = String(val);
+           } else {
+              // Computed / Alias resolving
+              if (cleanKey === "competition.name") resolvedElement.text = match.league;
+              else if (cleanKey === "date") resolvedElement.text = match.date;
+              else if (cleanKey === "time") resolvedElement.text = match.date;
+              else if (cleanKey === "round") resolvedElement.text = "Final";
+              else resolvedElement.text = `{{${finalDataKey}}}`;
+           }
+       }
+       
+       // Apply custom formatters combined with legacy explicit pipeline string
+       const combinedPipes = [...parts.slice(1), ...parsedFormatters];
+       if (combinedPipes.length > 0) {
+           resolvedElement.text = applyPipes(resolvedElement.text, combinedPipes);
+       }
+    } else {
+       // No explicit overrides or dataKey -> process raw text
+       if (resolvedElement.text !== undefined && typeof resolvedElement.text === 'string') {
+          resolvedElement.text = processStyleValue(resolvedElement.text);
+          if (parsedFormatters.length > 0) {
+             resolvedElement.text = applyPipes(resolvedElement.text, parsedFormatters);
+          }
+       }
+    }
+  }
 
-      if (overrideTextVal !== undefined) {
-         resolvedElement.text = overrideTextVal;
-         // Allow static pipes execution inside standard text override if people type {{homeTeam.name | uppercase}} static text.
-         resolvedElement.text = processStyleValue(resolvedElement.text);
-         if (parsedFormatters.length > 0) {
-            resolvedElement.text = applyPipes(resolvedElement.text, parsedFormatters);
-         }
-      } else if (finalDataKey) {
+  // 1.5 Image logic (runs regardless of dataKey presence for URL interpolation)
+  if (element.type === "Image" || element.type === "image" || element.type === "BackgroundImage") {
+    let overrideSrcVal = overrides?.src !== undefined ? overrides.src : undefined;
+    let overrideBindingPath = overrides?.bindingPath !== undefined ? overrides.bindingPath : undefined;
+    
+    if (overrideSrcVal !== undefined) {
+       // If manual input is provided, use it exactly as provided without resolving {{ }}
+       resolvedElement.src = overrideSrcVal;
+    } else if (overrideBindingPath !== undefined) {
+       // If binding path is overridden, use it and resolve it
+       resolvedElement.src = processStyleValue(overrideBindingPath);
+    } else if (finalDataKey) {
+        const isAuto = isAutoResolved(finalDataKey, match);
         if (!isAuto) {
-           resolvedElement.text = manualInputs[finalDataKey] !== undefined ? manualInputs[finalDataKey] : `{{${finalDataKey}}}`;
+             resolvedElement.src = manualInputs[finalDataKey] !== undefined ? manualInputs[finalDataKey] : "";
         } else if (match) {
-            const cleanKey = keyWithoutPipes.replace(/^match\./, '');
+            const cleanKey = finalDataKey.replace(/^match\./, '');
             const val = getByPath(match, cleanKey);
-            
-            if (val !== undefined && val !== null) {
-               resolvedElement.text = String(val);
+            if (val !== undefined && typeof val === 'string') {
+                resolvedElement.src = val;
             } else {
-               // Computed / Alias resolving
-               if (cleanKey === "competition.name") resolvedElement.text = match.league;
-               else if (cleanKey === "date") resolvedElement.text = match.date; // Native ISO parsed by pipe, or used as is
-               else if (cleanKey === "time") resolvedElement.text = match.date; // Pipe time:HH:mm will parse it
-               else if (cleanKey === "round") resolvedElement.text = "Final"; // mock
-               else resolvedElement.text = `{{${finalDataKey}}}`;
-            }
-            
-            // Allow applying custom formatters combined with legacy explicit pipeline string
-            const combinedPipes = [...parts.slice(1), ...parsedFormatters];
-            if (combinedPipes.length > 0) {
-                resolvedElement.text = applyPipes(resolvedElement.text, combinedPipes);
+                resolvedElement.src = "";
             }
         }
-      }
-    } else if (element.type === "Image" || element.type === "image" || element.type === "BackgroundImage") {
-      let overrideSrcVal = overrides?.src !== undefined ? overrides.src : undefined;
-      
-      if (overrideSrcVal !== undefined) {
-         resolvedElement.src = overrideSrcVal;
-      } else if (finalDataKey) {
-          if (!isAuto) {
-               resolvedElement.src = manualInputs[finalDataKey] !== undefined ? manualInputs[finalDataKey] : "";
-          } else if (match) {
-              const cleanKey = finalDataKey.replace(/^match\./, '');
-              const val = getByPath(match, cleanKey);
-              if (val !== undefined && typeof val === 'string') {
-                  resolvedElement.src = val;
-              } else {
-                  resolvedElement.src = "";
-              }
-          }
-      }
-      
-      // Finally, run through the Asset Resolver Pipeline
-      if (resolvedElement.src && typeof resolvedElement.src === 'string' && resolverContext) {
-        resolvedElement.src = resolveAssetPath(resolvedElement.src, resolverContext);
-      }
+    } else {
+       if (resolvedElement.src !== undefined && typeof resolvedElement.src === 'string') {
+          resolvedElement.src = processStyleValue(resolvedElement.src);
+       }
+    }
+    
+    // Finally, run through the Asset Resolver Pipeline
+    if (resolvedElement.src && typeof resolvedElement.src === 'string' && resolverContext) {
+      resolvedElement.src = resolveAssetPath(resolvedElement.src, resolverContext);
     }
   }
 
   // 2. Style Binding logic (e.g. fill: "{{homeTeam.colors.primary}}")
   if (resolvedElement.style) {
     resolvedElement.style = { ...resolvedElement.style };
-    if (resolvedElement.style.fill) {
+    
+    let overrideFillBindingPath = overrides?.fillBindingPath !== undefined ? overrides.fillBindingPath : undefined;
+    if (overrideFillBindingPath !== undefined) {
+      resolvedElement.style.fill = processStyleValue(overrideFillBindingPath);
+    } else if (resolvedElement.style.fill) {
       resolvedElement.style.fill = processStyleValue(resolvedElement.style.fill);
     }
-    if (resolvedElement.style.stroke) {
+    
+    let overrideStrokeBindingPath = overrides?.strokeBindingPath !== undefined ? overrides.strokeBindingPath : undefined;
+    if (overrideStrokeBindingPath !== undefined) {
+      resolvedElement.style.stroke = processStyleValue(overrideStrokeBindingPath);
+    } else if (resolvedElement.style.stroke) {
       resolvedElement.style.stroke = processStyleValue(resolvedElement.style.stroke);
     }
   }

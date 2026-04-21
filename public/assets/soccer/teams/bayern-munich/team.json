@@ -8,6 +8,6 @@
     "accent": "#FFFFFF"
   },
   "assets": {
-    "logo": "@global/soccer/teams/bayern-munich/logo.png"
+    "logo": "@global/soccer/teams/bayern-munich/logo.svg"
   }
 }

@@ -106,6 +106,8 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
     if (typeof text === 'string' && text.includes('{{')) return true;
     const fill = (el as any).style?.fill;
     if (typeof fill === 'string' && fill.includes('{{')) return true;
+    const src = (el as any).src;
+    if (typeof src === 'string' && src.includes('{{')) return true;
     return false;
   }).map(el => {
     let dataKey = el.dataKey;
@@ -120,6 +122,14 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
         const fill = (el as any).style?.fill;
         if (typeof fill === 'string' && fill.includes('{{')) {
           const match = fill.match(/{{([^}]+)}}/);
+          if (match) dataKey = match[1].split('|')[0].trim();
+        }
+      }
+
+      if (!dataKey) {
+        const src = (el as any).src;
+        if (typeof src === 'string' && src.includes('{{')) {
+          const match = src.match(/{{([^}]+)}}/);
           if (match) dataKey = match[1].split('|')[0].trim();
         }
       }
@@ -240,14 +250,30 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                    const resolved = resolveBoundData(element, match, manualInputs, elementOverrides[element.id], resolverContext);
                    let displayVal = 'N/A';
                    
-                   if (element.type.toLowerCase() === 'text') {
-                     displayVal = resolved.text;
-                   } else if (element.type.toLowerCase() === 'image' || element.type.toLowerCase() === 'backgroundimage') {
-                     displayVal = resolved.src ? '[Image Bound]' : 'N/A';
-                   } else if (resolved.fill && typeof resolved.fill === 'string' && resolved.fill.startsWith('#')) {
-                     displayVal = resolved.fill;
-                   } else if (resolved.stroke && typeof resolved.stroke === 'string' && resolved.stroke.startsWith('#')) {
-                     displayVal = resolved.stroke;
+                   let rawBoundValue: any;
+                   if (element.dataKey && match) {
+                     const cleanKey = element.dataKey.replace(/^match\./, '');
+                     if (cleanKey.endsWith('.colors.primary')) {
+                       rawBoundValue = cleanKey.split('.').reduce((acc:any, part:string) => acc && acc[part], match) || 
+                                       cleanKey.replace('.colors.primary', '.color').split('.').reduce((acc:any, part:string) => acc && acc[part], match);
+                     } else {
+                       rawBoundValue = cleanKey.split('.').reduce((acc:any, part:string) => acc && acc[part], match);
+                     }
+                     if (rawBoundValue !== undefined && rawBoundValue !== null) {
+                       displayVal = String(rawBoundValue);
+                     }
+                   }
+
+                   if (displayVal === 'N/A') {
+                     if (element.type.toLowerCase() === 'text') {
+                       displayVal = resolved.text;
+                     } else if (element.type.toLowerCase() === 'image' || element.type.toLowerCase() === 'backgroundimage') {
+                       displayVal = resolved.src ? '[Image Bound]' : 'N/A';
+                     } else if (resolved.fill && typeof resolved.fill === 'string' && resolved.fill.startsWith('#')) {
+                       displayVal = resolved.fill;
+                     } else if (resolved.stroke && typeof resolved.stroke === 'string' && resolved.stroke.startsWith('#')) {
+                       displayVal = resolved.stroke;
+                     }
                    }
                    
                    const isAuto = isAutoResolved(element.dataKey!, match);
@@ -368,37 +394,71 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                     {/* 1. CONTENT SECTION */}
                     {(isText || isImage) && (
                     <PropertySection title={t.panels.sections.content}>
-                      {/* Source */}
+                      {/* Binding Path (was Source) */}
                       <div className="space-y-1.5">
-                        <label className="text-[12px] font-medium text-app-muted/80">{t.panels.fields.source}</label>
-                        <div className="flex items-center bg-app-bg border border-app-border rounded-[4px] focus-within:border-app-accent overflow-hidden h-8">
-                          <span className="bg-app-sidebar text-app-muted h-full px-2 text-[12px] font-mono flex items-center border-r border-app-border">{"{{"}</span>
-                          <input 
-                            type="text" 
-                            disabled={!isEditable('dataKey')}
-                            value={(() => {
-                              if (overrides.dataKey !== undefined) return overrides.dataKey;
-                              if ((el as any).dataKey) return (el as any).dataKey;
-                              
-                              // Check if text itself has a binding
-                              const baseText = (el as any).text;
-                              if (typeof baseText === 'string' && baseText.includes('{{')) {
-                                return baseText.replace('{{', '').replace('}}', '').trim();
-                              }
-                              return "";
-                            })()}
-                            onChange={e => handleOverride(el.id, { dataKey: e.target.value })}
-                            placeholder={isText ? "e.g. homeTeam.name" : "e.g. homeTeam.logo"}
-                            className="w-full bg-transparent h-full px-2 text-app-text text-[12px] outline-none font-mono disabled:opacity-50"
-                          />
-                          <span className="bg-app-sidebar text-app-muted h-full px-2 text-[12px] font-mono flex items-center border-l border-app-border">{"}}"}</span>
-                        </div>
+                        <div className="flex justify-between items-end">
+                           <label className="text-[10px] font-medium text-app-muted/80">
+                             {isText ? "Value - Binding Path" : "Source - Binding Path"}
+                           </label>
+                        {/* Reset button if overridden */}
+                        {(((isText || isImage) && overrides.bindingPath !== undefined) ||
+                          ((isText || isImage) && overrides.dataKey !== undefined)) && (
+                           <button 
+                             onClick={() => {
+                               handleOverride(el.id, { bindingPath: undefined, dataKey: undefined });
+                             }}
+                             className="text-[11px] text-app-accent hover:underline lowercase"
+                           >
+                             {t.panels.fields.reset}
+                           </button>
+                        )}
+                     </div>
+
+                     <>
+                       <div className="flex items-center bg-app-bg border border-app-border rounded-[4px] focus-within:border-app-accent overflow-hidden h-8">
+                         <input 
+                           type="text" 
+                           disabled={isText ? (!isEditable('text') && !isEditable('dataKey')) : (!isEditable('src') && !isEditable('dataKey'))}
+                           value={(() => {
+                             if (overrides.bindingPath !== undefined) return overrides.bindingPath;
+                             if (overrides.dataKey !== undefined) return `{{${overrides.dataKey}}}`;
+                             if ((el as any).dataKey) return `{{${(el as any).dataKey}}}`;
+                             return isText ? ((el as any).text || "") : ((el as any).src || "");
+                           })()}
+                           onChange={e => {
+                             handleOverride(el.id, { bindingPath: e.target.value, dataKey: undefined });
+                           }}
+                           placeholder={isText ? "e.g. Giải {{match.league}}" : "e.g. @global/teams/{{match.homeTeam.id}}/logo.svg"}
+                           className="w-full bg-transparent h-full px-2 text-app-text text-[12px] outline-none font-mono disabled:opacity-50"
+                         />
+                       </div>
+                       {/* Read-only bindings indicator for Binding Path */}
+                       {(() => {
+                         const pathValue = overrides.bindingPath !== undefined ? overrides.bindingPath : 
+                                          (overrides.dataKey !== undefined ? `{{${overrides.dataKey}}}` : 
+                                          ((el as any).dataKey ? `{{${(el as any).dataKey}}}` : (isText ? (el as any).text : (el as any).src)));
+                         const matches = typeof pathValue === 'string' ? pathValue.match(/{{([^}]+)}}/g) : null;
+                         if (!matches) return null;
+                         const bindings = matches.map((m: string) => m.replace('{{', '').replace('}}', '').trim());
+                         if (bindings.length === 0) return null;
+                         return (
+                           <div className="flex gap-2 items-center mt-2 flex-wrap">
+                             <span className="text-[10px] text-app-muted font-medium">Binding Keys:</span>
+                             {bindings.map((b: string, i: number) => (
+                                <span key={i} className="text-[10px] bg-app-sidebar border border-app-border text-app-text px-1.5 py-0.5 rounded font-mono">
+                                  {b.split('|')[0].trim()}
+                                </span>
+                             ))}
+                           </div>
+                         );
+                       })()}
+                     </>
                       </div>
 
                       {/* Transform (Formatter) */}
                       {isText && (
                       <div className="space-y-1.5 bg-app-card border border-app-border rounded-md p-3 pb-4 relative">
-                        <label className="text-[12px] font-medium text-app-muted/80 flex justify-between">
+                        <label className="text-[10px] font-medium text-app-muted/80 flex justify-between">
                           {t.panels.fields.transform}
                           {activeFormatters.length > 0 && (
                             <button 
@@ -445,7 +505,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                       {/* Value (Rendered/Override) */}
                       <div className="space-y-1.5">
                         <div className="flex justify-between items-end">
-                          <label className="text-[12px] font-medium text-app-muted/80">{t.panels.fields.value}</label>
+                          <label className="text-[10px] font-medium text-app-muted/80">{isText ? t.panels.fields.value : "Source"}</label>
                           {(overrides.text !== undefined || overrides.src !== undefined) && (
                             <button 
                               onClick={() => handleOverride(el.id, isText ? { text: undefined } : { src: undefined })} 
@@ -461,10 +521,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                             value={overrides.text ?? ""} 
                             onChange={e => handleOverride(el.id, { text: e.target.value || undefined })}
                             placeholder={(() => {
-                              const isBound = !!el.dataKey || (typeof el.text === 'string' && el.text.includes('{{'));
-                              if (!isBound) return "Rendered value...";
-                              const hasFormatters = (el.formatters || []).length > 0;
-                              return hasFormatters ? `Parsed as ${resolved.text}` : (resolved.text || "");
+                              return resolved.text || "Rendered value...";
                             })()}
                             className="h-8 text-[12px] bg-app-bg border-app-border"
                           />
@@ -475,9 +532,9 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                               value={overrides.src ?? ""} 
                               onChange={e => handleOverride(el.id, { src: e.target.value || undefined })}
                               placeholder={(() => {
-                                const isBound = !!el.dataKey || (typeof (el as any).src === 'string' && (el as any).src.includes('{{'));
+                                const isBound = overrides.bindingPath !== undefined || overrides.dataKey !== undefined || !!el.dataKey || (typeof (el as any).src === 'string' && (el as any).src.includes('{{'));
                                 if (!isBound) return "Image URL...";
-                                return `Bind to ${resolved.src}`;
+                                return resolved.src || "Image URL...";
                               })()}
                               className="h-8 text-[12px] bg-app-bg border-app-border"
                             />
@@ -502,7 +559,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                     <PropertySection title={t.panels.sections.layout}>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <label className="text-[12px] font-medium text-app-muted/80 font-mono">X</label>
+                          <label className="text-[10px] font-medium text-app-muted/80 font-mono">X</label>
                           <Input 
                             type="number" 
                             disabled={!isEditable('x')}
@@ -512,7 +569,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[12px] font-medium text-app-muted/80 font-mono">Y</label>
+                          <label className="text-[10px] font-medium text-app-muted/80 font-mono">Y</label>
                           <Input 
                             type="number" 
                             disabled={!isEditable('y')}
@@ -525,7 +582,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <label className="text-[12px] font-medium text-app-muted/80">{t.panels.fields.width}</label>
+                          <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.width}</label>
                           <Input 
                             type="number" 
                             disabled={!isEditable('width')}
@@ -535,7 +592,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[12px] font-medium text-app-muted/80">{t.panels.fields.height}</label>
+                          <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.height}</label>
                           <Input 
                             type="number" 
                             disabled={!isEditable('height')}
@@ -763,7 +820,51 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                     {!isImage && (
                     <PropertySection title={t.panels.sections.fill}>
                        <div className="space-y-4">
-                          <div className="grid grid-cols-1 gap-2 items-center">
+                          <div className="grid grid-cols-1 gap-4 items-center">
+                             
+                             {/* Fill Binding Path */}
+                             <div className="space-y-1.5">
+                                <div className="flex justify-between items-end">
+                                   <label className="text-[10px] font-medium text-app-muted/80">Color - Binding Path</label>
+                                   {overrides.fillBindingPath !== undefined && (
+                                      <button 
+                                        onClick={() => handleOverride(el.id, { fillBindingPath: undefined })} 
+                                        className="text-[11px] text-app-accent hover:underline lowercase"
+                                      >
+                                        {t.panels.fields.reset}
+                                      </button>
+                                   )}
+                                </div>
+                                <div className="flex items-center bg-app-bg border border-app-border rounded-[4px] focus-within:border-app-accent overflow-hidden h-8">
+                                   <input 
+                                     type="text" 
+                                     value={overrides.fillBindingPath !== undefined ? overrides.fillBindingPath : ((el as any).style?.fill || "")}
+                                     onChange={e => handleOverride(el.id, { fillBindingPath: e.target.value })}
+                                     placeholder="e.g. {{match.homeTeam.colors.primary}}"
+                                     className="w-full bg-transparent h-full px-2 text-app-text text-[12px] outline-none font-mono disabled:opacity-50"
+                                   />
+                                </div>
+                                {/* Read-only bindings indicator for Fill */}
+                                {(() => {
+                                   const fillStr = overrides.fillBindingPath !== undefined ? overrides.fillBindingPath : ((el as any).style?.fill || "");
+                                   const matches = typeof fillStr === 'string' ? fillStr.match(/{{([^}]+)}}/g) : null;
+                                   if (!matches) return null;
+                                   const bindings = matches.map(m => m.replace('{{', '').replace('}}', '').trim());
+                                   if (bindings.length === 0) return null;
+                                   return (
+                                     <div className="flex gap-2 items-center mt-2 flex-wrap">
+                                       <span className="text-[10px] text-app-muted font-medium">Binding Keys:</span>
+                                       {bindings.map((b, i) => (
+                                          <span key={i} className="text-[10px] bg-app-sidebar border border-app-border text-app-text px-1.5 py-0.5 rounded font-mono">
+                                            {b.split('|')[0].trim()}
+                                          </span>
+                                       ))}
+                                     </div>
+                                   );
+                                })()}
+                             </div>
+
+                             {/* Fill Value (Manual Override) */}
                              <div className="space-y-1.5">
                                 <div className="flex justify-between items-center h-4">
                                   <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.color}</label>
@@ -783,7 +884,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                       type="color" 
                                       value={resolved.fill?.startsWith('#') ? resolved.fill.substring(0, 7) : '#ffffff'}
                                       onChange={e => {
-                                         const curFill = overrides.fill !== undefined ? overrides.fill : (el as any).style?.fill;
+                                         const curFill = overrides.fill !== undefined ? overrides.fill : (resolved.fill || "");
                                          const curAlpha = typeof curFill === 'string' && curFill.length === 9 ? curFill.substring(7, 9) : 'FF';
                                          handleOverride(el.id, { fill: e.target.value + (curAlpha !== 'FF' ? curAlpha : '') });
                                       }}
@@ -792,17 +893,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                   </div>
                                   
                                   <input 
-                                    placeholder={(() => {
-                                      const baseFill = (el as any).style?.fill;
-                                      const currentFill = overrides.fill !== undefined ? overrides.fill : baseFill;
-                                      const isCurrentBound = typeof currentFill === 'string' && currentFill.includes('{{');
-                                      const isBaseBound = typeof baseFill === 'string' && baseFill.includes('{{');
-                                      if (isCurrentBound || isBaseBound) return `Bind to ${resolved.fill}`;
-                                      return "FFFFFF";
-                                    })()}
+                                    placeholder={resolved.fill || "FFFFFF"}
                                     value={(() => {
-                                      const val = overrides.fill !== undefined ? overrides.fill : (el as any).style?.fill;
-                                      if (typeof val === 'string' && !val.includes('{{')) {
+                                      const val = overrides.fill !== undefined ? overrides.fill : undefined; // Only show hex if it's an override, don't show template string here
+                                      if (typeof val === 'string') {
                                         return val.startsWith('#') ? val.substring(1, 7).toUpperCase() : val.toUpperCase();
                                       }
                                       return "";
@@ -812,18 +906,17 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                        if (!hex) { handleOverride(el.id, { fill: undefined }); return; }
                                        let validHex = hex;
                                        if (hex.startsWith('#')) validHex = hex.substring(1);
-                                       const curFill = overrides.fill !== undefined ? overrides.fill : (el as any).style?.fill;
+                                       const curFill = overrides.fill !== undefined ? overrides.fill : resolved.fill;
                                        const curAlpha = typeof curFill === 'string' && curFill.length === 9 ? curFill.substring(7, 9) : 'FF';
                                        handleOverride(el.id, { fill: `#${validHex}${curAlpha !== 'FF' ? curAlpha : ''}` });
                                     }}
                                     className="flex-1 bg-transparent px-2 text-[12px] font-mono outline-none text-app-text min-w-0"
                                   />
-
                                   <div className="w-[50px] flex items-center border-l border-app-border px-1">
                                      <input 
                                        type="text"
                                        value={(() => {
-                                          const val = overrides.fill !== undefined ? overrides.fill : (el as any).style?.fill;
+                                          const val = overrides.fill !== undefined ? overrides.fill : (resolved.fill || "");
                                           if (typeof val === 'string' && val.length === 9 && val.startsWith('#')) {
                                              return Math.round((parseInt(val.substring(7, 9), 16) / 255) * 100).toString();
                                           }
@@ -834,9 +927,9 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                           if (isNaN(v)) return;
                                           v = Math.max(0, Math.min(100, v));
                                           const a = Math.round((v / 100) * 255).toString(16).padStart(2, '0').toUpperCase();
-                                          const curFill = overrides.fill !== undefined ? overrides.fill : (el as any).style?.fill;
+                                          const curFill = overrides.fill !== undefined ? overrides.fill : (resolved.fill || "");
                                           let base = '#FFFFFF';
-                                          if (typeof curFill === 'string' && !curFill.includes('{{')) {
+                                          if (typeof curFill === 'string') {
                                               if (curFill.startsWith('#')) base = curFill.substring(0, 7);
                                               else base = curFill;
                                           }
@@ -849,34 +942,6 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                 </div>
                              </div>
                           </div>
-
-                          {/* Source */}
-                         <div className="space-y-1.5 mt-2">
-                            <div className="flex justify-between items-center h-4">
-                               <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.source}</label>
-                            </div>
-                            <div className="flex bg-app-bg border border-app-border rounded-[4px] focus-within:border-app-accent overflow-hidden h-8">
-                               <span className="bg-app-sidebar text-app-muted px-2 py-1.5 text-[11px] font-mono border-r border-app-border flex items-center">{"{{"}</span>
-                                 <input 
-                                   type="text"
-                                   value={(() => {
-                                     // 1. If user is actively overriding WITH a binding, show it.
-                                     if (typeof overrides.fill === 'string' && overrides.fill.includes('{{')) {
-                                       return overrides.fill.replace('{{', '').replace('}}', '').trim();
-                                     }
-                                     // 2. Otherwise show template's binding if it exists
-                                     const baseVal = (el as any).style?.fill;
-                                     if (typeof baseVal === 'string' && baseVal.includes('{{')) {
-                                       return baseVal.replace('{{', '').replace('}}', '').trim();
-                                     }
-                                     return "";
-                                   })()}
-                                   onChange={e => handleOverride(el.id, { fill: e.target.value ? `{{${e.target.value}}}` : undefined })}
-                                 className="w-full bg-transparent p-1.5 text-app-text text-[12px] outline-none font-mono"
-                               />
-                               <span className="bg-app-sidebar text-app-muted px-2 py-1.5 text-[11px] font-mono border-l border-app-border flex items-center">{"}}"}</span>
-                            </div>
-                         </div>
                        </div>
                     </PropertySection>
                     )}
@@ -914,7 +979,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                   />
                                </div>
                                <div className="space-y-1.5">
-                                  <label className="text-[12px] font-medium text-app-muted/80">{t.panels.fields.width} (px)</label>
+                                  <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.width} (px)</label>
                                   <Input 
                                     type="number"
                                     min={0}
@@ -936,7 +1001,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                     <PropertySection title={t.panels.sections.shadow}>
                        <div className="space-y-4">
                           <div className="flex items-center justify-between">
-                             <label className="text-[12px] font-medium text-app-muted/80">{t.panels.fields.enable}</label>
+                             <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.enable}</label>
                              <Switch 
                                 checked={resolved.shadowEnabled || false}
                                 onCheckedChange={checked => handleOverride(el.id, { shadowEnabled: checked })}
@@ -969,7 +1034,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                </div>
                                <div className="grid grid-cols-2 gap-4">
                                   <div className="space-y-1.5">
-                                     <label className="text-[12px] font-medium text-app-muted/80">{t.panels.fields.offsetX}</label>
+                                     <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.offsetX}</label>
                                      <Input 
                                        type="number"
                                        value={resolved.shadowOffsetX || 0}
@@ -978,7 +1043,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                      />
                                   </div>
                                   <div className="space-y-1.5">
-                                     <label className="text-[12px] font-medium text-app-muted/80">{t.panels.fields.offsetY}</label>
+                                     <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.offsetY}</label>
                                      <Input 
                                        type="number"
                                        value={resolved.shadowOffsetY || 0}
@@ -997,7 +1062,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                       <PropertySection title={t.panels.sections.background}>
                          <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                               <label className="text-[12px] font-medium text-app-muted/80">{t.panels.fields.enable}</label>
+                              <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.enable}</label>
                                <Switch 
                                  checked={overrides.bgEnabled !== undefined ? overrides.bgEnabled : el.bgEnabled}
                                  onCheckedChange={checked => handleOverride(el.id, { bgEnabled: checked })}

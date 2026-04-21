@@ -8,6 +8,6 @@
     "accent": "#FEBE10"
   },
   "assets": {
-    "logo": "@global/soccer/teams/real-madrid/logo.png"
+    "logo": "@global/soccer/teams/real-madrid/logo.svg"
   }
 }
