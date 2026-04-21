@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Template, TemplateElement, Match } from '../types/template';
 import { v4 as uuidv4 } from 'uuid';
+import { normalizeTemplate } from '../lib/shapeUtils';
 
 export interface WorkflowSession {
   id: string;
@@ -28,6 +29,7 @@ interface EditorState {
   addSession: (name?: string) => string;
   createBatchSessions: (match: Match, templates: Template[]) => void;
   closeSession: (id: string) => void;
+  renameSession: (id: string, name: string) => void;
   setActiveSession: (id: string) => void;
   
   setTemplate: (t: Template | null) => void;
@@ -48,7 +50,7 @@ interface EditorState {
 
 const createDefaultSession = (name?: string): WorkflowSession => ({
   id: uuidv4(),
-  name: name || "Untitled Graphic",
+  name: name || "Untitled graphic",
   template: null,
   match: null,
   elementOverrides: {},
@@ -95,7 +97,40 @@ export const useEditorStore = create<EditorState>((set, get) => {
     activeSessionId: initId,
 
     addSession: (name) => {
-      const newSession = createDefaultSession(name);
+      const state = get();
+      let finalName = name || "Untitled graphic";
+      
+      if (!name) {
+        const existingUntitled = state.sessions
+          .map(s => s.name)
+          .filter(n => n === "Untitled graphic" || n.startsWith("Untitled graphic - "));
+        
+        if (existingUntitled.length > 0) {
+          let highest = 0;
+          let hasBase = false;
+          existingUntitled.forEach(n => {
+            if (n === "Untitled graphic") {
+              hasBase = true;
+            } else {
+              const match = n.match(/Untitled graphic - (\d+)/);
+              if (match) {
+                const num = parseInt(match[1]);
+                if (num > highest) highest = num;
+              }
+            }
+          });
+          
+          if (hasBase && highest === 0) {
+            finalName = "Untitled graphic - 1";
+          } else if (highest > 0) {
+            finalName = `Untitled graphic - ${highest + 1}`;
+          } else if (!hasBase) {
+            finalName = "Untitled graphic";
+          }
+        }
+      }
+
+      const newSession = createDefaultSession(finalName);
       set((state) => ({
         sessions: [...state.sessions, newSession],
         activeSessionId: newSession.id
@@ -105,13 +140,16 @@ export const useEditorStore = create<EditorState>((set, get) => {
 
     createBatchSessions: (match, templates) => {
       set((state) => {
-        const newSessions = templates.map(template => ({
-          ...createDefaultSession(),
-          id: uuidv4(),
-          name: `${template.name} - ${match.homeTeam?.shortName || match.player1?.name} vs ${match.awayTeam?.shortName || match.player2?.name}`,
-          template,
-          match
-        }));
+        const newSessions = templates.map(t => {
+          const template = normalizeTemplate(t);
+          return {
+            ...createDefaultSession(),
+            id: uuidv4(),
+            name: `${template.name} - ${match.homeTeam?.shortName || match.player1?.name} vs ${match.awayTeam?.shortName || match.player2?.name}`,
+            template,
+            match
+          };
+        });
         
         // Remove empty default tabs if there's only one and it has no template/match
         const existingSessions = state.sessions.length === 1 && !state.sessions[0].template && !state.sessions[0].match 
@@ -132,9 +170,9 @@ export const useEditorStore = create<EditorState>((set, get) => {
         
         const newSessions = state.sessions.filter(s => s.id !== id);
         
-        // Prevent closing last session, or auto-create a new one
+        // If last tab closed, auto-create a new one
         if (newSessions.length === 0) {
-          const fresh = createDefaultSession();
+          const fresh = createDefaultSession("Untitled graphic");
           return { sessions: [fresh], activeSessionId: fresh.id };
         }
         
@@ -147,9 +185,14 @@ export const useEditorStore = create<EditorState>((set, get) => {
       });
     },
 
+    renameSession: (id, name) => set((state) => ({
+      sessions: state.sessions.map(s => s.id === id ? { ...s, name } : s)
+    })),
+
     setActiveSession: (id) => set({ activeSessionId: id }),
 
-    setTemplate: (template) => {
+    setTemplate: (templateInput) => {
+      const template = templateInput ? normalizeTemplate(templateInput) : null;
       updateActiveSession((sess) => {
         const expanded: Record<string, boolean> = {};
         if (template) {
@@ -157,6 +200,12 @@ export const useEditorStore = create<EditorState>((set, get) => {
             expanded[l.id] = l.expanded !== false;
           });
         }
+        
+        // Logic from USER: Tab should stay "Untitled graphic" when template is set for the first time
+        // or keep current name if user manually renamed it.
+        const currentName = sess.name;
+        const isDefault = currentName === "Untitled Graphic" || currentName === "Untitled graphic";
+        
         return {
           template,
           elementOverrides: {},
@@ -165,7 +214,7 @@ export const useEditorStore = create<EditorState>((set, get) => {
           selectedElementId: null,
           history: [],
           historyIndex: -1,
-          name: template ? `${template.name} - Graphic` : "Untitled Graphic"
+          name: isDefault ? "Untitled graphic" : currentName
         };
       });
     },

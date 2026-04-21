@@ -50,7 +50,9 @@ The engine resolves visual elements by merging three layers of data:
 
 ### Panel Conventions
 - **Left Sidebar**: Sport selection, Match list, and Template thumbnails.
-- **Top Tab Bar**: Manages active sessions. Closing a "Dirty" tab (History index >= 0 or Overrides present) prompts for Export.
+- **Editor Workspace (Center)**: 
+  - **Editor Header**: Contains the **Session Tab Bar** and localized actions (**Undo**, **Redo**, **Export**).
+  - **Localized Actions**: Document-specific controls (Save/Export) must remain within the editor workspace context.
 - **Right Panel**: 
   - **Match Tab**: Data source selection and raw data binding overview.
   - **Editor Tab**: Property controls (sliders, color pickers, text inputs) for the selected element.
@@ -65,6 +67,9 @@ To provide clarity between data engine values and manual overrides, the Design t
 - **Value (Override)**:
   - This field allows manual static overrides that "win" over the source.
   - **Reset**: A "Reset" button appears on the label of this field ONLY when an override is active. It clears the override and reverts the visual result to the resolved Source value.
+- **Data Source Resolution (Right Panel)**:
+  - The Data Sources list must correctly extract keys from inline bindings (e.g., `{{colors.primary}}`) even if a root `dataKey` is missing.
+  - **Color Bindings**: Resolved values for shape colors (Fill/Stroke) must display the current HEX code (e.g., `#FF0000`) instead of `N/A`.
 - **Placeholder Logic**:
   - **Non-Text (Fill/Source)**: If bound, show `Bind to [resolvedValue]`.
   - **Text Elements**:
@@ -79,6 +84,8 @@ To provide clarity between data engine values and manual overrides, the Design t
   3. Only if no suitable tab is found does it create a new "Untitled Graphic" session.
 - **Active Tab Sync**: Changing the Active Tab automatically updates the Sport Dropdown to match the active tab's context.
 - **Scaling**: `KonvaEditor` calculates a dynamic scale to fit the canvas while maintaining aspect ratio (Desktop-first).
+- **Safety (Dirty Checks)**: 
+  - Switching templates or closing a session triggers a confirmation dialog if the session is "dirty" (i.e., has unsaved manual overrides or unsynced history).
 
 ## 6. Design Guidelines & Themes (EXTERNALISED)
 Themes are now managed via `src/constants/themes.json`. This file acts as the single source of truth for all visual styles.
@@ -115,6 +122,23 @@ We use **shadcn/ui** (built on tailwindcss and radix-ui) for all standard interf
 
 ## 8. Development Principles
 - **Icons**: STRICTLY import from `lucide-react`. Do not use custom SVGs.
-- **Safety**: Do not introduce destructive prompts without checking state (dirty checks).
+- **Geometric Accuracy**: 
+  - For slanted dividers (e.g., "Home Quad"), always prefer a **Parallelogram** (Rectangle + `skewX`) over an invalid trapezoid.
+  - Modern quads use `topWidth` to define trapezoidal shapes, ensuring the baseline `width` remains the primary layout anchor.
+- **Safety**: Do not introduce destructive actions without checking state (dirty checks).
 - **Gracefulness**: Handle edge cases: opening the app with no data should show a helpful empty state.
 - **Performance**: Use `react-konva` for rendering. Use JSON layout descriptions instead of static PNGs where possible.
+
+## 9. Transformation & Coordinate System
+
+### Stationary Center Pivot
+To ensure predictable transformations, RedPanda Forge uses a **Stationary Center Pivot** model for all elements (Shapes, Text, Images):
+- **Rotation**: Occurs around the geometric center of the element.
+- **Skew X**: Leans the shape symmetrically from the center. The top and bottom edges move in opposite directions, keeping the center point fixed on the canvas.
+- **Flip X/Y**: Mirrors the element relative to its center axes.
+
+### Selection UI Indicators
+The editor provides visual feedback to distinguish between layout and visual state:
+1.  **Geometric Outline**: A blue outline follows the actual vertices (corners) of the transformed shape, including skew effects.
+2.  **Pivot Crosshair**: A technical crosshair indicates the center pivot point—the soul of all transformations. It rotates with the element but remains unskewed (perfectly perpendicular) to ensure technical clarity.
+3.  **Layout Anchor**: A dashed rectangle/indicator at the top-left represents the logical `(X, Y)` position stored in the data, clarifying the coordinate system's origin.

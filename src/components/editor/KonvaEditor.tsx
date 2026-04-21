@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { Stage, Layer, Image, Text, Rect, Line, Group, Shape } from "react-konva";
+import { Stage, Layer, Image, Text, Rect, Line, Group, Shape, Ellipse, Circle } from "react-konva";
 import useImage from "use-image";
 import { TemplateElement } from "../../types/template";
 import { ZoomIn, ZoomOut, PanelRightOpen } from "lucide-react";
@@ -198,8 +198,21 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
           >
             <Layer>
               {elementsWithData.map((element) => {
+                const w = element.width || 0;
+                const h = element.height || 0;
+                const skX = element.skewX || 0;
+                const tw = element.topWidth !== undefined ? element.topWidth : w;
+
                 const commonProps = {
                   draggable: element.draggable,
+                  // Stationary center pivot for all transformations (Rotation & Skew)
+                  x: element.x + w / 2,
+                  y: element.y + h / 2,
+                  offsetX: w / 2,
+                  offsetY: h / 2,
+                  scaleX: element.flipX ? -1 : 1,
+                  scaleY: element.flipY ? -1 : 1,
+                  skewX: skX,
                   onClick: (e: any) => {
                     e.cancelBubble = true;
                     setSelectedElementId(element.id);
@@ -211,8 +224,13 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
                     setActiveRightTab('design');
                   },
                   onDragEnd: (e: any) => {
+                    const konvaX = e.target.x();
+                    const konvaY = e.target.y();
                     setElementOverride(element.id, { 
-                      position: { x: Math.round(e.target.x()), y: Math.round(e.target.y()) } 
+                      position: { 
+                        x: Math.round(konvaX - w / 2), 
+                        y: Math.round(konvaY - h / 2) 
+                      } 
                     });
                     commitHistory();
                   }
@@ -223,89 +241,105 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
                 }
                 
                 if (element.type === "Shape") {
-                  const shadowEnabled = element.shadowEnabled && (element.shadowBlur > 0 || element.shadowOffsetX !== 0 || element.shadowOffsetY !== 0);
-                  const strokeWidth = (element.strokeEnabled !== false && element.strokeWidth > 0) ? element.strokeWidth * 2 : 0;
-                  const stroke = (element.strokeEnabled !== false && element.strokeWidth > 0) ? element.stroke : undefined;
-                  
-                  const isTrapezoid = element.topWidth !== undefined && element.topWidth !== element.width;
+                   const shadowEnabled = element.shadowEnabled && (element.shadowBlur > 0 || element.shadowOffsetX !== 0 || element.shadowOffsetY !== 0);
+                   const strokeWidth = (element.strokeEnabled !== false && element.strokeWidth > 0) ? element.strokeWidth * 2 : 0;
+                   const stroke = (element.strokeEnabled !== false && element.strokeWidth > 0) ? element.stroke : undefined;
+                   
+                   // 1. ELLIPSE
+                   if (element.shapeType === "ellipse") {
+                     return (
+                       <Ellipse
+                         key={element.id}
+                         radiusX={element.radiusX || w / 2}
+                         radiusY={element.radiusY || h / 2}
+                         fill={element.fill}
+                         rotation={element.rotation}
+                         opacity={element.opacity !== undefined ? element.opacity : 1}
+                         shadowColor={shadowEnabled ? element.shadowColor : undefined}
+                         shadowBlur={element.shadowBlur}
+                         shadowOffsetX={element.shadowOffsetX}
+                         shadowOffsetY={element.shadowOffsetY}
+                         shadowOpacity={element.shadowOpacity}
+                         stroke={stroke}
+                         strokeWidth={strokeWidth}
+                         fillAfterStrokeEnabled={true}
+                         {...commonProps}
+                       />
+                     );
+                   }
 
-                  if (isTrapezoid) {
-                    return (
-                      <Shape
-                        key={element.id}
-                        x={element.x}
-                        y={element.y}
-                        fill={element.fill}
-                        rotation={element.rotation}
-                        opacity={element.opacity !== undefined ? element.opacity : 1}
-                        skewX={element.skewX || 0}
-                        skewY={element.skewY || 0}
-                        shadowColor={shadowEnabled ? element.shadowColor : undefined}
-                        shadowBlur={element.shadowBlur}
-                        shadowOffsetX={element.shadowOffsetX}
-                        shadowOffsetY={element.shadowOffsetY}
-                        shadowOpacity={element.shadowOpacity}
-                        stroke={stroke}
-                        strokeWidth={strokeWidth}
-                        fillAfterStrokeEnabled={true}
-                        {...commonProps}
-                        sceneFunc={(context, shape) => {
-                          const h = element.height || 0;
-                          const w = element.width || 0;
-                          const tw = element.topWidth !== undefined ? element.topWidth : w;
-                          const radius = element.cornerRadius || 0;
-                          
-                          const tl_x = (w - tw) / 2;
-                          const tr_x = (w + tw) / 2;
-                          const br_x = w;
-                          const bl_x = 0;
-                          
-                          if (radius > 0) {
-                             context.beginPath();
-                             context.moveTo((tl_x + tr_x)/2, 0); 
-                             context.arcTo(tr_x, 0, br_x, h, radius);
-                             context.arcTo(br_x, h, bl_x, h, radius);
-                             context.arcTo(bl_x, h, tl_x, 0, radius);
-                             context.arcTo(tl_x, 0, tr_x, 0, radius);
-                             context.closePath();
-                          } else {
-                             context.beginPath();
-                             context.moveTo(tl_x, 0);
-                             context.lineTo(tr_x, 0);
-                             context.lineTo(br_x, h);
-                             context.lineTo(bl_x, h);
-                             context.closePath();
-                          }
-                          context.fillStrokeShape(shape);
-                        }}
-                      />
-                    );
-                  }
+                   // 2. QUAD (Rect, Parallelogram, Trapezoid)
+                   const isComplexQuad = Math.abs(tw - w) > 0.01;
 
-                  return (
-                    <Rect
-                      key={element.id}
-                      x={element.x}
-                      y={element.y}
-                      width={element.width}
-                      height={element.height}
-                      fill={element.fill}
-                      rotation={element.rotation}
-                      opacity={element.opacity !== undefined ? element.opacity : 1}
-                      skewX={element.skewX || 0}
-                      skewY={element.skewY || 0}
-                      shadowColor={shadowEnabled ? element.shadowColor : undefined}
-                      shadowBlur={element.shadowBlur}
-                      shadowOffsetX={element.shadowOffsetX}
-                      shadowOffsetY={element.shadowOffsetY}
-                      shadowOpacity={element.shadowOpacity}
-                      stroke={stroke}
-                      strokeWidth={strokeWidth}
-                      fillAfterStrokeEnabled={true}
-                      cornerRadius={element.cornerRadius}
-                      {...commonProps}
-                    />
-                  );
+                   if (isComplexQuad) {
+                     return (
+                       <Shape
+                         key={element.id}
+                         fill={element.fill}
+                         rotation={element.rotation}
+                         opacity={element.opacity !== undefined ? element.opacity : 1}
+                         shadowColor={shadowEnabled ? element.shadowColor : undefined}
+                         shadowBlur={element.shadowBlur}
+                         shadowOffsetX={element.shadowOffsetX}
+                         shadowOffsetY={element.shadowOffsetY}
+                         shadowOpacity={element.shadowOpacity}
+                         stroke={stroke}
+                         strokeWidth={strokeWidth}
+                         fillAfterStrokeEnabled={true}
+                         {...commonProps}
+                         sceneFunc={(context, shape) => {
+                           const radius = element.cornerRadius || 0;
+                           
+                           // Using Right Trapezoid logic (Left side vertical)
+                           // Leaning is handled by commonProps.skewX
+                           const tl_x = 0;
+                           const tr_x = tw;
+                           const br_x = w;
+                           const bl_x = 0;
+                           
+                           if (radius > 0) {
+                              context.beginPath();
+                              context.moveTo((tl_x + tr_x)/2, 0); 
+                              context.arcTo(tr_x, 0, br_x, h, radius);
+                              context.arcTo(br_x, h, bl_x, h, radius);
+                              context.arcTo(bl_x, h, tl_x, 0, radius);
+                              context.arcTo(tl_x, 0, tr_x, 0, radius);
+                              context.closePath();
+                           } else {
+                              context.beginPath();
+                              context.moveTo(tl_x, 0);
+                              context.lineTo(tr_x, 0);
+                              context.lineTo(br_x, h);
+                              context.lineTo(bl_x, h);
+                              context.closePath();
+                           }
+                           context.fillStrokeShape(shape);
+                         }}
+                       />
+                     );
+                   }
+
+                   // Default to simple Rect (Canonical Quad as Rect)
+                   return (
+                     <Rect
+                       key={element.id}
+                       width={w}
+                       height={h}
+                       fill={element.fill}
+                       rotation={element.rotation}
+                       opacity={element.opacity !== undefined ? element.opacity : 1}
+                       shadowColor={shadowEnabled ? element.shadowColor : undefined}
+                       shadowBlur={element.shadowBlur}
+                       shadowOffsetX={element.shadowOffsetX}
+                       shadowOffsetY={element.shadowOffsetY}
+                       shadowOpacity={element.shadowOpacity}
+                       stroke={stroke}
+                       strokeWidth={strokeWidth}
+                       fillAfterStrokeEnabled={true}
+                       cornerRadius={element.cornerRadius}
+                       {...commonProps}
+                     />
+                   );
                 }
 
                 if (element.type === "Polygon") {
@@ -392,49 +426,104 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
                 if (!targetEl) return null;
                 
                 const isSelected = selectedElementId === targetId;
-                const strokeColor = isSelected ? "#3b82f6" : "rgba(59, 130, 246, 0.5)"; // Pro Blue
-                const strokeWidth = 1.5 / scale;
+                const strokeColor = isSelected ? "#3b82f6" : "rgba(59, 130, 246, 0.5)"; 
+                const strokeWidth = 1 / scale;
                 const handleSize = 6 / scale;
+
+                const w = targetEl.width || 0;
+                const h = targetEl.height || 0;
+                const skX = targetEl.skewX || 0;
+                const tw = targetEl.topWidth !== undefined ? targetEl.topWidth : w;
+                
+                const pivotX = w / 2;
+                const pivotY = h / 2;
+
+                // Points relative to un-skewed local group
+                const outlinePoints = [
+                  0, 0,
+                  tw, 0,
+                  w, h,
+                  0, h
+                ];
+
+                const crossSize = 8 / scale;
 
                 return (
                   <Group listening={false}>
-                    <Rect
-                      x={targetEl.x}
-                      y={targetEl.y}
-                      width={targetEl.width}
-                      height={targetEl.height || 0}
+                    {/* 1. Skewed transform stack - Geometric Outline & Handles */}
+                    <Group 
+                      x={targetEl.x + w / 2} 
+                      y={targetEl.y + h / 2}
+                      rotation={targetEl.rotation || 0} 
+                      offsetX={pivotX} 
+                      offsetY={pivotY} 
+                      skewX={skX}
+                      scaleX={targetEl.flipX ? -1 : 1}
+                      scaleY={targetEl.flipY ? -1 : 1}
+                    >
+                      {/* Geometric Outline */}
+                      <Line
+                        points={outlinePoints}
+                        closed={true}
+                        stroke={strokeColor}
+                        strokeWidth={strokeWidth}
+                        dash={isSelected ? [] : [4 / scale, 4 / scale]}
+                      />
+                      
+                      {/* Vertices handles */}
+                      {isSelected && [
+                        { x: 0, y: 0 },
+                        { x: tw, y: 0 },
+                        { x: w, y: h },
+                        { x: 0, y: h }
+                      ].map((pos, i) => (
+                        <Rect
+                          key={i}
+                          x={pos.x - handleSize / 2}
+                          y={pos.y - handleSize / 2}
+                          width={handleSize}
+                          height={handleSize}
+                          fill="#FFFFFF"
+                          stroke={strokeColor}
+                          strokeWidth={0.5 / scale}
+                        />
+                      ))}
+                    </Group>
+
+                    {/* 2. Unskewed Pivot Indicator - Stationary Crosshair */}
+                    {/* Positioned at the exact geometric center, rotates but does NOT skew */}
+                    <Group 
+                      x={targetEl.x + w / 2} 
+                      y={targetEl.y + h / 2}
                       rotation={targetEl.rotation || 0}
-                      stroke={strokeColor}
-                      strokeWidth={strokeWidth}
-                      dash={isSelected ? [] : [4 / scale, 4 / scale]}
-                      fill="transparent"
-                    />
-                    {isSelected && (
-                      <>
-                        {/* Figma-like handles at corners */}
-                        {[
-                          { x: targetEl.x, y: targetEl.y },
-                          { x: targetEl.x + targetEl.width, y: targetEl.y },
-                          { x: targetEl.x, y: targetEl.y + (targetEl.height || 0) },
-                          { x: targetEl.x + targetEl.width, y: targetEl.y + (targetEl.height || 0) }
-                        ].map((pos, i) => (
-                          <Rect
-                            key={i}
-                            x={pos.x - handleSize / 2}
-                            y={pos.y - handleSize / 2}
-                            width={handleSize}
-                            height={handleSize}
-                            fill="#FFFFFF"
-                            stroke={strokeColor}
-                            strokeWidth={1 / scale}
-                            rotation={targetEl.rotation || 0}
-                            offsetX={targetEl.rotation ? (pos.x - targetEl.x) : 0}
-                            offsetY={targetEl.rotation ? (pos.y - targetEl.y) : 0}
-                            // Simplified rotation handling for handles
-                          />
-                        ))}
-                      </>
-                    )}
+                    >
+                      <Line 
+                        points={[-crossSize/2, 0, crossSize/2, 0]} 
+                        stroke={strokeColor} 
+                        strokeWidth={1.5 / scale}
+                      />
+                      <Line 
+                        points={[0, -crossSize/2, 0, crossSize/2]} 
+                        stroke={strokeColor} 
+                        strokeWidth={1.5 / scale}
+                      />
+                      <Rect 
+                        x={-0.5/scale} 
+                        y={-0.5/scale} 
+                        width={1/scale} 
+                        height={1/scale} 
+                        fill="#FFF"
+                      />
+                    </Group>
+
+                    {/* 3. Logical Anchor (Top-Left point in store coordinate system) */}
+                    <Group x={targetEl.x} y={targetEl.y}>
+                      <Rect 
+                         x={-2/scale} y={-2/scale} width={4/scale} height={4/scale}
+                         fill="transparent" stroke={strokeColor} strokeWidth={0.5/scale}
+                         dash={[1/scale, 1/scale]}
+                      />
+                    </Group>
                   </Group>
                 );
               })()}

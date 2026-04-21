@@ -9,12 +9,13 @@
 │                                                              │
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │           UI Layer (Components)                        │  │
-│  │  ┌───────────────┬───────────────┬──────────────────┐  │  │
-│  │  │  LeftSidebar  │  EditorArea   │   RightPanel     │  │  │
-│  │  │ • Sport       │ • Canvas      │ • Properties     │  │  │
-│  │  │ • Matches     │ • Konva       │ • Data Binding   │  │  │
-│  │  │ • Templates   │ • Grid        │ • History        │  │  │
-│  │  └───────────────┴───────────────┴──────────────────┘  │  │
+│  │  ┌───────────────┬─────────────────┬──────────────────┐  │  │
+│  │  │  LeftSidebar  │ EditorWorkspace │   RightPanel     │  │  │
+│  │  │ • Sport       │ • EditorHeader  │ • Properties     │  │  │
+│  │  │ • Matches     │ • Local Tabs    │ • Data Binding   │  │  │
+│  │  │ • Templates   │ • Undo/Redo     │ • History        │  │  │
+│  │  │               │ • Konva Canvas  │                  │  │  │
+│  │  └───────────────┴─────────────────┴──────────────────┘  │  │
 │  └────────────────────────────────────────────────────────┘  │
 │                          ▼                                   │
 │  ┌────────────────────────────────────────────────────────┐  │

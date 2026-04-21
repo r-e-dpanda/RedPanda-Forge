@@ -26,7 +26,7 @@ export const MOCK_MATCHES: Match[] = [
         kit: {
           home: { type: "home", primary: "#DA291C", image: "" }
         },
-        background: "https://picsum.photos/seed/mu_stadium/2000/1200" // example stadium
+        background: "https://images.unsplash.com/photo-1623607915241-a3151d59a9c8?q=80&w=1080&auto=format&fit=crop" // example stadium
       }
     },
     awayTeam: {
@@ -123,14 +123,14 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "bg_1",
             type: "Image",
             name: "Stadium Background",
-            src: "https://picsum.photos/seed/stadium_wider/1920/1080",
+            src: "https://images.unsplash.com/photo-1623607915241-a3151d59a9c8?q=80&w=1080&auto=format&fit=crop",
             visible: true, zIndex: 0, position: {x: 0, y: 0}, size: {width: 1920, height: 1080}, rotation: 0, opacity: 1, objectFit: "cover"
           },
           {
             id: "overlay_1",
             type: "Shape",
             name: "Dark Gradient",
-            shapeType: "rect",
+            shapeType: "quad",
             style: { fill: "#000000" },
             visible: true, zIndex: 1, position: {x: 0, y: 0}, size: {width: 1920, height: 1080}, rotation: 0, opacity: 0.7
           }
@@ -267,26 +267,29 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "stadium_bg",
             type: "Image",
             name: "Stadium Image",
-            src: "https://picsum.photos/seed/vertical_stadium/1080/1920",
+            src: "https://images.unsplash.com/photo-1556816214-6d16c62fbbf6?q=80&w=1080&auto=format&fit=crop",
             visible: true, zIndex: 0, position: {x: 0, y: 0}, size: {width: 1080, height: 1920}, rotation: 0, opacity: 0.8, objectFit: "cover"
           },
           {
             id: "away_tint",
             type: "Shape",
             name: "Away Team Overlay",
-            shapeType: "rect",
+            shapeType: "quad",
             style: { fill: "#0A1B3B" }, // Man City dark blue vibe fallback
             visible: true, zIndex: 1, position: {x: 0, y: 0}, size: {width: 1080, height: 1920}, rotation: 0, opacity: 0.6
           },
           {
             id: "home_poly",
             type: "Shape",
-            shapeType: "rect",
             name: "Home Quad",
+            shapeType: "quad",
+            dataKey: "homeTeam.colors.primary",
             style: { fill: "{{homeTeam.colors.primary}}" },
-            visible: true, zIndex: 2, position: {x: 0, y: 0}, rotation: 0, opacity: 0.95,
-            size: {width: 500, height: 1920},
-            topWidth: 750
+            visible: true, zIndex: 2, position: {x: 0, y: 0}, rotation: 0, opacity: 0.65,
+            size: {width: 700, height: 1920},
+            topWidth: 400,
+            skewX: 0,
+            flipY: true
           },
           {
             id: "match_day_bg",
@@ -311,7 +314,7 @@ export const MOCK_TEMPLATES: Template[] = [
             type: "Image",
             name: "Home Team Visual",
             dataKey: "homeTeam.logo",
-            visible: true, zIndex: 1, position: {x: -50, y: 400}, size: {width: 500, height: 500}, rotation: 0, opacity: 0.95, objectFit: "contain",
+            visible: true, zIndex: 1, position: {x: 50, y: 400}, size: {width: 500, height: 500}, rotation: 0, opacity: 0.95, objectFit: "contain",
             src: ""
           },
           {
@@ -356,7 +359,7 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "home_name_box",
             type: "Shape",
             name: "Home Name Box",
-            shapeType: "rect",
+            shapeType: "quad",
             style: { fill: "#7F0000" }, // Dark red fallback
             visible: true, zIndex: 3, position: {x: 60, y: 1350}, size: {width: 420, height: 80}, rotation: 0, opacity: 0.9
           },
@@ -374,7 +377,7 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "away_name_box",
             type: "Shape",
             name: "Away Name Box",
-            shapeType: "rect",
+            shapeType: "quad",
             style: { fill: "#0B1D42" }, // Dark blue fallback
             visible: true, zIndex: 5, position: {x: 600, y: 1350}, size: {width: 440, height: 80}, rotation: 0, opacity: 0.9
           },
@@ -446,7 +449,7 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "footer_bg",
             type: "Shape",
             name: "Footer Strip",
-            shapeType: "rect",
+            shapeType: "quad",
             style: { fill: "#000000" },
             visible: true, zIndex: 1, position: {x: 0, y: 1820}, size: {width: 1080, height: 100}, rotation: 0, opacity: 0.95
           },
@@ -462,7 +465,7 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "broadcaster_fake_1",
             type: "Shape",
             name: "Broadcaster Logo 1",
-            shapeType: "rect",
+            shapeType: "quad",
             style: { fill: "#EAB308" },
             visible: true, zIndex: 3, position: {x: 280, y: 1845}, size: {width: 120, height: 40}, rotation: 0, opacity: 1
           },
@@ -470,7 +473,7 @@ export const MOCK_TEMPLATES: Template[] = [
              id: "broadcaster_fake_2",
              type: "Shape",
              name: "Broadcaster Logo 2",
-             shapeType: "rect",
+             shapeType: "quad",
              style: { fill: "#3B82F6" },
              visible: true, zIndex: 4, position: {x: 480, y: 1845}, size: {width: 150, height: 40}, rotation: 0, opacity: 1
           }
@@ -502,7 +505,7 @@ export const MOCK_TEMPLATES: Template[] = [
         id: "overlay_1",
         type: "Shape",
         name: "Bottom Gradient",
-        shapeType: "rect",
+        shapeType: "quad",
         style: { fill: "#000000" },
         zIndex: 1, visible: true, position: {x: 0, y: 960}, size: {width: 1080, height: 960}, rotation: 0, opacity: 0.9
       },

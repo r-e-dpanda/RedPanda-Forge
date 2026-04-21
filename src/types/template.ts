@@ -142,6 +142,8 @@ export interface BaseElement {
   opacity?: number;
   skewX?: number;
   skewY?: number;
+  flipX?: boolean;
+  flipY?: boolean;
   cornerRadius?: number;
   topWidth?: number;
   anchor?: "topLeft" | "center" | "bottomRight";
@@ -167,7 +169,9 @@ export interface TextElement extends BaseElement {
 
 export interface ShapeElement extends BaseElement {
   type: "Shape";
-  shapeType: "rect" | "circle" | "ellipse" | "polygon";
+  shapeType: "ellipse" | "quad" | "polygon";
+  radiusX?: number; // For ellipse
+  radiusY?: number; // For ellipse
   style: ElementStyle;
   points?: number[]; // Cho Polygon
 }
