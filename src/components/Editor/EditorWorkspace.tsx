@@ -159,7 +159,7 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
 
             <button 
               onClick={() => innerEditorRef.current?.exportPNG()}
-              className="h-6 bg-app-accent hover:bg-app-accent/80 text-black px-3 rounded flex items-center justify-center gap-2 text-[12px] font-[900] transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+              className="h-6 bg-app-accent hover:bg-app-accent/80 text-black px-3 rounded flex items-center justify-center gap-2 text-[12px] font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
               disabled={!activeSession?.template}
             >
               <Download size={11} /> {t.workspace.actions.export}

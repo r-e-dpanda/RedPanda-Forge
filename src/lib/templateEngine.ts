@@ -120,11 +120,14 @@ export const isAutoResolved = (dataKey: string, match: Match | null) => {
   return value !== undefined || computedKeys.includes(keyWithoutPipes);
 }
 
+import { resolveAssetPath, ResolverContext } from './assetResolver';
+
 export const resolveBoundData = (
   element: any, 
   match: Match | null, 
   manualInputs: Record<string, string>,
-  overrides: any = {}
+  overrides: any = {},
+  resolverContext?: ResolverContext
 ): any => {
   let resolvedElement = { ...element };
   
@@ -220,6 +223,11 @@ export const resolveBoundData = (
                   resolvedElement.src = "";
               }
           }
+      }
+      
+      // Finally, run through the Asset Resolver Pipeline
+      if (resolvedElement.src && typeof resolvedElement.src === 'string' && resolverContext) {
+        resolvedElement.src = resolveAssetPath(resolvedElement.src, resolverContext);
       }
     }
   }

@@ -5,14 +5,36 @@ This document serves as a persistent record of RedPanda Forge's technical archit
 ## 1. Project Overview
 RedPanda Forge is a high-performance template engine and editor for sports broadcast graphics. It allows users to bind real-time match data to visual templates and customize them on a live canvas.
 
-## 2. Asset Structure (ASSETS_STRUCTURE)
-All static assets and mock data are structured carefully inside the `/public` folder to facilitate dynamic loading on the canvas.
-- **Team Logos:** `/public/[sport]/[league]/[team_name_or_shortname].png`
-  - Example: `/public/football/premier-league/MCI.png`
-  - Example: `/public/basketball/nba/GSW.png`
-- **Templates:** `/public/templates/[sport]/[ratio]/`
-  - Example backgrounds: `/public/templates/football/16-9/bg-1.png`
-- **Mock Data:** `MOCK_MATCHES` in `src/lib/mockData.ts` handles the match definitions.
+## 2. Asset & Template Architecture (Enterprise Bundle System)
+Assets and Templates are strictly separated concerns. Assets represent raw visual data (logos, placeholders), while Templates represent layout blueprints. RedPanda Forge uses a 3-tier Scope-based Taxonomy for assets to ensure templates are highly portable (Can be zipped and shared as "Packs").
+
+### 2.1 The "Pack" (Unit of Distribution)
+A "Pack" is the standard distribution unit. It contains multiple templates that share a design concept (e.g., "Neon Matchday Pack"). Standalone imported templates fallback to a `_default_pack`.
+- **Pack Folder Structure:**
+  - `pack.json` - Metadata for the bundle.
+  - `shared_assets/` - Assets used by multiple templates in this pack.
+  - `templates/`
+    - `<template-id>/`
+      - `template.json` - The actual layout blueprint.
+      - `local_assets/` - Assets explicitly unique to this template.
+
+### 2.2 Asset Routing & Resolution Pipeline
+To prevent hardcoded absolute URLs, the template engine employs a Context-Aware Prefix Resolver. Image elements specify their `src` using `@` prefixes, which are resolved at runtime depending on the actively loaded Pack and Editor configuration:
+
+1. **`@global/`** (Domain Assets)
+   - Scope: System-wide (All packs/templates).
+   - Usage: `{"src": "@global/soccer/teams/{{match.homeTeam.id}}/logo.png"}`
+   - Resolution: Maps to the configured `assetRoot` (e.g., `/assets/soccer/...`).
+2. **`@shared/`** (Theme Shared Assets)
+   - Scope: Local to the active Pack.
+   - Usage: `{"src": "@shared/backgrounds/neo-theme.jpg"}`
+   - Resolution: Maps to `templateRoot/<pack-id>/shared_assets/`.
+3. **`@local/`** (Template-Specific Assets)
+   - Scope: Local to the specific Template.
+   - Usage: `{"src": "@local/masks/diagonal.png"}`
+   - Resolution: Maps to `templateRoot/<pack-id>/templates/<template-id>/local_assets/`.
+
+Default configurable roots fallback to `/assets` and `/templates` relative to `window.location.origin`. MOCK_MATCH data should utilize string IDs (e.g. `mci`) instead of exact HTTP URLs so templates can dynamically build global asset paths using `{{match.homeTeam.id}}`.
 
 ## 3. Core Architecture & Resolution logic
 
@@ -125,6 +147,8 @@ We use **shadcn/ui** (built on tailwindcss and radix-ui) for all standard interf
 - **Geometric Accuracy**: 
   - For slanted dividers (e.g., "Home Quad"), always prefer a **Parallelogram** (Rectangle + `skewX`) over an invalid trapezoid.
   - Modern quads use `topWidth` to define trapezoidal shapes, ensuring the baseline `width` remains the primary layout anchor.
+  - **Element Dimensions (Size vs Root):** Elements may define their dimensions inside a `size` object (e.g., `size.width`, `size.height`) instead of at the root of the element object. To prevent accidental geometric deformations, utilities (e.g., `shapeUtils.ts`) MUST gracefully fallback to `element.size?.width` / `element.size?.height`.
+  - For `quad` / `rect` shapes, if `topWidth` is omitted, it MUST fallback to `element.width` or `element.size?.width` to ensure the shape defaults to a true rectangle, rather than an arbitrary skewed trapezoid value (like `100`).
 - **Safety**: Do not introduce destructive actions without checking state (dirty checks).
 - **Gracefulness**: Handle edge cases: opening the app with no data should show a helpful empty state.
 - **Performance**: Use `react-konva` for rendering. Use JSON layout descriptions instead of static PNGs where possible.

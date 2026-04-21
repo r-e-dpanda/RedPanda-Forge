@@ -153,7 +153,12 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
     }
   });
 
-  const elementsWithData = flatElements.map(el => resolveBoundData(el, match, manualInputs, elementOverrides[el.id]));
+  const resolverContext = {
+    packId: activeSession?.packId || "_default_pack",
+    templateId: template?.id || "fallback"
+  };
+  
+  const elementsWithData = flatElements.map(el => resolveBoundData(el, match, manualInputs, elementOverrides[el.id], resolverContext));
 
   return (
     <div className="flex-1 flex flex-col relative bg-app-bg overflow-hidden">

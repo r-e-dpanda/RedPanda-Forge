@@ -11,8 +11,8 @@ export function normalizeShape(element: any): any {
   switch (shapeType) {
     case "circle":
       normalized.shapeType = "ellipse";
-      normalized.radiusX = element.r ?? (element.width ? element.width / 2 : 50);
-      normalized.radiusY = element.r ?? (element.height ? element.height / 2 : 50);
+      normalized.radiusX = element.r ?? (element.width ? element.width / 2 : (element.size?.width ? element.size.width / 2 : 50));
+      normalized.radiusY = element.r ?? (element.height ? element.height / 2 : (element.size?.height ? element.size.height / 2 : 50));
       normalized.x = element.cx ?? element.x ?? 0;
       normalized.y = element.cy ?? element.y ?? 0;
       // Cleanup aliases
@@ -23,8 +23,8 @@ export function normalizeShape(element: any): any {
 
     case "ellipse":
       normalized.shapeType = "ellipse";
-      normalized.radiusX = element.rx ?? element.radiusX ?? (element.width ? element.width / 2 : 50);
-      normalized.radiusY = element.ry ?? element.radiusY ?? (element.height ? element.height / 2 : 50);
+      normalized.radiusX = element.rx ?? element.radiusX ?? (element.width ? element.width / 2 : (element.size?.width ? element.size.width / 2 : 50));
+      normalized.radiusY = element.ry ?? element.radiusY ?? (element.height ? element.height / 2 : (element.size?.height ? element.size.height / 2 : 50));
       normalized.x = element.cx ?? element.x ?? 0;
       normalized.y = element.cy ?? element.y ?? 0;
       delete normalized.rx;
@@ -36,15 +36,15 @@ export function normalizeShape(element: any): any {
     case "rect":
     case "square":
       normalized.shapeType = "quad";
-      normalized.topWidth = element.width ?? 100;
-      normalized.width = element.width ?? 100;
+      normalized.topWidth = element.topWidth ?? element.width ?? element.size?.width ?? 100;
+      normalized.width = element.width ?? element.size?.width ?? 100;
       normalized.skewX = element.skewX ?? 0;
       break;
 
     case "quad":
       normalized.shapeType = "quad";
-      normalized.topWidth = element.topWidth ?? element.width ?? 100;
-      normalized.width = element.width ?? 100;
+      normalized.topWidth = element.topWidth ?? element.width ?? element.size?.width ?? 100;
+      normalized.width = element.width ?? element.size?.width ?? 100;
       normalized.skewX = element.skewX ?? 0;
       break;
     

@@ -1,0 +1,13 @@
+{
+  "id": "bayern-munich",
+  "name": "Bayern Munich",
+  "shortName": "BAY",
+  "colors": {
+    "primary": "#DC052D",
+    "secondary": "#0066B2",
+    "accent": "#FFFFFF"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/bayern-munich/logo.png"
+  }
+}

@@ -45,7 +45,7 @@ export const strings = {
       }
     },
     actions: {
-      export: "EXPORT",
+      export: "Export",
       undo: "Undo",
       redo: "Redo",
       newGraphic: "New Graphic"

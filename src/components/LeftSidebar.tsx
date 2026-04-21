@@ -5,6 +5,7 @@ import { cn } from "../lib/utils";
 import { MOCK_MATCHES, MOCK_TEMPLATES } from "../lib/mockData";
 import { Sport, Ratio } from "../types/template";
 import { useTranslation } from "../lib/i18n";
+import { resolveAssetPath } from "../lib/assetResolver";
 
 export const LeftSidebar = ({
   selectedSport,
@@ -137,12 +138,20 @@ export const LeftSidebar = ({
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="w-6 h-6 flex items-center justify-center bg-white/5 rounded border border-app-border">
-                                <img src={m.sport === 'tennis' ? m.player1?.flag : m.homeTeam?.logo} className="w-4 h-4 object-contain" alt="" />
+                                <img 
+                                  src={
+                                    m.sport === 'tennis' 
+                                      ? resolveAssetPath(m.player1?.flag || "", {packId: "", templateId: ""})
+                                      : resolveAssetPath(m.homeTeam?.assets?.logo || "", {packId: "", templateId: ""})
+                                  } 
+                                  className="w-4 h-4 object-contain" 
+                                  alt="" 
+                                />
                               </div>
                               <span className={cn("text-[13px] font-[600]", activeMatch?.id === m.id ? "text-app-text" : "text-app-text/90")}>
                                 {m.sport === 'tennis' 
                                   ? `${m.player1?.name} vs ${m.player2?.name}`
-                                  : `${m.homeTeam?.shortName} vs ${m.awayTeam?.shortName}`}
+                                  : `${m.homeTeam?.shortName || m.homeTeam?.id} vs ${m.awayTeam?.shortName || m.awayTeam?.id}`}
                               </span>
                             </div>
                             {activeMatch?.id === m.id && <Check size={16} className="text-app-accent ml-2 shrink-0" />}

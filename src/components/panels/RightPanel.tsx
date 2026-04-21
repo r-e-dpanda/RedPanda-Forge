@@ -161,11 +161,11 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
             
             {match && (
               <>
-                <div className="flex items-center gap-3 bg-white/5 rounded-[6px] border border-white/10 p-3">
-                  <span className="bg-app-accent text-app-bg px-2 py-0.5 rounded text-[11px] font-bold tracking-wider">
+                <div className="flex items-center gap-3 bg-app-card rounded-[6px] border border-app-border p-3 shadow-sm">
+                  <span className="bg-app-accent text-app-bg px-2 py-0.5 rounded text-[11px] font-semibold capitalize">
                     {match.sport}
                   </span>
-                  <span className="text-[13px] font-[600] text-zinc-300">{match.league}</span>
+                  <span className="text-[13px] font-semibold text-app-text">{match.league}</span>
                 </div>
 
                 {match.homeTeam && match.awayTeam && (
@@ -233,7 +233,11 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
               <h3 className="text-[12px] text-app-text font-bold mb-3">{t.panels.fields.dataSources}</h3>
               <div className="flex flex-col gap-2">
                 {elementsWithBinding.map(element => {
-                   const resolved = resolveBoundData(element, match, manualInputs, elementOverrides[element.id]);
+                   const resolverContext = {
+                     packId: activeSession?.packId || "_default_pack",
+                     templateId: template?.id || "fallback"
+                   };
+                   const resolved = resolveBoundData(element, match, manualInputs, elementOverrides[element.id], resolverContext);
                    let displayVal = 'N/A';
                    
                    if (element.type.toLowerCase() === 'text') {
@@ -338,7 +342,11 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
               const isEditable = (prop: string) => !el.editableProperties || el.editableProperties.includes(prop);
               
               const activeFormatters = overrides.formatters !== undefined ? overrides.formatters : ((el as any).formatters || []);
-              const resolved = resolveBoundData(el, match, manualInputs, overrides);
+              const resolverContext = {
+                packId: activeSession?.packId || "_default_pack",
+                templateId: template?.id || "fallback"
+              };
+              const resolved = resolveBoundData(el, match, manualInputs, overrides, resolverContext);
 
               return (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-200">
@@ -351,7 +359,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
 
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-[14px] text-app-text font-[700] truncate">{el.label || el.name || 'Properties'}</h3>
-                    <span className="bg-[#111] text-zinc-300 px-2 py-0.5 rounded border border-app-border text-[11px] font-bold tracking-wider">
+                    <span className="bg-app-sidebar text-app-muted px-2 py-0.5 rounded border border-app-border text-[11px] font-medium">
                       {isText ? 'Text Layer' : isImage ? 'Image Layer' : shapeSubtype ? `Shape: ${shapeSubtype}` : 'Layer'}
                     </span>
                   </div>
@@ -1109,7 +1117,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                     onMouseEnter={() => setHoveredElementId(el.id)}
                                     onMouseLeave={() => setHoveredElementId(null)}
                                 >
-                                    <div className="w-[12px] h-[1px] bg-[#333] absolute left-[20px]"></div>
+                                    <div className="w-[12px] h-[1px] bg-app-border absolute left-[20px]"></div>
 
                                     <button 
                                       className="text-app-muted hover:text-app-text transition-colors shrink-0 z-10 bg-transparent pl-1 relative"

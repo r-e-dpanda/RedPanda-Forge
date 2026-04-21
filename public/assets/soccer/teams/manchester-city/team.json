@@ -1,0 +1,16 @@
+{
+  "id": "manchester-city",
+  "name": "Manchester City",
+  "shortName": "MCI",
+  "colors": {
+    "primary": "#6CABDD",
+    "secondary": "#FFFFFF",
+    "accent": "#1C2C5B"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/manchester-city/logo.png",
+    "kit": {
+      "away": { "type": "away", "primary": "#000000", "image": "" }
+    }
+  }
+}

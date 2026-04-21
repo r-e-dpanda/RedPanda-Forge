@@ -6,6 +6,7 @@ import { normalizeTemplate } from '../lib/shapeUtils';
 export interface WorkflowSession {
   id: string;
   name: string;
+  packId: string; // Context for asset resolution (e.g. "_default_pack" or "neo-theme")
   template: Template | null;
   match: Match | null;
   elementOverrides: Record<string, Partial<TemplateElement>>;
@@ -51,6 +52,7 @@ interface EditorState {
 const createDefaultSession = (name?: string): WorkflowSession => ({
   id: uuidv4(),
   name: name || "Untitled graphic",
+  packId: "_default_pack",
   template: null,
   match: null,
   elementOverrides: {},

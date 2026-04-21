@@ -1,0 +1,13 @@
+{
+  "id": "real-madrid",
+  "name": "Real Madrid",
+  "shortName": "RMA",
+  "colors": {
+    "primary": "#FFFFFF",
+    "secondary": "#00529F",
+    "accent": "#FEBE10"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/real-madrid/logo.png"
+  }
+}

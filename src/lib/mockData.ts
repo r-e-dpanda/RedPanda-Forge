@@ -1,99 +1,64 @@
 import { Match, Template } from "../types/template";
+// Mock hydration step: Import local JSON data (Replacing actual async network fetch for demo environment)
+import mciData from "../../public/assets/soccer/teams/manchester-city/team.json" with { type: "json" };
+import munData from "../../public/assets/soccer/teams/manchester-united/team.json" with { type: "json" };
+import rmaData from "../../public/assets/soccer/teams/real-madrid/team.json" with { type: "json" };
+import bayData from "../../public/assets/soccer/teams/bayern-munich/team.json" with { type: "json" };
 
-export const MOCK_MATCHES: Match[] = [
+import ndData from "../../public/assets/tennis/players/novak-djokovic/player.json" with { type: "json" };
+import caData from "../../public/assets/tennis/players/carlos-alcaraz/player.json" with { type: "json" };
+
+const LOCAL_DB: Record<string, any> = {
+  "manchester-city": mciData,
+  "manchester-united": munData,
+  "real-madrid": rmaData,
+  "bayern-munich": bayData,
+  "novak-djokovic": ndData,
+  "carlos-alcaraz": caData
+};
+
+const hydrateTeam = (teamId: string) => {
+  return LOCAL_DB[teamId] || { id: teamId };
+};
+
+const RAW_MOCK_MATCHES = [
   {
     id: "m_fb_1",
-    sport: "football",
+    sport: "football" as const,
     league: "Premier League",
     date: "2026-04-25T15:00:00Z",
     venue: "Old Trafford",
     liveBadge: true,
     score: "",
-    homeTeam: {
-      id: "t_mu",
-      name: "Manchester United",
-      shortName: "MUN",
-      logo: "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg", // Keep old field for legacy templates
-      color: "#DA291C", // Keep old field
-      colors: {
-        primary: "#DA291C",
-        secondary: "#000000",
-        accent: "#FBE122"
-      },
-      assets: {
-        logo: "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg",
-        badge: "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg",
-        kit: {
-          home: { type: "home", primary: "#DA291C", image: "" }
-        },
-        background: "https://images.unsplash.com/photo-1623607915241-a3151d59a9c8?q=80&w=1080&auto=format&fit=crop" // example stadium
-      }
-    },
-    awayTeam: {
-      id: "t_mc",
-      name: "Manchester City",
-      shortName: "MCI",
-      logo: "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
-      color: "#6CABDD",
-      colors: {
-        primary: "#6CABDD",
-        secondary: "#FFFFFF",
-        accent: "#1C2C5B"
-      },
-      assets: {
-        logo: "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
-        kit: {
-          away: { type: "away", primary: "#000000", image: "" } // Example 24/25 away kit logic
-        }
-      }
-    },
+    homeTeam: { id: "manchester-united" },
+    awayTeam: { id: "manchester-city" },
     awayTeamOverrides: {
       kit: {
-        type: "away",
+        type: "away" as const,
         primary: "#000000"
       }
     }
   },
   {
     id: "m_fb_2",
-    sport: "football",
+    sport: "football" as const,
     league: "Champions League",
     date: "2026-05-10T19:45:00Z",
     venue: "Santiago Bernabéu",
     liveBadge: false,
     score: "1 - 1",
-    homeTeam: {
-      id: "t_rma",
-      name: "Real Madrid",
-      shortName: "RMA",
-      logo: "https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg",
-      color: "#FFFFFF"
-    },
-    awayTeam: {
-      id: "t_bay",
-      name: "Bayern Munich",
-      shortName: "BAY",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg",
-      color: "#DC052D"
-    }
+    homeTeam: { id: "real-madrid" },
+    awayTeam: { id: "bayern-munich" }
   },
   {
     id: "m_te_1",
-    sport: "tennis",
+    sport: "tennis" as const,
     league: "ATP Tour - Wimbledon",
     date: "2026-07-12T14:00:00Z",
     venue: "Centre Court",
     liveBadge: true,
-    player1: {
-      id: "p_nd",
-      name: "N. Djokovic",
-      flag: "https://upload.wikimedia.org/wikipedia/commons/f/ff/Flag_of_Serbia.svg"
-    },
-    player2: {
-      id: "p_ca",
-      name: "C. Alcaraz",
-      flag: "https://upload.wikimedia.org/wikipedia/commons/8/89/Bandera_de_Espa%C3%B1a.svg"
-    }
+    player1: { id: "novak-djokovic" },
+    player2: { id: "carlos-alcaraz" }
   }
 ];
 
@@ -148,9 +113,8 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "home_logo",
             type: "Image",
             name: "Home Team Logo",
-            dataKey: "homeTeam.logo",
             visible: true, zIndex: 1, position: {x: 400, y: 340}, size: {width: 400, height: 400}, rotation: 0, opacity: 1, objectFit: "contain",
-            src: ""
+            src: "@global/soccer/teams/{{match.homeTeam.id}}/logo.png"
           },
           {
             id: "home_name",
@@ -167,9 +131,8 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "away_logo",
             type: "Image",
             name: "Away Team Logo",
-            dataKey: "awayTeam.logo",
             visible: true, zIndex: 3, position: {x: 1120, y: 340}, size: {width: 400, height: 400}, rotation: 0, opacity: 1, objectFit: "contain",
-            src: ""
+            src: "@global/soccer/teams/{{match.awayTeam.id}}/logo.png"
           },
           {
             id: "away_name",
@@ -313,17 +276,15 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "home_big_logo",
             type: "Image",
             name: "Home Team Visual",
-            dataKey: "homeTeam.logo",
             visible: true, zIndex: 1, position: {x: 50, y: 400}, size: {width: 500, height: 500}, rotation: 0, opacity: 0.95, objectFit: "contain",
-            src: ""
+            src: "@global/soccer/teams/{{match.homeTeam.id}}/logo.png"
           },
           {
             id: "away_big_logo",
             type: "Image",
             name: "Away Team Visual",
-            dataKey: "awayTeam.logo",
             visible: true, zIndex: 2, position: {x: 600, y: 650}, size: {width: 450, height: 450}, rotation: 0, opacity: 0.95, objectFit: "contain",
-            src: ""
+            src: "@global/soccer/teams/{{match.awayTeam.id}}/logo.png"
           }
         ]
       },
@@ -352,8 +313,8 @@ export const MOCK_TEMPLATES: Template[] = [
             dataKey: "match.venue",
             text: "ANFIELD STADIUM",
             formatters: ["uppercase"],
-            style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 64, fontWeight: "bold", align: "left" },
-            visible: true, zIndex: 2, position: {x: 100, y: 1200}, size: {width: 1000, height: 80}, rotation: -90, opacity: 0.7
+            style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 50, fontWeight: "bold", align: "left" },
+            visible: true, zIndex: 2, position: {x: -450, y: 700}, size: {width: 1000, height: 80}, rotation: -90, opacity: 0.7
           },
           {
             id: "home_name_box",
@@ -403,8 +364,7 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "home_logo_small",
             type: "Image",
             name: "Home Logo Small",
-            dataKey: "homeTeam.logo",
-            src: "",
+            src: "@global/soccer/teams/{{match.homeTeam.id}}/logo.png",
             visible: true, zIndex: 8, position: {x: 180, y: 1470}, size: {width: 140, height: 140}, rotation: 0, opacity: 1, objectFit: "contain"
           },
           {
@@ -421,8 +381,7 @@ export const MOCK_TEMPLATES: Template[] = [
             id: "away_logo_small",
             type: "Image",
             name: "Away Logo Small",
-            dataKey: "awayTeam.logo",
-            src: "",
+            src: "@global/soccer/teams/{{match.awayTeam.id}}/logo.png",
             visible: true, zIndex: 10, position: {x: 750, y: 1470}, size: {width: 140, height: 140}, rotation: 0, opacity: 1, objectFit: "contain"
           },
           {
@@ -450,8 +409,9 @@ export const MOCK_TEMPLATES: Template[] = [
             type: "Shape",
             name: "Footer Strip",
             shapeType: "quad",
-            style: { fill: "#000000" },
-            visible: true, zIndex: 1, position: {x: 0, y: 1820}, size: {width: 1080, height: 100}, rotation: 0, opacity: 0.95
+            style: { fill: "#666666" },
+            topWidth: 900,
+            visible: true, zIndex: 1, position: {x: 0, y: 1820}, size: {width: 1080, height: 100}, rotation: 0, opacity: 0.5
           },
           {
             id: "live_on_txt",
@@ -538,3 +498,17 @@ export const MOCK_TEMPLATES: Template[] = [
     ]
   }
 ];
+
+export const MOCK_MATCHES: Match[] = RAW_MOCK_MATCHES.map((m: any) => {
+  const overrides: any = {};
+  if (m.homeTeam && m.homeTeam.id) overrides.homeTeam = hydrateTeam(m.homeTeam.id);
+  if (m.awayTeam && m.awayTeam.id) overrides.awayTeam = hydrateTeam(m.awayTeam.id);
+  
+  if (m.player1 && m.player1.id) overrides.player1 = hydrateTeam(m.player1.id);
+  if (m.player2 && m.player2.id) overrides.player2 = hydrateTeam(m.player2.id);
+  
+  return {
+    ...m,
+    ...overrides
+  };
+}) as Match[];

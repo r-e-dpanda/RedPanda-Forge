@@ -17,7 +17,7 @@ export interface TeamKit {
 }
 
 export interface TeamAssets {
-  logo: string;
+  logo?: string;
   badge?: string;
   kit?: {
     home?: TeamKit;
@@ -28,11 +28,11 @@ export interface TeamAssets {
 }
 
 export interface Team {
-  id: string;
-  name: string;
-  shortName: string;
-  logo: string; // Keep for backwards compatibility
-  color?: TeamColor; // Keep for backwards compatibility
+  id: string; // The Entity ID (e.g. manchester-city, ars, mu)
+  name?: string;
+  shortName?: string;
+  logo?: string; // TBD: Remove once all templates use @global logic
+  color?: TeamColor; 
   colors?: {
     primary: string;
     secondary?: string;
