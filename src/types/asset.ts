@@ -9,7 +9,7 @@ export interface Asset {
   usage: string[]; // e.g., "team.logo", "background"
 }
 
-// Mở rộng thêm khái niệm Entity Registry (Nếu ứng dụng có Quản lý Đội bóng / Giải đấu cục bộ)
+// Extended Entity Registry (If app has local Team/League Management)
 export interface EntityColors {
   primary: string;
   secondary?: string;

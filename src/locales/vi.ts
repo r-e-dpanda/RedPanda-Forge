@@ -11,38 +11,38 @@ export const strings: LocaleStrings = {
     open: "Mở",
     delete: "Xóa",
     edit: "Sửa",
-    untitled: "Graphic chưa đặt tên",
+    untitled: "Untitled Graphic",
     all: "Tất cả"
   },
   settings: {
-    header: "Cài đặt ứng dụng",
+    header: "Cài đặt",
     tabs: {
-      general: "Tùy chọn chung",
-      paths: "Đường dẫn không gian làm việc"
+      general: "Cài đặt chung",
+      paths: "Đường dẫn"
     },
     appearance: {
       title: "Giao diện",
-      description: "Chọn giao diện không gian làm việc ưu tiên để tập trung tối ưu.",
-      themeLibrary: "Thư viện giao diện",
+      description: "Chọn giao diện làm việc để tập trung tối ưu.",
+      themeLibrary: "Giao diện",
       typography: "Văn bản & Tỷ lệ",
-      typographyDesc: "Điều chỉnh kích thước giao diện để phù hợp với màn hình hiển thị.",
+      typographyDesc: "Điều chỉnh kích thước chữ hiển thị của giao diện.",
       uiScale: "Tỷ lệ giao diện",
       currentBase: "Kích thước gốc",
       language: "Ngôn ngữ",
-      languageDesc: "Chọn ngôn ngữ hiển thị cho không gian làm việc."
+      languageDesc: "Chọn ngôn ngữ hiển thị."
     },
     paths: {
       title: "Vị trí lưu trữ",
-      description: "Cấu hình thư mục chứa nguyên liệu và template cục bộ.",
-      assetsRoot: "Thư mục Assets",
-      templatesRoot: "Thư mục Templates"
+      description: "Cấu hình thư mục chứa Assets và Templates.",
+      assetsRoot: "Assets",
+      templatesRoot: "Templates"
     },
     saveConfig: "Lưu Cấu Hình",
-    ready: "Sẵn sàng chế tác."
+    ready: "Sẵn sàng."
   },
   sidebar: {
     tabs: {
-      matches: "Trận đấu",
+      matches: "Trận Đấu",
       templates: "Templates"
     },
     filters: {
@@ -51,24 +51,24 @@ export const strings: LocaleStrings = {
       allRatios: "Tất cả tỷ lệ"
     },
     matches: {
-      header: "Các trận đấu trống",
-      selectTemplateFirst: "Hãy chọn Template trước",
-      noMatchesFound: "Không tìm thấy trận đấu nào phù hợp với bộ lọc."
+      header: "Các trận đấu",
+      selectTemplateFirst: "Chọn Template trước",
+      noMatchesFound: "Không tìm thấy trận đấu nào."
     },
     templates: {
-      importBtn: "Nhập JSON Template",
-      noTemplates: "Không có template trong thư viện",
+      importBtn: "Nhập JSON",
+      noTemplates: "Không có template",
       useTemplate: "Sử dụng Template"
     }
   },
   workspace: {
     tabs: {
-      untitled: "Graphic chưa đặt tên"
+      untitled: "Untitled Graphic"
     },
     modals: {
       closeTab: {
-        header: "Đóng Tab?",
-        description: "Bạn có {changes} THAY ĐỔI CHƯA LƯU {/changes}. Đóng tab này sẽ xóa bỏ vĩnh viễn mọi chỉnh sửa của bạn.",
+        header: "Đóng tab?",
+        description: "Bạn có {changes} thay đổi chưa lưu {/changes}. Đóng tab này sẽ xóa bỏ vĩnh viễn mọi chỉnh sửa của bạn.",
         confirm: "Bỏ thay đổi & Đóng"
       }
     },
@@ -81,9 +81,9 @@ export const strings: LocaleStrings = {
   },
   modals: {
     templateSwitch: {
-      header: "Phát hiện chỉnh sửa chưa lưu",
-      description: "Bạn đã có chỉnh sửa thủ công trong phiên này. Thay đổi template sẽ {discard} HỦY BỎ {/discard} toàn bộ công sức của bạn.",
-      openNewTab: "Mở trong Tab Mới",
+      header: "Thay đổi template",
+      description: "Bạn có chỉnh sửa thủ công chưa lưu. Thay đổi template sẽ {discard} HỦY BỎ {/discard} toàn bộ công sức của bạn.",
+      openNewTab: "Mở trong tab mới",
       discardReplace: "Bỏ chỉnh sửa & Thay thế"
     }
   },
@@ -99,15 +99,15 @@ export const strings: LocaleStrings = {
       fill: "Tô màu",
       appearance: "Hiển thị",
       outline: "Đường viền",
-      shadow: "Bóng đổ",
+      shadow: "Đổ bóng",
       typography: "Văn bản",
       background: "Nền",
       layers: "Các lớp"
     },
     fields: {
-      sourceBindingPath: "Nguồn - Cấu trúc liên kết",
+      sourceBindingPath: "Nguồn - Binding",
       source: "Nguồn",
-      valueBindingPath: "Giá trị - Cấu trúc liên kết",
+      valueBindingPath: "Giá trị - Binding",
       value: "Giá trị",
       transform: "Bộ lọc",
       clear: "Xóa",

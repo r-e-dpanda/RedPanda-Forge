@@ -4,13 +4,14 @@
 
 **RedPanda Forge** is a desktop-class React application (being migrated to Electron) designed to generate high-quality sports graphics, matchday thumbnails, and social media assets. It combines a dynamic data-binding engine with a visual canvas editor.
 
-**Repository**: https://github.com/r-e-dpanda/RedPanda-Forge
+**Repository**: <https://github.com/r-e-dpanda/RedPanda-Forge>
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - **Node.js** v16+ (recommended: v18 or v20)
 - **npm** v8+ or **yarn**
 - **Git**
@@ -35,14 +36,14 @@ cp .env.example .env.local
 npm run dev
 ```
 
-The application will be available at: **http://localhost:3000**
+The application will be available at: **<http://localhost:3000>**
 
 ---
 
 ## 📦 Available Commands
 
 | Command | Description |
-|---------|-------------|
+| --------- | ------------- |
 | `npm run dev` | Start development server with hot reload (port 3000) |
 | `npm run build` | Build production bundle in `/dist` |
 | `npm run preview` | Preview production build locally |
@@ -53,7 +54,7 @@ The application will be available at: **http://localhost:3000**
 
 ## 🏗️ Project Structure
 
-```
+```text
 RedPanda-Forge/
 ├── src/
 │   ├── components/
@@ -103,7 +104,7 @@ RedPanda-Forge/
 ├── index.html                     # HTML entry point
 │
 ├── AGENTS.md                      # Developer guidelines & conventions
-├── Claude.md                      # Architecture documentation
+├── CLAUDE.md                      # Architecture documentation
 ├── ASSETS_STRUCTURE.md            # Asset organization
 ├── README.md                      # Project README
 └── .env.example                   # Environment variables template
@@ -114,7 +115,7 @@ RedPanda-Forge/
 ## 🔧 Technology Stack
 
 | Layer | Technology |
-|-------|-----------|
+| ------- | ----------- |
 | **Frontend Framework** | React 19 + Vite 6 |
 | **Language** | TypeScript 5.8 |
 | **Styling** | Tailwind CSS 4 + custom themes |
@@ -130,25 +131,32 @@ RedPanda-Forge/
 ## 📊 Core Concepts
 
 ### 1. **Template System**
+
 Templates define the canvas structure with:
+
 - **Template**: Root container (width, height, ratio, sport)
 - **TemplateLayer**: Organizational groups (folders for visual elements)
 - **TemplateElement**: Renderable objects (Text, Image, Shape)
 
 Each element has:
+
 - Positioning: `x`, `y`, `width`, `height`
 - Styling: `fill`, `fontFamily`, `fontSize`, `opacity`
 - Interaction: `draggable`, `editableProperties`
 - Data Binding: `dataKey` (e.g., `homeTeam.name`)
 
 ### 2. **Data Binding Engine**
+
 Resolves values in this order:
+
 1. **Template Base**: Default properties defined in template JSON
 2. **Data Binding**: Dynamic values from match object using `{{dot.notation}}`
 3. **User Overrides**: Manual edits in the Editor Panel (highest priority)
 
 ### 3. **State Management (Zustand)**
+
 `editorStore.ts` manages:
+
 - **WorkflowSessions**: Tabs representing different edits
   - Each session has: `id`, `name`, `template`, `match`
   - `elementOverrides`: Map of user-modified properties
@@ -156,7 +164,9 @@ Resolves values in this order:
   - `history`: Undo/Redo stack (scoped per session)
 
 ### 4. **Themes**
+
 Three built-in themes in `src/constants/themes.json`:
+
 - **Dark (Iron & Sulfur)**: Default industrial dark theme
 - **Icy Mint (Aqua Light)**: Modern light theme with teal accents
 - **Studio Light**: Minimal editorial light theme
@@ -170,14 +180,16 @@ Themes inject CSS variables (e.g., `--app-bg`, `--app-text`) that components use
 Templates use a templating language for dynamic content:
 
 ### Basic Syntax
-```
+
+```text
 {{match.homeTeam.name}}           # Dot notation data access
 {{homeTeam.name | uppercase}}     # With pipe transformations
 ```
 
 ### Supported Pipes
+
 | Pipe | Example | Result |
-|------|---------|--------|
+| ------ | --------- | -------- |
 | `uppercase` | `{{name \| uppercase}}` | TEAM NAME |
 | `lowercase` | `{{name \| lowercase}}` | team name |
 | `titlecase` | `{{name \| titlecase}}` | Team Name |
@@ -197,12 +209,14 @@ Templates use a templating language for dynamic content:
 ## 🎯 UI/UX Features
 
 ### Left Sidebar
+
 - **Sport Selector**: Switch between football, basketball, tennis, esports
 - **Match List**: Browse available matches for the selected sport
 - **Template Repository**: Browse templates by ratio and sport
 - **Match Details**: View match information in sidebar
 
 ### Canvas Editor (Center)
+
 - **Interactive Konva Canvas**: Render templates with real-time binding
 - **Drag & Drop**: Move elements (if `draggable: true`)
 - **Element Selection**: Click elements to select them
@@ -210,7 +224,9 @@ Templates use a templating language for dynamic content:
 - **Guides**: Visual alignment helpers (optional)
 
 ### Right Panel
+
 Two tabs:
+
 1. **Data Tab**: Shows match data source and binding overview
 2. **Design Tab**: Property controls for selected element
    - Position/Size sliders
@@ -221,6 +237,7 @@ Two tabs:
    - Reset button for overrides
 
 ### Top Tab Bar
+
 - **Session Tabs**: Manage multiple open edits
 - **New Session**: Create new editing session
 - **Close Tab**: Close with dirty-check confirmation
@@ -234,6 +251,7 @@ Two tabs:
 ### Adding a New Component
 
 1. Create component file in `src/components/`
+
 ```tsx
 import React from 'react'
 import { cn } from '@/lib/utils'
@@ -245,7 +263,8 @@ export const MyComponent = ({ className, ...props }) => (
 )
 ```
 
-2. Import and use in parent components:
+1. Import and use in parent components:
+
 ```tsx
 import { MyComponent } from '@/components/MyComponent'
 ```
@@ -254,19 +273,22 @@ import { MyComponent } from '@/components/MyComponent'
 
 1. Edit `src/lib/templateEngine.ts`
 2. Add pipe handler in `applyPipes()` function:
+
 ```typescript
 case 'myPipe':
   return value.toUpperCase() // Your logic
 ```
 
-3. Test with template:
-```
+1. Test with template:
+
+```text
 {{text | myPipe}}
 ```
 
 ### Modifying Styles
 
 Use Tailwind CSS classes with `app-` prefix for theme consistency:
+
 ```tsx
 <div className="bg-app-bg text-app-text border-app-border">
   Content
@@ -274,6 +296,7 @@ Use Tailwind CSS classes with `app-` prefix for theme consistency:
 ```
 
 Available theme variables:
+
 - `bg-app-bg`, `bg-app-sidebar`, `bg-app-card`
 - `text-app-text`, `text-app-muted`
 - `border-app-border`, `ring-app-accent`
@@ -299,6 +322,7 @@ APP_URL="http://localhost:3000"
 ## 📦 Build & Deployment
 
 ### Production Build
+
 ```bash
 npm run build
 ```
@@ -306,6 +330,7 @@ npm run build
 Output: `/dist` directory
 
 ### Preview Production Build
+
 ```bash
 npm run preview
 ```
@@ -313,18 +338,21 @@ npm run preview
 ### Deployment Options
 
 1. **Vercel** (recommended for React apps)
+
 ```bash
 npm i -g vercel
 vercel
 ```
 
-2. **Netlify**
+1. **Netlify**
+
 ```bash
 npm run build
 # Deploy dist/ folder
 ```
 
-3. **Docker**
+1. **Docker**
+
 ```dockerfile
 FROM node:20-alpine
 WORKDIR /app
@@ -333,7 +361,8 @@ RUN npm install && npm run build
 CMD ["npm", "run", "preview"]
 ```
 
-4. **Electron** (desktop app)
+1. **Electron** (desktop app)
+
 ```bash
 # WIP: Electron setup in progress
 # Will enable offline usage and native file system access
@@ -344,18 +373,21 @@ CMD ["npm", "run", "preview"]
 ## 🐛 Troubleshooting
 
 ### Port 3000 Already in Use
+
 ```bash
 # Change port in vite.config.ts or use:
 npm run dev -- --port 3001
 ```
 
 ### TypeScript Errors
+
 ```bash
 npm run lint
 # Check for type issues and fix them
 ```
 
 ### Node Modules Issues
+
 ```bash
 # Clear cache and reinstall
 rm -rf node_modules package-lock.json
@@ -363,6 +395,7 @@ npm install
 ```
 
 ### Build Fails
+
 ```bash
 # Clean build
 npm run clean
@@ -370,7 +403,9 @@ npm run build
 ```
 
 ### Hot Reload Not Working
+
 Check if `DISABLE_HMR=false` in environment. Edit `vite.config.ts`:
+
 ```typescript
 hmr: process.env.DISABLE_HMR !== 'true'
 ```
@@ -380,12 +415,14 @@ hmr: process.env.DISABLE_HMR !== 'true'
 ## 📚 Additional Resources
 
 ### Documentation Files in Project
+
 - **AGENTS.md**: Detailed developer guidelines, conventions, and architecture
 - **Claude.md**: Technical architecture overview
 - **ASSETS_STRUCTURE.md**: How assets are organized and loaded
 - **README.md**: Quick start and overview
 
 ### External Resources
+
 - [React Documentation](https://react.dev)
 - [Tailwind CSS](https://tailwindcss.com)
 - [Konva Canvas](https://konvajs.org)
@@ -397,13 +434,14 @@ hmr: process.env.DISABLE_HMR !== 'true'
 ## ✅ Verification Checklist
 
 After setup, verify:
+
 - [ ] Node.js v16+ installed: `node --version`
 - [ ] npm v8+ installed: `npm --version`
 - [ ] Dependencies installed: `npm install` completed
 - [ ] Environment file created: `.env.local` exists
 - [ ] TypeScript checks pass: `npm run lint`
 - [ ] Development server starts: `npm run dev`
-- [ ] Browser opens to http://localhost:3000
+- [ ] Browser opens to <http://localhost:3000>
 - [ ] Can load matches and templates
 - [ ] Can drag elements on canvas
 - [ ] Can edit properties in right panel
@@ -414,6 +452,7 @@ After setup, verify:
 ## 🤝 Contributing
 
 When contributing, follow these principles (from AGENTS.md):
+
 1. **Maintain Interface Segregation**: Keep `TemplateLayer` (structure) separate from `TemplateElement` (rendered)
 2. **Electron-First**: Prioritize native file system and SQLite solutions
 3. **Canvas Performance**: Avoid unnecessary re-renders in `EditorWorkspace`
@@ -424,6 +463,7 @@ When contributing, follow these principles (from AGENTS.md):
 ## 📝 Fixed Issues
 
 ✅ All TypeScript compilation errors resolved:
+
 - Added missing UI components: `Button`, `Select`, `Tabs`, `Separator`, `Slider`
 - Created hybrid `@base-ui/react` + `shadcn/ui` component implementations
 - Fixed type definitions for compound components

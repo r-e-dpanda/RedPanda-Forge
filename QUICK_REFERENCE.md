@@ -22,6 +22,7 @@ npm fund                # View funding info
 ## 📁 File Paths & Imports
 
 ### Path Aliases
+
 ```typescript
 // Instead of:
 import { cn } from '../../../lib/utils'
@@ -42,6 +43,7 @@ import { cn } from '@/lib/utils'
 ## 🎨 Common Component Patterns
 
 ### Button
+
 ```tsx
 import { Button } from '@/components/ui/button'
 
@@ -53,6 +55,7 @@ import { Button } from '@/components/ui/button'
 ```
 
 ### Select
+
 ```tsx
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 
@@ -68,6 +71,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 ```
 
 ### Tabs
+
 ```tsx
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
@@ -82,6 +86,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 ```
 
 ### Input
+
 ```tsx
 import { Input } from '@/components/ui/input'
 
@@ -93,6 +98,7 @@ import { Input } from '@/components/ui/input'
 ```
 
 ### Slider
+
 ```tsx
 import { Slider } from '@/components/ui/slider'
 
@@ -108,6 +114,7 @@ import { Slider } from '@/components/ui/slider'
 ## 🌐 Localization (i18n)
 
 ### Translate Strings
+
 ```tsx
 import { useTranslation } from '@/lib/i18n'
 
@@ -120,6 +127,7 @@ export function MyComponent() {
 ```
 
 ### Translate Rich Text
+
 ```tsx
 // Using {tag} in language string: "Welcome {bold}user{/bold}"
 const Welcome = () => (
@@ -136,6 +144,7 @@ const Welcome = () => (
 ## 📊 Zustand Store Usage
 
 ### Access Store State
+
 ```typescript
 import { useEditorStore } from '@/stores/editorStore'
 
@@ -151,6 +160,7 @@ const { undo, redo } = useEditorStore()
 ```
 
 ### Common Operations
+
 ```typescript
 // Set match data
 setMatch(activeSessionId, matchData)
@@ -171,6 +181,7 @@ canUndo() ? 'Can undo' : 'Cannot undo'
 ```
 
 ### Settings Store
+
 ```typescript
 import { useSettingsStore } from '@/stores/settingsStore'
 
@@ -185,6 +196,7 @@ applyTheme('dark')  // Apply dark theme
 ## 🎯 Template & Data Types
 
 ### Template Structure
+
 ```typescript
 interface Template {
   id: string
@@ -225,6 +237,7 @@ interface TemplateElement {
 ```
 
 ### Match Data
+
 ```typescript
 interface Match {
   id: string
@@ -251,7 +264,8 @@ interface Team {
 ## 🔗 Data Binding Syntax
 
 ### Basic Examples
-```
+
+```text
 {{match.homeTeam.name}}          // Access nested properties
 {{score.home}}                   // Get value
 {{date | date:dd/MM/yyyy}}       // With pipe formatting
@@ -260,7 +274,8 @@ interface Team {
 ```
 
 ### Common Pipes
-```
+
+```text
 | uppercase              // CONVERT TO UPPERCASE
 | lowercase              // convert to lowercase
 | titlecase              // Convert To Titlecase
@@ -281,21 +296,24 @@ interface Team {
 ## 🎨 Tailwind CSS Quick Refs
 
 ### Spacing
-```
+
+```text
 m-1, m-2, m-4, m-8       // Margin
 p-1, p-2, p-4, p-8       // Padding
 gap-1, gap-2, gap-4      // Gap between flex/grid items
 ```
 
 ### Sizing
-```
+
+```text
 w-full, w-1/2, w-1/3     // Width
 h-screen, h-full         // Height
 min-w-0, max-w-full      // Min/Max
 ```
 
 ### Colors
-```
+
+```text
 bg-app-bg                // Use theme variables
 text-app-text
 border-app-border
@@ -303,20 +321,23 @@ ring-app-accent
 ```
 
 ### Flexbox
-```
+
+```text
 flex items-center justify-between
 gap-4 p-2
 flex-1, flex-col, flex-wrap
 ```
 
 ### Grid
-```
+
+```text
 grid grid-cols-3 gap-4
 col-span-2 row-span-1
 ```
 
 ### Responsive
-```
+
+```text
 md:w-1/2 lg:w-1/3        // Breakpoints: sm, md, lg, xl, 2xl
 hidden md:block          // Show on medium+
 ```
@@ -326,6 +347,7 @@ hidden md:block          // Show on medium+
 ## 🔍 Debugging Utilities
 
 ### Console Logging
+
 ```typescript
 // Check store state
 console.log(useEditorStore.getState())
@@ -340,7 +362,8 @@ console.log('Resolved:', resolveDataKey(match, 'homeTeam.name'))
 ```
 
 ### React DevTools
-```
+
+```text
 1. Install "React Developer Tools" extension
 2. Open DevTools → Components tab
 3. Inspect component props and hooks
@@ -348,6 +371,7 @@ console.log('Resolved:', resolveDataKey(match, 'homeTeam.name'))
 ```
 
 ### Vite HMR
+
 ```typescript
 // Check HMR status
 if (import.meta.hot) {
@@ -362,6 +386,7 @@ if (import.meta.hot) {
 ## 📝 Common Code Snippets
 
 ### Create New Component
+
 ```tsx
 import React from 'react'
 import { cn } from '@/lib/utils'
@@ -389,6 +414,7 @@ MyComponent.displayName = 'MyComponent'
 ```
 
 ### Add Store Action
+
 ```typescript
 // In editorStore.ts
 addSession: (sessionData) => set(state => ({
@@ -402,6 +428,7 @@ addSession({ id: 'new-1', name: 'New Project', ... })
 ```
 
 ### Utility Function
+
 ```typescript
 // src/lib/myUtils.ts
 export function processData(input: string): string {
@@ -414,6 +441,7 @@ const result = processData(userInput)
 ```
 
 ### Conditional Styling
+
 ```tsx
 <div className={cn(
   'base-classes',
@@ -430,6 +458,7 @@ const result = processData(userInput)
 ## 🚨 Error Handling
 
 ### Safe Data Access
+
 ```typescript
 // ❌ Risky
 const name = match.homeTeam.name  // Can crash if undefined
@@ -444,6 +473,7 @@ if (match && 'homeTeam' in match) {
 ```
 
 ### Try-Catch
+
 ```typescript
 try {
   const data = await fetchData()
@@ -455,6 +485,7 @@ try {
 ```
 
 ### Validation
+
 ```typescript
 function validateMatch(data: unknown): Match {
   if (!data || typeof data !== 'object') {
@@ -474,6 +505,7 @@ function validateMatch(data: unknown): Match {
 ## 🔄 Async Operations
 
 ### Data Fetching
+
 ```typescript
 const [loading, setLoading] = React.useState(false)
 const [error, setError] = React.useState<string | null>(null)
@@ -500,6 +532,7 @@ return loading ? 'Loading...' : error ? `Error: ${error}` : <div>{data}</div>
 ```
 
 ### Debounce Input
+
 ```typescript
 import { useCallback, useRef } from 'react'
 
@@ -516,6 +549,7 @@ const handleChange = useCallback((value: string) => {
 ## 🎯 Performance Tips
 
 ### Memoization
+
 ```typescript
 // Prevent re-renders
 const Component = React.memo(({ props }) => {
@@ -535,6 +569,7 @@ const handleClick = useCallback(() => {
 ```
 
 ### Lazy Loading
+
 ```typescript
 import { lazy, Suspense } from 'react'
 
@@ -546,6 +581,7 @@ const HeavyComponent = lazy(() => import('./HeavyComponent'))
 ```
 
 ### Asset Caching
+
 ```typescript
 const cache = new Map<string, ImageData>()
 
@@ -562,6 +598,7 @@ async function loadAsset(url: string) {
 ## 🔧 Build & Deploy
 
 ### Environment Variables
+
 ```bash
 # .env.local (local development)
 GEMINI_API_KEY=your_key_here
@@ -571,6 +608,7 @@ GEMINI_API_KEY=prod_key_here
 ```
 
 ### Build Output
+
 ```bash
 npm run build
 # Creates dist/ folder with:
@@ -580,6 +618,7 @@ npm run build
 ```
 
 ### Deploy to Vercel
+
 ```bash
 npm i -g vercel
 vercel
@@ -590,8 +629,8 @@ vercel
 
 ## 📚 Quick Links
 
-- **Local Dev**: http://localhost:3000
-- **GitHub**: https://github.com/r-e-dpanda/RedPanda-Forge
+- **Local Dev**: <http://localhost:3000>
+- **GitHub**: <https://github.com/r-e-dpanda/RedPanda-Forge>
 - **Docs**: See README.md, AGENTS.md, Claude.md
 - **Assets**: Check `/public` folder structure
 
@@ -600,7 +639,7 @@ vercel
 ## ⚠️ Common Mistakes
 
 | ❌ Don't | ✅ Do |
-|---------|-------|
+| --------- | ------- |
 | `const data: any` | `const data: MatchData` |
 | `match.team.name` | `match?.team?.name ?? 'N/A'` |
 | `<div dangerouslySetInnerHTML>` | `<div>{text}</div>` |
@@ -614,7 +653,7 @@ vercel
 
 ## 🆘 Get Help
 
-```
+```text
 TypeScript Error?
 → Check src/types/ for interfaces
 

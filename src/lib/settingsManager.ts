@@ -1,8 +1,7 @@
 import { AppSettings, DEFAULT_SETTINGS } from '../types/settings';
 
-// Giả lập môi trường Electron IPC / FS (Cho phép chạy trên Browser hiện tại)
-// Khi migrate sang main process của Electron thật, bạn có thể comment lại block này 
-// và sử dụng fs.readFile, fs.writeFile thông qua contextBridge.
+// Mock Electron IPC / FS for browser compatibility
+// Replace with actual fs calls via contextBridge in the real Electron app
 
 export class SettingsManager {
   private settings: AppSettings = { ...DEFAULT_SETTINGS };
@@ -47,7 +46,7 @@ export class SettingsManager {
       this.settings.assetsRoot = `${workspacePath}/Assets`;
       this.settings.templatesRoot = `${workspacePath}/Templates`;
       
-      // Ở Desktop thực tế, bạn sẽ chạy:
+      // In the desktop app, you will run:
       // await fs.mkdir(this.settings.assetsRoot, { recursive: true });
       // await fs.mkdir(this.settings.templatesRoot, { recursive: true });
     }

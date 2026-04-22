@@ -23,20 +23,20 @@ export const strings = {
       description: "Select your preferred workspace theme for optimal focus.",
       themeLibrary: "Theme Library",
       typography: "Typography & Scale",
-      typographyDesc: "Adjust the interface size to match your screen density and preference.",
+      typographyDesc: "Adjust interface size for screen density & preference.",
       uiScale: "UI Scale",
       currentBase: "Current base",
       language: "Language",
-      languageDesc: "Select the display language for the workspace UI."
+      languageDesc: "Select display language for workspace UI."
     },
     paths: {
       title: "Storage Locations",
-      description: "Configure your workspace folders for native operations.",
-      assetsRoot: "Assets Root",
-      templatesRoot: "Templates Root"
+      description: "Configure folders.",
+      assetsRoot: "Assets",
+      templatesRoot: "Templates"
     },
-    saveConfig: "Save Configuration",
-    ready: "Ready to forge."
+    saveConfig: "Save Settings",
+    ready: "Ready to work."
   },
   sidebar: {
     tabs: {
@@ -49,14 +49,14 @@ export const strings = {
       allRatios: "All Ratios"
     },
     matches: {
-      header: "Available Matches",
+      header: "Matches",
       selectTemplateFirst: "Select Template First",
-      noMatchesFound: "No matches found for the current filters."
+      noMatchesFound: "No matches found."
     },
     templates: {
-      importBtn: "Import JSON Template",
-      noTemplates: "No templates in library",
-      useTemplate: "Use Template"
+      importBtn: "Import JSON",
+      noTemplates: "No templates",
+      useTemplate: "Use"
     }
   },
   workspace: {
@@ -67,7 +67,7 @@ export const strings = {
       closeTab: {
         header: "Close Tab?",
         description: "This graphic has {changes} UNSAVED CHANGES {/changes}. Closing this tab will permanently discard all your adjustments.",
-        confirm: "Discard Changes & Close"
+        confirm: "Discard & Close"
       }
     },
     actions: {
@@ -79,15 +79,15 @@ export const strings = {
   },
   modals: {
     templateSwitch: {
-      header: "Unsaved Work Detected",
-      description: "You have manual adjustments in this session. Switching templates will {discard} DISCARD {/discard} all your edits.",
+      header: "Switch Template",
+      description: "You have unsaved changes. Switching templates will {discard} DISCARD {/discard} all your edits.",
       openNewTab: "Open in New Tab",
-      discardReplace: "Discard & Replace current"
+      discardReplace: "Discard & Replace"
     }
   },
   panels: {
     tabs: {
-      match: "Match",
+      match: "Data",
       design: "Design",
       layers: "Layers"
     },
@@ -103,13 +103,13 @@ export const strings = {
       layers: "Layers"
     },
     fields: {
-      sourceBindingPath: "Source - Binding Path",
+      sourceBindingPath: "Source Binding",
       source: "Source",
-      valueBindingPath: "Value - Binding Path",
+      valueBindingPath: "Value Binding",
       value: "Value",
       transform: "Transform",
       clear: "Clear",
-      addPipeline: "+ Add Pipeline...",
+      addPipeline: "+ Pipeline",
       reset: "Reset",
       enable: "Enable",
       opacity: "Opacity",

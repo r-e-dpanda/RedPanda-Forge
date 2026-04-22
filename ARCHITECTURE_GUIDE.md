@@ -2,13 +2,13 @@
 
 ## 📐 System Architecture
 
-```
-┌──────────────────────────────────────────────────────────────┐
+```text
+┌────────────────────────────────────────────────────────────────┐
 │                     React App (Vite)                         │
-├──────────────────────────────────────────────────────────────┤
+├────────────────────────────────────────────────────────────────┤
 │                                                              │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │           UI Layer (Components)                        │  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │           UI Layer (Components)                          │  │
 │  │  ┌───────────────┬─────────────────┬──────────────────┐  │  │
 │  │  │  LeftSidebar  │ EditorWorkspace │   RightPanel     │  │  │
 │  │  │ • Sport       │ • EditorHeader  │ • Properties     │  │  │
@@ -16,50 +16,50 @@
 │  │  │ • Templates   │ • Undo/Redo     │ • History        │  │  │
 │  │  │               │ • Konva Canvas  │                  │  │  │
 │  │  └───────────────┴─────────────────┴──────────────────┘  │  │
-│  └────────────────────────────────────────────────────────┘  │
-│                          ▼                                   │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │        State Management (Zustand)                      │  │
-│  │  ┌───────────────┬───────────────┬──────────────────┐  │  │
-│  │  │ editorStore   │settingsStore  │    Local State   │  │  │
-│  │  │ • sessions    │ • themes      │ • UI selections  │  │  │
-│  │  │ • overrides   │ • prefs       │ • form values    │  │  │
-│  │  │ • history     │               │                  │  │  │
-│  │  └───────────────┴───────────────┴──────────────────┘  │  │
-│  └────────────────────────────────────────────────────────┘  │
-│                          ▼                                   │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │         Template Engine & Data Binding                 │  │
-│  │  ┌─────────── ───┬───────────────┬──────────────────┐  │  │
-│  │  │ templateEngine│  colorUtils   │  localization    │  │  │
-│  │  │ • Pipes       │  • Contrast   │ • i18n / locales │  │  │
-│  │  │ • Resolvers   │  • Colors     │ • Rich Text      │  │  │
-│  │  └───────────────┴───────────────┴──────────────────┘  │  │
-│  └────────────────────────────────────────────────────────┘  │
-│                          ▼                                   │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │            Data & Asset Management                     │  │
-│  │  ┌───────────────┬───────────────┬──────────────────┐  │  │
-│  │  │  mockData     │ assetManager  │templateRegistry  │  │  │
-│  │  │ • Matches     │ • Images      │ • Templates      │  │  │
-│  │  │ • Teams       │ • Logos       │ • Library        │  │  │
-│  │  └───────────────┴───────────────┴──────────────────┘  │  │
-│  └────────────────────────────────────────────────────────┘  │
-│                          ▼                                   │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │              Data Storage (Future)                     │  │
-│  │  • Electron: Local File System                         │  │
-│  │  • Database: SQLite + Drizzle ORM                      │  │
-│  └────────────────────────────────────────────────────────┘  │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
+│  └──────────────────────────────────────────────────────────┘  │
+│                          ▼                                     │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │        State Management (Zustand)                        │  │
+│  │  ┌───────────────┬───────────────┬────────────────────┐  │  │
+│  │  │ editorStore   │settingsStore  │    Local State     │  │  │
+│  │  │ • sessions    │ • themes      │ • UI selections    │  │  │
+│  │  │ • overrides   │ • prefs       │ • form values      │  │  │
+│  │  │ • history     │               │                    │  │  │
+│  │  └───────────────┴───────────────┴────────────────────┘  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                          ▼                                     │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │         Template Engine & Data Binding                   │  │
+│  │  ┌─────────── ───┬───────────────┬────────────────────┐  │  │
+│  │  │ templateEngine│  colorUtils   │  localization      │  │  │
+│  │  │ • Pipes       │  • Contrast   │ • i18n / locales   │  │  │
+│  │  │ • Resolvers   │  • Colors     │ • Rich Text        │  │  │
+│  │  └───────────────┴───────────────┴────────────────────┘  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                          ▼                                     │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │            Data & Asset Management                       │  │
+│  │  ┌───────────────┬───────────────┬────────────────────┐  │  │
+│  │  │  mockData     │ assetManager  │templateRegistry    │  │  │
+│  │  │ • Matches     │ • Images      │ • Templates        │  │  │
+│  │  │ • Teams       │ • Logos       │ • Library          │  │  │
+│  │  └───────────────┴───────────────┴────────────────────┘  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                          ▼                                     │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │              Data Storage (Future)                       │  │
+│  │  • Electron: Local File System                           │  │
+│  │  • Database: SQLite + Drizzle ORM                        │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## 🔄 Data Flow Diagram
 
-```
+```text
 User Action (Click, Drag, Type)
            ↓
     UI Component Handler
@@ -107,7 +107,7 @@ User Action (Click, Drag, Type)
 
 ### 1. **Separation of Concerns**
 
-```
+```text
 Templates (JSON)          Match Data          Editor State
      ↓                        ↓                    ↓
   Default Props      Dynamic Values       User Overrides
@@ -188,6 +188,7 @@ function resolveElementProperty(
 ## 📁 Module Organization
 
 ### `src/types/` - Type Definitions
+
 ```typescript
 // template.ts
 Template          // Root container (width, height, ratio, sport)
@@ -205,6 +206,7 @@ ThemeDefinition   // Theme colors and variables
 ```
 
 ### `src/stores/` - State Management
+
 ```typescript
 // editorStore.ts (Zustand)
 - sessions[]              // Array of editing sessions
@@ -221,6 +223,7 @@ ThemeDefinition   // Theme colors and variables
 ```
 
 ### `src/lib/` - Business Logic
+
 ```typescript
 // templateEngine.ts
 - resolveDataKey()        // Navigate match data with dot notation
@@ -247,7 +250,8 @@ ThemeDefinition   // Theme colors and variables
 ```
 
 ### `src/components/` - UI Components
-```
+
+```text
 components/
 ├── ui/                    # Primitive components (kebab-case/lowercase)
 │   ├── button.tsx         # Sized variants
@@ -280,6 +284,7 @@ components/
 ### Adding a New Feature
 
 1. **Define Types** (`src/types/`)
+
 ```typescript
 interface MyFeature {
   id: string
@@ -288,7 +293,8 @@ interface MyFeature {
 }
 ```
 
-2. **Extend State** (`src/stores/editorStore.ts`)
+1. **Extend State** (`src/stores/editorStore.ts`)
+
 ```typescript
 interface WorkflowSession {
   // ... existing
@@ -296,21 +302,24 @@ interface WorkflowSession {
 }
 ```
 
-3. **Create Utilities** (`src/lib/`)
+1. **Create Utilities** (`src/lib/`)
+
 ```typescript
 export function processMyFeature(data: MyFeature): ProcessedData {
   // Logic here
 }
 ```
 
-4. **Build UI** (`src/components/`)
+1. **Build UI** (`src/components/`)
+
 ```tsx
 export const MyFeatureComponent = ({ feature }) => {
   // React component
 }
 ```
 
-5. **Connect Store** (`src/components/...`)
+1. **Connect Store** (`src/components/...`)
+
 ```tsx
 const feature = useEditorStore(state => state.activeSession?.myFeature)
 const updateFeature = useEditorStore(state => state.updateFeature)
@@ -342,6 +351,7 @@ const updateFeature = useEditorStore(state => state.updateFeature)
 ```
 
 ### Responsive Rem Scaling
+
 ```typescript
 // The root font size is injected via the UI Scale setting slider
 React.useEffect(() => {
@@ -350,6 +360,7 @@ React.useEffect(() => {
   root.style.fontSize = `${16 * settings.uiScale}px`;
 }, [settings.uiScale]);
 ```
+
 *Note: All layout boundaries (heights, widths) must use Tailwind's rem-based utility classes (e.g., `h-[2.75rem]` instead of `h-[44px]`).*
 
 ### Component Styling
@@ -397,6 +408,7 @@ export function applyTheme(themeName: 'dark' | 'light' | 'custom') {
 ## 🧪 Testing Guidelines
 
 ### Unit Tests (Utilities)
+
 ```typescript
 // src/lib/__tests__/templateEngine.test.ts
 describe('resolveDataKey', () => {
@@ -408,6 +420,7 @@ describe('resolveDataKey', () => {
 ```
 
 ### Component Tests
+
 ```typescript
 // src/components/__tests__/Button.test.tsx
 describe('Button', () => {
@@ -423,6 +436,7 @@ describe('Button', () => {
 ## 🚀 Performance Optimization
 
 ### Canvas Performance
+
 ```typescript
 // Use React.memo for expensive components
 const KonvaEditor = React.memo(({ stage, ...props }) => {
@@ -437,6 +451,7 @@ const memoizedScale = useMemo(() =>
 ```
 
 ### Asset Loading
+
 ```typescript
 // Cache assets to prevent re-fetching
 const assetCache = new Map<string, HTMLImageElement>()
@@ -453,6 +468,7 @@ async function loadAsset(path: string) {
 ```
 
 ### Bundle Size
+
 ```typescript
 // Use dynamic imports for heavy modules
 const PasteModal = lazy(() => import('./PasteTemplateModal'))
@@ -467,6 +483,7 @@ const PasteModal = lazy(() => import('./PasteTemplateModal'))
 ## 🔐 Security Considerations
 
 ### Data Validation
+
 ```typescript
 // Always validate external data
 function validateTemplate(data: unknown): Template {
@@ -478,6 +495,7 @@ function validateTemplate(data: unknown): Template {
 ```
 
 ### XSS Prevention
+
 ```typescript
 // Never inject raw HTML
 ❌ <div dangerouslySetInnerHTML={{ __html: userInput }} />
@@ -486,6 +504,7 @@ function validateTemplate(data: unknown): Template {
 ```
 
 ### File Upload Safety
+
 ```typescript
 // Validate file types and sizes
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -507,6 +526,7 @@ function validateFile(file: File): void {
 ## 📋 Code Quality Standards
 
 ### ESLint Configuration
+
 ```javascript
 // .eslintrc.js (to implement)
 module.exports = {
@@ -519,6 +539,7 @@ module.exports = {
 ```
 
 ### Prettier Configuration
+
 ```json
 // .prettierrc
 {
@@ -530,6 +551,7 @@ module.exports = {
 ```
 
 ### TypeScript Best Practices
+
 ```typescript
 // ✅ Use strict null checks
 "strictNullChecks": true
@@ -553,7 +575,8 @@ const themes = as const {
 ## 🔄 Version Control Best Practices
 
 ### Commit Messages
-```
+
+```text
 feat: Add template import dialog
 fix: Resolve canvas scaling on mobile
 docs: Update architecture guide
@@ -562,7 +585,8 @@ perf: Optimize asset loading with caching
 ```
 
 ### Branch Naming
-```
+
+```text
 feature/add-electron-support
 bugfix/canvas-drag-performance
 docs/update-architecture-guide
@@ -573,6 +597,7 @@ docs/update-architecture-guide
 ## 📚 Common Development Tasks
 
 ### Add a New Sport
+
 ```typescript
 // 1. Update types/template.ts
 type Sport = 'football' | 'basketball' | 'tennis' | 'esports' | 'cricket'
@@ -589,6 +614,7 @@ const MOCK_MATCHES = [
 ```
 
 ### Extend Template Binding
+
 ```typescript
 // 1. Add to templateEngine.ts applyPipes()
 case 'myPipe':
@@ -599,6 +625,7 @@ case 'myPipe':
 ```
 
 ### Add Settings Option
+
 ```typescript
 // 1. Update types/settings.ts
 interface AppSettings {
@@ -620,6 +647,7 @@ const useSettingsStore = create(store => ({
 ## 🐛 Debugging Tips
 
 ### Debug Zustand State
+
 ```typescript
 // Log state changes
 useEditorStore.subscribe(
@@ -628,19 +656,22 @@ useEditorStore.subscribe(
 ```
 
 ### Debug Data Binding
+
 ```typescript
 // Add temporary log in templateEngine
 console.log('Resolving:', dataKey, 'from:', match)
 ```
 
 ### React DevTools
-```
+
+```text
 1. Install React DevTools browser extension
 2. Use Profiler tab to track renders
 3. Use Components tab to inspect props/state
 ```
 
 ### Vite Debug
+
 ```bash
 # Source maps enabled in dev
 npm run dev
@@ -656,7 +687,7 @@ npm run dev
 ### Common Issues & Solutions
 
 | Issue | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Canvas not updating | Check override logic in store |
 | Theme not applying | Verify CSS variable injection |
 | Image not loading | Check asset path in public/ |
@@ -664,8 +695,9 @@ npm run dev
 | Performance lag | Profile with React DevTools |
 
 ### Documentation References
+
 - **AGENTS.md**: Detailed conventions
-- **Claude.md**: Architecture overview
+- **CLAUDE.md**: Architecture overview
 - **ASSETS_STRUCTURE.md**: Asset organization
 - **README.md**: Quick start
 

@@ -130,9 +130,9 @@ export interface BaseElement {
   
   // Data Binding
   dataKey?: string;
-  visibleDataKey?: string; // Logic hiển thị (VD: "isLive")
-  fallback?: string;       // Giá trị dự phòng nếu dataKey rỗng
-  formatters?: string[];   // Array of formatter pipelines (VD: ["uppercase", "shorten:10"])
+  visibleDataKey?: string; // Visibility logic (e.g., "isLive")
+  fallback?: string;       // Fallback value if dataKey is empty
+  formatters?: string[];   // Array of formatter pipelines (e.g., ["uppercase", "shorten:10"])
   
   // Legacy / existing formatting (keep for backward compatibility)
   position: Coordinates;
@@ -187,17 +187,17 @@ export interface LineElement extends BaseElement {
   points: number[]; // [x1, y1, x2, y2, ...]
   tension?: number;
   arrowHead?: boolean;
-  style: ElementStyle; // Thường dùng fill hoặc stroke
+  style: ElementStyle; // Usually uses fill or stroke
 }
 
 export interface GroupElement extends BaseElement {
   type: "Group";
-  children: TemplateNode[]; // Hỗ trợ nesting
+  children: TemplateNode[]; // Supports nesting
 }
 
 export type TemplateNode = ImageElement | TextElement | ShapeElement | LineElement | GroupElement | PolygonElement;
 
-// (Thay vì Layer Group như ngày xưa, chúng ta có thể giữ LayersArray làm root)
+// LayersArray as root
 export interface Template {
   id: string;
   name: string;

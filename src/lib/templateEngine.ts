@@ -2,7 +2,7 @@ import { Match, TemplateElement } from '../types/template';
 import { getContrastColor } from './colorUtils';
 import { format as formatDate, parseISO } from 'date-fns';
 
-// Hỗ trợ truy xuất dữ liệu từ object dựa trên dấu chấm (e.g. "homeTeam.assets.logo")
+// Support retrieving data from objects using dots (e.g. "homeTeam.assets.logo")
 const getByPath = (obj: any, path: string) => {
   if (!path || typeof path !== 'string') return undefined;
   
@@ -112,9 +112,9 @@ const applyPipes = (value: any, pipes: string[]): any => {
 export const isAutoResolved = (dataKey: string, match: Match | null) => {
   if (!match || !dataKey || typeof dataKey !== 'string') return false;
   
-  // Với cơ chế mới, nếu dataKey tồn tại trong match struct (hoặc bắt đầu bằng match.) 
-  // thì nó được tính là auto resolved. 
-  // Chúng ta parse dataKey linh hoạt thay vì fix cứng.
+  // With the new mechanism, if dataKey exists in the match struct (or starts with match.) 
+  // it is considered auto resolved. 
+  // We parse dataKey flexibly instead of hardcoding.
   const keyWithoutPipes = dataKey.split('|')[0].trim();
   const cleanKey = keyWithoutPipes.replace(/^match\./, '');
   const value = getByPath(match, cleanKey);

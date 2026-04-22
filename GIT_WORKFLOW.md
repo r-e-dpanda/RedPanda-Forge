@@ -9,13 +9,15 @@ This guide establishes best practices for collaborating on RedPanda Forge.
 ## 📋 Branch Naming Convention
 
 ### Format
-```
+
+```text
 {type}/{feature-name}
 ```
 
 ### Types
+
 | Type | Purpose | Example |
-|------|---------|---------|
+| ------ | --------- | --------- |
 | `feature/` | New feature | `feature/add-electron-support` |
 | `bugfix/` | Bug fix | `bugfix/canvas-scaling-issue` |
 | `refactor/` | Code restructuring | `refactor/template-engine` |
@@ -25,7 +27,8 @@ This guide establishes best practices for collaborating on RedPanda Forge.
 | `test/` | Add tests | `test/add-canvas-tests` |
 
 ### Examples
-```
+
+```text
 feature/sports-graphics-export
 bugfix/konva-drag-performance
 refactor/zustand-store
@@ -40,7 +43,8 @@ test/template-engine-unit
 ## 💬 Commit Message Format
 
 ### Format
-```
+
+```text
 {type}: {subject}
 
 {body}
@@ -49,7 +53,8 @@ test/template-engine-unit
 ```
 
 ### Types
-```
+
+```text
 feat:     New feature
 fix:      Bug fix
 refactor: Code restructuring
@@ -62,13 +67,15 @@ ci:       CI/CD configuration
 ```
 
 ### Subject Line
+
 - Use imperative mood ("add" not "added" or "adds")
 - Don't capitalize first letter
 - No period at end
 - Limit to 50 characters
 
 ### Examples
-```
+
+```text
 feat: add template import from JSON
 fix: resolve canvas scaling on zoom
 refactor: simplify color utility functions
@@ -79,7 +86,8 @@ test: add template engine unit tests
 ```
 
 ### Detailed Example
-```
+
+```text
 feat: add electron main process with IPC channels
 
 - Implement main process with preload script
@@ -95,7 +103,8 @@ Breaks: Legacy file format compatibility (migration guide added)
 ## 🔀 Branching Strategy
 
 ### Main Branches
-```
+
+```text
 main                    Production-ready code
   ↓
 develop                 Integration/staging branch
@@ -107,7 +116,7 @@ refactor/*              Refactoring branches
 
 ### Workflow
 
-```
+```text
 1. Create Feature Branch
    git checkout -b feature/my-feature develop
 
@@ -140,6 +149,7 @@ refactor/*              Refactoring branches
 ## 📤 Pull Request Process
 
 ### Before Creating PR
+
 ```bash
 # Update from develop
 git checkout develop
@@ -158,7 +168,8 @@ git push origin feature/my-feature -f
 ```
 
 ### PR Title Format
-```
+
+```text
 {type}: {description}
 
 Examples:
@@ -169,6 +180,7 @@ docs: add electron setup guide
 ```
 
 ### PR Description Template
+
 ```markdown
 ## Description
 Brief explanation of changes
@@ -201,6 +213,7 @@ Add screenshots for UI changes
 ### Code Review Checklist
 
 **As Reviewer**:
+
 - [ ] Code follows conventions (AGENTS.md)
 - [ ] TypeScript types are correct
 - [ ] No security vulnerabilities
@@ -210,6 +223,7 @@ Add screenshots for UI changes
 - [ ] Commit messages are descriptive
 
 **As Author**:
+
 - [ ] Respond to all feedback
 - [ ] Don't be defensive
 - [ ] Ask questions if unclear
@@ -221,7 +235,8 @@ Add screenshots for UI changes
 ## 🔗 Commit Best Practices
 
 ### Good Commits
-```
+
+```text
 ✅ One logical change per commit
 ✅ Meaningful commit message
 ✅ Can be built in isolation
@@ -230,7 +245,8 @@ Add screenshots for UI changes
 ```
 
 ### Bad Commits
-```
+
+```text
 ❌ "update code"
 ❌ "fix stuff"
 ❌ "work in progress"
@@ -239,7 +255,8 @@ Add screenshots for UI changes
 ```
 
 ### Atomic Commits
-```
+
+```text
 Good:
   commit 1: refactor: simplify data binding logic
   commit 2: feat: add contrast pipe
@@ -250,6 +267,7 @@ Bad:
 ```
 
 ### Commit Tips
+
 ```bash
 # Stage changes interactively
 git add -p
@@ -269,6 +287,7 @@ git log --oneline origin/develop..HEAD
 ## 🚨 Conflict Resolution
 
 ### When Conflicts Occur
+
 ```bash
 # Pull latest
 git fetch origin
@@ -291,6 +310,7 @@ git rebase --abort
 ```
 
 ### Conflict Prevention
+
 ```bash
 # Always pull before starting work
 git pull origin develop
@@ -311,7 +331,8 @@ git push origin feature/my-feature
 ## 📝 Code Review Comments
 
 ### When Requesting Changes
-```
+
+```text
 ❌ "This is wrong"
 ✅ "This implementation could cause issues because...
    Consider using X instead, which handles Y case."
@@ -322,7 +343,8 @@ git push origin feature/my-feature
 ```
 
 ### Providing Feedback
-```
+
+```markdown
 # Style Issue
 'nit: Consider using const instead of let here'
 
@@ -344,6 +366,7 @@ git push origin feature/my-feature
 ## 🔀 Merging Strategy
 
 ### Squash Merge (Recommended)
+
 ```bash
 # Combines all feature commits into one
 git merge --squash feature/my-feature
@@ -354,6 +377,7 @@ git merge --squash feature/my-feature
 **When to use**: Feature branches with multiple commits
 
 ### Regular Merge
+
 ```bash
 # Preserves full history
 git merge feature/my-feature
@@ -364,6 +388,7 @@ git merge feature/my-feature
 **When to use**: Long-lived branches with meaningful commits
 
 ### Rebase Merge
+
 ```bash
 # Replays commits on top of base
 git rebase develop
@@ -379,7 +404,8 @@ git merge --ff-only
 ## 🏷️ Tagging Releases
 
 ### Version Format
-```
+
+```text
 v{major}.{minor}.{patch}
 
 Examples:
@@ -390,6 +416,7 @@ v2.0.0  Major breaking change
 ```
 
 ### Creating Tags
+
 ```bash
 # Lightweight tag
 git tag v1.0.0
@@ -405,7 +432,8 @@ git tag -l
 ```
 
 ### Release Checklist
-```
+
+```text
 - [ ] All tests passing
 - [ ] Build successful
 - [ ] Documentation updated
@@ -423,6 +451,7 @@ git tag -l
 ## 🔐 Security Best Practices
 
 ### Secrets Management
+
 ```bash
 # ❌ Never commit secrets
 .env.local (in .gitignore)
@@ -434,6 +463,7 @@ Load from .env.local at runtime
 ```
 
 ### Git Security
+
 ```bash
 # Sign commits (optional but recommended)
 git commit -S -m "message"
@@ -447,7 +477,8 @@ git config user.signingkey {KEY_ID}
 ```
 
 ### Repository Protection
-```
+
+```text
 Rules to implement:
 - Require pull request reviews
 - Dismiss stale PR approvals
@@ -461,6 +492,7 @@ Rules to implement:
 ## 📊 Useful Git Commands
 
 ### Daily Use
+
 ```bash
 # Check status
 git status
@@ -483,6 +515,7 @@ git branch -d feature/name
 ```
 
 ### History & Investigation
+
 ```bash
 # View commit history
 git log --oneline
@@ -499,6 +532,7 @@ git show abc123
 ```
 
 ### Undoing Changes
+
 ```bash
 # Undo local changes
 git checkout -- src/file.ts
@@ -514,6 +548,7 @@ git reset --hard abc123
 ```
 
 ### Maintenance
+
 ```bash
 # Clean up local branches
 git branch -d merged_branch
@@ -534,7 +569,8 @@ git cherry-pick abc123
 ## 🚀 Deployment Workflow
 
 ### Development
-```
+
+```text
 1. Create feature branch from develop
 2. Commit changes with meaningful messages
 3. Create pull request
@@ -544,7 +580,8 @@ git cherry-pick abc123
 ```
 
 ### Staging
-```
+
+```text
 1. Test on staging environment
 2. QA approval
 3. Create release branch
@@ -552,7 +589,8 @@ git cherry-pick abc123
 ```
 
 ### Production
-```
+
+```text
 1. Merge release to main
 2. Create version tag
 3. Build for production
@@ -565,24 +603,28 @@ git cherry-pick abc123
 ## 📋 Team Conventions
 
 ### Code Standards
+
 - Follow AGENTS.md guidelines
 - Use TypeScript strictly
 - Write tests for features
 - Update documentation
 
 ### Communication
+
 - Be respectful in reviews
 - Ask questions, don't assume
 - Provide context in commits
 - Respond to feedback promptly
 
 ### Responsibility
+
 - Own your changes
 - Review others' code
 - Share knowledge
 - Help junior developers
 
 ### Quality
+
 - All tests must pass
 - No TypeScript errors
 - Clean commit history
@@ -593,6 +635,7 @@ git cherry-pick abc123
 ## 🆘 Common Scenarios
 
 ### "I committed to wrong branch"
+
 ```bash
 # Create correct branch
 git checkout -b feature/correct develop
@@ -609,6 +652,7 @@ git reset --hard {original_hash}
 ```
 
 ### "I need to update my branch"
+
 ```bash
 # Update from develop
 git fetch origin
@@ -624,6 +668,7 @@ git push origin feature/my-branch -f
 ```
 
 ### "I want to undo a commit"
+
 ```bash
 # Keep changes, undo commit
 git reset --soft HEAD~1
@@ -636,6 +681,7 @@ git revert abc123
 ```
 
 ### "I need to split a commit"
+
 ```bash
 # Start interactive rebase
 git rebase -i HEAD~3
@@ -661,7 +707,7 @@ git rebase --continue
 
 Before pushing code:
 
-```
+```text
 Code Quality:
   [ ] npm run lint passes
   [ ] npm run build succeeds
@@ -692,11 +738,13 @@ Documentation:
 ## 📚 Reference Links
 
 ### Git Guides
+
 - [Git Documentation](https://git-scm.com/doc)
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [GitHub Flow](https://guides.github.com/introduction/flow/)
 
 ### Project Resources
+
 - **AGENTS.md** - Development conventions
 - **ARCHITECTURE_GUIDE.md** - Code standards
 - **QUICK_REFERENCE.md** - Code patterns
@@ -706,6 +754,7 @@ Documentation:
 ## 🎯 Summary
 
 ### Key Points
+
 1. **Use feature branches** for all work
 2. **Write descriptive commit messages**
 3. **Keep commits atomic and focused**
@@ -716,6 +765,7 @@ Documentation:
 8. **Follow conventions** from AGENTS.md
 
 ### Quick Checklist
+
 ```bash
 # Daily workflow
 git checkout -b feature/my-feature develop

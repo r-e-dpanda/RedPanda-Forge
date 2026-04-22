@@ -7,12 +7,12 @@ export class TemplateRegistry {
 
   constructor(assetManager: AssetManager) {
     this.assetManager = assetManager;
-    // Load mock database tạm thời cho Web Preview
+    // Load mock database temporarily for Web Preview
     this._mockInit();
   }
 
   async loadAllTemplates(): Promise<void> {
-    // Trong Electron: quét thư mục (fs.readdir), parse các file JSON và add vào Map.
+    // In Electron: Scan directory (fs.readdir), parse JSON files, and add to Map.
     console.log("[TemplateRegistry] Scanned local templates directory...");
   }
 

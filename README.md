@@ -11,7 +11,7 @@ This folder contains comprehensive documentation and guides for the RedPanda For
 ### 📚 Documentation Files
 
 | File | Purpose | Audience |
-|------|---------|----------|
+| ------ | --------- | ---------- |
 | **PROJECT_STATUS.md** | Current status, completed tasks, build report | Everyone |
 | **SETUP_GUIDE.md** | Installation, quick start, usage | Beginners, Ops |
 | **ARCHITECTURE_GUIDE.md** | System design, patterns, best practices | Developers |
@@ -25,6 +25,7 @@ This folder contains comprehensive documentation and guides for the RedPanda For
 ## 🚀 Quick Start
 
 ### 1. Get the Repository
+
 ```bash
 # Clone the project
 git clone https://github.com/r-e-dpanda/RedPanda-Forge.git
@@ -32,6 +33,7 @@ cd RedPanda-Forge
 ```
 
 ### 2. Install & Run
+
 ```bash
 # Install dependencies
 npm install
@@ -43,35 +45,43 @@ cp .env.example .env.local
 npm run dev
 ```
 
-The app will open at **http://localhost:3000**
+The app will open at **<http://localhost:3000>**
 
 ---
 
 ## 📖 Reading Guide
 
 ### I'm New to the Project
+
 Read in this order:
+
 1. **PROJECT_STATUS.md** - Get the overview
 2. **SETUP_GUIDE.md** - Install and run it
 3. **QUICK_REFERENCE.md** - See common patterns
 4. Start developing!
 
 ### I'm a Developer
+
 Read in this order:
+
 1. **QUICK_REFERENCE.md** - Get oriented
 2. **ARCHITECTURE_GUIDE.md** - Understand the design
 3. **AGENTS.md** - Follow the conventions
 4. Start coding!
 
 ### I'm a Team Lead
+
 Read in this order:
+
 1. **PROJECT_STATUS.md** - See the status
 2. **ARCHITECTURE_GUIDE.md** - Understand technical decisions
 3. **AGENTS.md** - Review standards and practices
 4. Plan your sprints!
 
 ### I'm Deploying This
+
 Read in this order:
+
 1. **PROJECT_STATUS.md** - Check build status
 2. **SETUP_GUIDE.md** - Build & deployment section
 3. **ARCHITECTURE_GUIDE.md** - Security section
@@ -82,6 +92,7 @@ Read in this order:
 ## ✅ Verification Checklist
 
 Make sure you have:
+
 - [ ] **Node.js v16+** installed
 - [ ] **npm v8+** installed
 - [ ] **Git** installed
@@ -90,13 +101,14 @@ Make sure you have:
 - [ ] Run `npm install`
 - [ ] Created `.env.local`
 - [ ] Run `npm run dev` successfully
-- [ ] Can access http://localhost:3000
+- [ ] Can access <http://localhost:3000>
 
 ---
 
 ## 🎯 Key Information
 
 ### Technology Stack
+
 - **Frontend**: React 19 + Vite 6
 - **Language**: TypeScript 5.8
 - **Styling**: Tailwind CSS 4
@@ -105,6 +117,7 @@ Make sure you have:
 - **Build**: Vite with React plugin
 
 ### Current Status
+
 - ✅ Development ready
 - ✅ All TypeScript errors fixed
 - ✅ Production build working
@@ -113,6 +126,7 @@ Make sure you have:
 - ⏳ Database setup planned
 
 ### Available Commands
+
 ```bash
 npm run dev       # Start development server
 npm run build     # Production build
@@ -125,7 +139,7 @@ npm run clean     # Clean artifacts
 
 ## 📊 Project Structure
 
-```
+```text
 RedPanda-Forge/
 ├── src/
 │   ├── components/        # UI components (editor, panels, etc)
@@ -147,16 +161,19 @@ RedPanda-Forge/
 ## 🔍 Key Files to Review
 
 ### Start Here
+
 - `AGENTS.md` - Development guidelines (from repo)
 - `Claude.md` - Architecture notes (from repo)
 
 ### Then Review
+
 - `src/App.tsx` - Main component structure
 - `src/stores/editorStore.ts` - State management
 - `src/lib/templateEngine.ts` - Data binding logic
 - `src/components/editor/EditorWorkspace.tsx` - Canvas rendering
 
 ### Finally Explore
+
 - `src/components/ui/` - UI components
 - `src/lib/` - Utility functions
 - `src/types/template.ts` - Data types
@@ -167,24 +184,28 @@ RedPanda-Forge/
 ## 🛠️ Common Tasks
 
 ### Start Development
+
 ```bash
 npm run dev
 # Opens http://localhost:3000 with hot reload
 ```
 
 ### Check for Errors
+
 ```bash
 npm run lint
 # TypeScript type checking
 ```
 
 ### Build for Production
+
 ```bash
 npm run build
 # Creates optimized dist/ folder
 ```
 
 ### Debug Locally
+
 ```bash
 npm run dev
 # Open browser DevTools (F12)
@@ -197,18 +218,21 @@ npm run dev
 ## 🆘 Troubleshooting
 
 ### Port 3000 Already in Use
+
 ```bash
 npm run dev -- --port 3001
 # Use different port
 ```
 
 ### TypeScript Errors
+
 ```bash
 npm run lint
 # See detailed error messages
 ```
 
 ### Dependencies Issue
+
 ```bash
 rm -rf node_modules package-lock.json
 npm install
@@ -216,6 +240,7 @@ npm install
 ```
 
 ### Build Fails
+
 ```bash
 npm run clean
 npm run build
@@ -227,6 +252,7 @@ npm run build
 ## 📚 Learning Path
 
 ### Week 1: Get Oriented
+
 - [ ] Install and run project
 - [ ] Read SETUP_GUIDE.md
 - [ ] Read QUICK_REFERENCE.md
@@ -234,6 +260,7 @@ npm run build
 - [ ] Review project structure
 
 ### Week 2: Understand Architecture
+
 - [ ] Read ARCHITECTURE_GUIDE.md
 - [ ] Study templateEngine.ts
 - [ ] Review editorStore.ts
@@ -241,6 +268,7 @@ npm run build
 - [ ] Check AGENTS.md guidelines
 
 ### Week 3: Start Developing
+
 - [ ] Create a simple feature
 - [ ] Add tests for it
 - [ ] Follow AGENTS.md conventions
@@ -248,6 +276,7 @@ npm run build
 - [ ] Submit for review
 
 ### Week 4: Deep Dive
+
 - [ ] Master data binding
 - [ ] Understand Konva rendering
 - [ ] Learn theme system
@@ -284,6 +313,7 @@ See ARCHITECTURE_GUIDE.md for details.
 ## 📈 Performance
 
 Current metrics:
+
 - Dev server start: ~1-2 seconds
 - Production bundle: 688 KB (205 KB gzip)
 - CSS: 55 KB (9.4 KB gzip)
@@ -322,18 +352,23 @@ See PROJECT_STATUS.md for full metrics.
 ## 📞 Getting Help
 
 ### Quick Questions
+
 → Check QUICK_REFERENCE.md
 
 ### How Do I Build/Deploy?
+
 → Read SETUP_GUIDE.md (section: Build & Deployment)
 
 ### Why is it Designed This Way?
+
 → Read ARCHITECTURE_GUIDE.md
 
 ### What are the Conventions?
+
 → Read AGENTS.md
 
 ### How Do I Set Up Locally?
+
 → Follow SETUP_GUIDE.md (Quick Start section)
 
 ---
@@ -341,17 +376,20 @@ See PROJECT_STATUS.md for full metrics.
 ## 📝 File Reference
 
 ### From Repository (Original)
+
 - `AGENTS.md` - Developer guidelines & conventions
 - `Claude.md` - Technical architecture
 - `ASSETS_STRUCTURE.md` - Asset organization
 
 ### New Guides (This Package)
+
 - `PROJECT_STATUS.md` - Status report & metrics
 - `SETUP_GUIDE.md` - Installation & usage guide
 - `ARCHITECTURE_GUIDE.md` - Detailed architecture
 - `QUICK_REFERENCE.md` - Developer cheat sheet
 
 ### This File
+
 - `README.md` - Navigation guide (you are here!)
 
 ---
@@ -359,6 +397,7 @@ See PROJECT_STATUS.md for full metrics.
 ## ✨ Highlights
 
 ### What Makes RedPanda Forge Special
+
 - 🎨 Beautiful sports graphics editor
 - 📊 Powerful data binding engine
 - 🎯 Multi-tab session management
@@ -369,6 +408,7 @@ See PROJECT_STATUS.md for full metrics.
 - 🎪 Rich Konva canvas
 
 ### Future Enhancements
+
 - 🖥️ Electron desktop app
 - 💾 SQLite database
 - 📁 User asset management
@@ -380,6 +420,7 @@ See PROJECT_STATUS.md for full metrics.
 ## 🎓 Educational Value
 
 This project is great for learning:
+
 - React patterns and best practices
 - TypeScript advanced features
 - Zustand state management
@@ -404,7 +445,7 @@ This project is great for learning:
 
 ---
 
-## 🚀 You're Ready!
+## 🚀 You're Ready
 
 Everything is set up and documented. Pick a guide and start exploring:
 
@@ -423,6 +464,7 @@ npm run dev
 ## 📚 Documentation Quality
 
 All guides include:
+
 - ✅ Clear explanations
 - ✅ Code examples
 - ✅ Diagrams (ASCII art)
