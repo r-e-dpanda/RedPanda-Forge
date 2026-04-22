@@ -90,7 +90,7 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
                 onClick={() => setActiveSession(session.id)}
                 onDoubleClick={(e) => startRenaming(session.id, session.name, e)}
                 className={cn(
-                  "h-[34px] px-4 flex items-center gap-2.5 rounded-t-lg min-w-[120px] max-w-[220px] cursor-pointer transition-all border-x border-t relative text-[13px] font-bold tracking-tight group",
+                  "h-[34px] px-3.5 flex items-center gap-2 rounded-t-lg min-w-[120px] max-w-[220px] cursor-pointer transition-all border-x border-t relative text-ui-sm font-normal group",
                   activeSessionId === session.id 
                     ? "bg-app-bg border-app-border border-b-app-bg -mb-[1px] text-app-text z-10" 
                     : "bg-transparent border-transparent text-app-muted hover:text-app-text hover:bg-app-card/30"
@@ -110,7 +110,7 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
                     onBlur={submitRename}
                     onKeyDown={e => e.key === 'Enter' && submitRename()}
                     onClick={e => e.stopPropagation()}
-                    className="bg-app-card border border-app-accent rounded px-2 w-full text-[13px] h-7 outline-none font-bold"
+                    className="bg-app-card border border-app-accent rounded px-2 w-full text-ui-xs h-7 outline-none"
                   />
                 ) : (
                   <span className="truncate flex-1 leading-none">{session.name}</span>
@@ -159,7 +159,7 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
 
             <button 
               onClick={() => innerEditorRef.current?.exportPNG()}
-              className="h-8 bg-app-accent hover:brightness-110 text-black px-4 rounded flex items-center justify-center gap-2 text-[13px] font-bold tracking-tight transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-sm"
+              className="h-8 bg-app-accent hover:brightness-110 text-black px-4 rounded flex items-center justify-center gap-2 text-ui-xs font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-sm"
               disabled={!activeSession?.template}
             >
               <Download size={13} /> {t.workspace.actions.export}
@@ -186,24 +186,24 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-app-sidebar border border-app-border w-full max-w-[400px] p-6 rounded-xl shadow-2xl animate-in zoom-in-95 duration-200">
               <div className="flex items-center gap-3 text-red-500 mb-4">
-                <AlertTriangle size={24} />
-                <h2 className="text-lg font-bold text-app-text tracking-tight uppercase">{t.workspace.modals.closeTab.header}</h2>
+                <AlertTriangle size={20} />
+                <h2 className="text-ui-base font-medium text-app-text">{t.workspace.modals.closeTab.header}</h2>
               </div>
               
-              <p className="text-app-muted text-[14px] leading-relaxed mb-8">
-                This graphic has <span className="text-app-text font-bold">UNSAVED CHANGES</span>. Closing this tab will permanently discard all your adjustments.
+              <p className="text-app-muted text-ui-sm leading-relaxed mb-6">
+                This graphic has <span className="text-app-text font-medium">unsaved changes</span>. Closing this tab will permanently discard all your adjustments.
               </p>
 
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2">
                 <button 
                   onClick={confirmClose}
-                  className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-lg transition-colors text-[13px] uppercase tracking-wider"
+                  className="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg transition-colors text-ui-sm"
                 >
                   {t.workspace.modals.closeTab.confirm}
                 </button>
                 <button 
                   onClick={() => setShowConfirmClose(null)}
-                  className="w-full bg-app-card hover:bg-app-bg text-app-text border border-app-border font-bold py-3.5 rounded-lg transition-colors text-[13px] uppercase tracking-wider"
+                  className="w-full bg-app-card hover:bg-app-bg text-app-text border border-app-border font-normal py-2.5 rounded-lg transition-colors text-ui-sm"
                 >
                   {t.common.cancel}
                 </button>

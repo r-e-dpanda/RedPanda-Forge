@@ -156,8 +156,8 @@ export default function App() {
             <div className="w-7 h-7 bg-app-accent rounded flex items-center justify-center shadow-[0_0_20px_rgba(var(--app-accent-rgb),0.25)]">
               <span className="text-black font-[900] text-[13px] italic">RP</span>
             </div>
-            <h1 className="text-[14px] font-[900] text-app-text tracking-tight flex items-center gap-1 leading-none uppercase">
-              REDPANDA <span className="text-app-accent font-bold">FORGE</span>
+            <h1 className="text-ui-sm font-medium text-app-text tracking-tight flex items-center gap-1 leading-none">
+              Redpanda <span className="text-app-accent font-semibold">Forge</span>
             </h1>
           </div>
 
@@ -166,7 +166,7 @@ export default function App() {
             <select 
               value={selectedSport}
               onChange={(e) => handleSportChange(e.target.value as Sport)}
-              className="bg-transparent text-[12px] font-bold text-app-text outline-none cursor-pointer uppercase tracking-wider pr-1"
+              className="bg-transparent text-ui-xs font-medium text-app-text outline-none cursor-pointer capitalize pr-1"
             >
               <option value="football">Football</option>
               <option value="basketball">Basketball</option>
@@ -218,30 +218,30 @@ export default function App() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-app-sidebar border border-app-border w-full max-w-[400px] p-6 rounded-xl shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 text-app-accent mb-4">
-              <AlertTriangle size={24} />
-              <h2 className="text-[15px] font-bold text-app-text tracking-tight uppercase">{t.modals.templateSwitch.header}</h2>
+              <AlertTriangle size={20} />
+              <h2 className="text-ui-base font-medium text-app-text">{t.modals.templateSwitch.header}</h2>
             </div>
             
-            <p className="text-app-muted text-[13.5px] leading-relaxed mb-8">
-              You have manual adjustments in this session. Switching templates will <span className="text-app-text font-bold">DISCARD</span> all your edits.
+            <p className="text-app-muted text-ui-sm leading-relaxed mb-6">
+              You have manual adjustments in this session. Switching templates will <span className="text-app-text font-medium">discard</span> all your edits.
             </p>
 
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2">
               <button 
                 onClick={openInNewTab}
-                className="w-full bg-app-accent hover:bg-app-accent/90 text-app-bg font-bold py-3.5 rounded-lg transition-colors text-[13px] uppercase tracking-wider"
+                className="w-full bg-app-accent hover:bg-app-accent/90 text-app-bg font-medium py-2.5 rounded-lg transition-colors text-ui-sm"
               >
                 {t.modals.templateSwitch.openNewTab}
               </button>
               <button 
                 onClick={confirmSwitch}
-                className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-lg transition-colors text-[13px] uppercase tracking-wider"
+                className="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg transition-colors text-ui-sm"
               >
                 {t.modals.templateSwitch.discardReplace}
               </button>
               <button 
                 onClick={() => setShowConfirmRestart(null)}
-                className="w-full bg-app-card hover:bg-app-bg text-app-text border border-app-border font-bold py-3.5 rounded-lg transition-colors text-[13px] uppercase tracking-wider"
+                className="w-full bg-app-card hover:bg-app-bg text-app-text border border-app-border font-normal py-2.5 rounded-lg transition-colors text-ui-sm"
               >
                 {t.common.cancel}
               </button>
