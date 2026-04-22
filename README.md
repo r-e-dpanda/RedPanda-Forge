@@ -154,7 +154,7 @@ RedPanda-Forge/
 - `src/App.tsx` - Main component structure
 - `src/stores/editorStore.ts` - State management
 - `src/lib/templateEngine.ts` - Data binding logic
-- `src/components/Editor/EditorWorkspace.tsx` - Canvas rendering
+- `src/components/editor/EditorWorkspace.tsx` - Canvas rendering
 
 ### Finally Explore
 - `src/components/ui/` - UI components

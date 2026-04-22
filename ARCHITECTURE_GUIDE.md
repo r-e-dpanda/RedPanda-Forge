@@ -31,9 +31,9 @@
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │         Template Engine & Data Binding                 │  │
 │  │  ┌─────────── ───┬───────────────┬──────────────────┐  │  │
-│  │  │ templateEngine│  colorUtils   │ formatters       │  │  │
-│  │  │ • Pipes       │  • Contrast   │ • Date/Time      │  │  │
-│  │  │ • Resolvers   │  • Colors     │ • Text           │  │  │
+│  │  │ templateEngine│  colorUtils   │  localization    │  │  │
+│  │  │ • Pipes       │  • Contrast   │ • i18n / locales │  │  │
+│  │  │ • Resolvers   │  • Colors     │ • Rich Text      │  │  │
 │  │  └───────────────┴───────────────┴──────────────────┘  │  │
 │  └────────────────────────────────────────────────────────┘  │
 │                          ▼                                   │
@@ -86,8 +86,8 @@ User Action (Click, Drag, Type)
            ↓
     ┌──────────────────────────────┐
     │  Apply Pipes                 │
-    │  • formatters                │
-    │  • transformations           │
+    │  • inline transformations    │
+    │  • formatting patterns       │
     │  • color operations          │
     └──────────────────────────────┘
            ↓
@@ -232,10 +232,9 @@ ThemeDefinition   // Theme colors and variables
 - hexToRgb()              // Color conversion
 - adjustBrightness()      // Color manipulation
 
-// formatters.ts
-- formatNumber()          // 1234.56 → "1,234.56"
-- formatDate()            // Date formatting
-- formatText()            // Text transformation
+// i18n.tsx
+- useTranslation()        // React hook for localized strings
+- language switching      // Dynamic localization ('en', 'vi')
 
 // assetManager.ts
 - loadImage()             // Load image from public/
@@ -250,7 +249,7 @@ ThemeDefinition   // Theme colors and variables
 ### `src/components/` - UI Components
 ```
 components/
-├── ui/                    # Base UI elements
+├── ui/                    # Primitive components (kebab-case/lowercase)
 │   ├── button.tsx         # Sized variants
 │   ├── select.tsx         # Compound select
 │   ├── tabs.tsx           # Tab component
@@ -260,19 +259,17 @@ components/
 │   ├── separator.tsx      # Divider
 │   └── switch.tsx         # Toggle
 │
-├── Editor/                # Main editor
-│   └── EditorWorkspace.tsx # Canvas + controls
-│
-├── editor/                # Editor utilities
+├── editor/                # Smart/Composite Editor specific components (PascalCase)
+│   ├── EditorWorkspace.tsx# Canvas + controls (Contextual to active session)
 │   └── KonvaEditor.tsx    # Konva stage component
 │
-├── panels/                # Side panels
-│   └── RightPanel.tsx     # Properties & data
+├── panels/                # Smart/Composite side panels
+│   └── RightPanel.tsx     # Context-aware Properties Inspector
 │
-├── settings/              # Settings modal
-│   └── SettingsModal.tsx
+├── settings/              # Settings & Preferences
+│   └── SettingsModal.tsx  # Modal w/ i18n support
 │
-├── LeftSidebar.tsx        # Match & template selection
+├── LeftSidebar.tsx        # Global Explorer (Match & Template selection)
 └── PasteTemplateModal.tsx # Template import dialog
 ```
 
@@ -343,6 +340,17 @@ const updateFeature = useEditorStore(state => state.updateFeature)
   --border: var(--app-border);
 }
 ```
+
+### Responsive Rem Scaling
+```typescript
+// The root font size is injected via the UI Scale setting slider
+React.useEffect(() => {
+  const root = document.documentElement;
+  // Scales the entire UI by mutating the baseline pixel value of 1rem
+  root.style.fontSize = `${16 * settings.uiScale}px`;
+}, [settings.uiScale]);
+```
+*Note: All layout boundaries (heights, widths) must use Tailwind's rem-based utility classes (e.g., `h-[2.75rem]` instead of `h-[44px]`).*
 
 ### Component Styling
 

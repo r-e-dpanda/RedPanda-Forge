@@ -4,11 +4,35 @@ import { X, Folder, Save, HelpCircle, HardDrive, Settings2 } from 'lucide-react'
 import { AppSettings } from '../../types/settings';
 import themes from '../../constants/themes.json';
 import { cn } from '../../lib/utils';
+import { useTranslation } from '../../lib/i18n';
+
+const InputField = ({ label, field, placeholder, icon: Icon, localDraft, setLocalDraft }: any) => (
+  <div className="space-y-2 text-app-text">
+    <label className="text-[12px] font-medium text-app-muted flex items-center gap-1.5 uppercase tracking-wider">
+      {Icon && <Icon className="w-4 h-4" />}
+      {label}
+    </label>
+    <div className="flex">
+      <input 
+        type="text" 
+        value={localDraft[field as keyof AppSettings] as string}
+        onChange={(e) => setLocalDraft({...localDraft, [field]: e.target.value})}
+        placeholder={placeholder}
+        className="flex-1 bg-app-bg border border-app-border rounded-l-lg px-4 py-2.5 text-[13.5px] text-app-text placeholder:text-app-muted/50 focus:outline-none focus:border-app-accent transition-colors shadow-inner"
+      />
+      <button className="bg-app-card border-y border-r border-app-border px-4 rounded-r-lg text-[13px] font-medium text-app-accent hover:bg-app-bg transition-colors active:text-app-text">
+        Browse
+      </button>
+    </div>
+  </div>
+);
 
 export const SettingsModal = () => {
   const { settings, isOpen, toggleModal, updateSettings } = useSettingsStore();
   const [localDraft, setLocalDraft] = useState<AppSettings>(settings);
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<'general' | 'paths'>('general');
+  const { t, language, setLanguage } = useTranslation();
 
   // Sync draft whenever store changes OR modal opens
   useEffect(() => {
@@ -26,27 +50,6 @@ export const SettingsModal = () => {
     }, 400); // Fake delay animation
   };
 
-  const InputField = ({ label, field, placeholder, icon: Icon }: any) => (
-    <div className="space-y-2 text-app-text">
-      <label className="text-[12px] font-medium text-app-muted flex items-center gap-1.5 uppercase tracking-wider">
-        {Icon && <Icon className="w-4 h-4" />}
-        {label}
-      </label>
-      <div className="flex">
-        <input 
-          type="text" 
-          value={localDraft[field as keyof AppSettings] as string}
-          onChange={(e) => setLocalDraft({...localDraft, [field]: e.target.value})}
-          placeholder={placeholder}
-          className="flex-1 bg-app-bg border border-app-border rounded-l-lg px-4 py-2.5 text-[13.5px] text-app-text placeholder:text-app-muted/50 focus:outline-none focus:border-app-accent transition-colors shadow-inner"
-        />
-        <button className="bg-app-card border-y border-r border-app-border px-4 rounded-r-lg text-[13px] font-medium text-app-accent hover:bg-app-bg transition-colors active:text-app-text">
-          Browse
-        </button>
-      </div>
-    </div>
-  );
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-app-sidebar border border-app-border rounded-xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[85vh] overflow-hidden">
@@ -55,7 +58,7 @@ export const SettingsModal = () => {
         <div className="px-6 py-4 border-b border-app-border flex items-center justify-between bg-app-sidebar/50">
           <div className="flex items-center gap-2 text-app-text font-medium">
             <Settings2 className="w-5 h-5 text-app-accent" />
-            App Settings
+            {t.settings.header}
           </div>
           <button 
             onClick={() => toggleModal(false)}
@@ -69,25 +72,37 @@ export const SettingsModal = () => {
         <div className="flex flex-1 overflow-hidden">
           {/* Side Menu */}
           <div className="w-48 border-r border-app-border bg-app-sidebar/30 p-2 space-y-1">
-            <button className="w-full text-left px-4 py-2.5 rounded-lg bg-app-accent text-accent-foreground font-medium shadow-md shadow-app-accent/10 transition-all">
-              General Preference
+            <button 
+              onClick={() => setActiveTab('general')}
+              className={cn(
+                "w-full text-left px-4 py-2.5 rounded-lg font-medium transition-all",
+                activeTab === 'general' ? "bg-app-accent text-accent-foreground shadow-md shadow-app-accent/10" : "text-app-muted hover:text-app-text hover:bg-app-bg text-[13px]"
+              )}>
+              {t.settings.tabs.general}
             </button>
-            <button className="w-full text-left px-4 py-2.5 rounded-lg text-app-muted hover:text-app-text hover:bg-app-bg text-[13px] font-medium transition-colors">
-              Workspace Paths
+            <button 
+              onClick={() => setActiveTab('paths')}
+              className={cn(
+                "w-full text-left px-4 py-2.5 rounded-lg font-medium transition-all text-[13px]",
+                activeTab === 'paths' ? "bg-app-accent text-accent-foreground shadow-md shadow-app-accent/10" : "text-app-muted hover:text-app-text hover:bg-app-bg"
+              )}>
+              {t.settings.tabs.paths}
             </button>
           </div>
 
           {/* Settings Fields */}
           <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-app-bg">
             
-            <section className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-app-text tracking-tight">Appearance</h3>
-                <p className="text-[13px] text-app-muted mt-1 font-normal">Select your preferred workspace theme for optimal focus.</p>
-              </div>
-              <div className="space-y-4 flex flex-col">
-                <label className="text-[12px] font-medium text-app-muted uppercase tracking-wider">Theme Library</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-1">
+            {activeTab === 'general' && (
+              <>
+                <section className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-app-text tracking-tight">{t.settings.appearance.title}</h3>
+                    <p className="text-[13px] text-app-muted mt-1 font-normal">{t.settings.appearance.description}</p>
+                  </div>
+                  <div className="space-y-4 flex flex-col">
+                    <label className="text-[12px] font-medium text-app-muted uppercase tracking-wider">{t.settings.appearance.themeLibrary}</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-1">
                   {Object.entries(themes).map(([id, theme]: [string, any]) => (
                     <button 
                       key={id}
@@ -125,21 +140,40 @@ export const SettingsModal = () => {
                   ))}
                 </div>
               </div>
+              
+              <div className="space-y-4 flex flex-col">
+                <label className="text-[12px] font-medium text-app-muted uppercase tracking-wider">{t.settings.appearance.language}</label>
+                <div className="flex justify-between items-center bg-app-card p-4 rounded-xl border border-app-border">
+                  <div className="space-y-1">
+                    <p className="text-[12px] text-app-muted/80">{t.settings.appearance.languageDesc}</p>
+                  </div>
+                  <div className="flex items-center w-64">
+                    <select
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value as 'en' | 'vi')}
+                      className="w-full bg-app-bg border border-app-border rounded-lg px-4 py-2 text-[13.5px] text-app-text focus:outline-none focus:border-app-accent transition-colors shadow-sm"
+                    >
+                      <option value="en">English</option>
+                      <option value="vi">Tiếng Việt</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </section>
 
             <div className="w-full h-px bg-app-border/30"></div>
             
             <section className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-app-text tracking-tight">Typography & Scale</h3>
-                <p className="text-[13px] text-app-muted mt-1 font-normal">Adjust the interface size to match your screen density and preference.</p>
+                <h3 className="text-lg font-semibold text-app-text tracking-tight">{t.settings.appearance.typography}</h3>
+                <p className="text-[13px] text-app-muted mt-1 font-normal">{t.settings.appearance.typographyDesc}</p>
               </div>
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center bg-app-card p-4 rounded-xl border border-app-border">
                   <div className="space-y-1">
-                    <label className="text-[12px] font-medium text-app-muted uppercase tracking-wider">UI Scale</label>
-                    <p className="text-[12px] text-app-muted/80">Current base: {Math.round(13 * (localDraft.uiScale || 1.0))}px</p>
+                    <label className="text-[12px] font-medium text-app-muted uppercase tracking-wider">{t.settings.appearance.uiScale}</label>
+                    <p className="text-[12px] text-app-muted/80">{t.settings.appearance.currentBase}: {Math.round(13 * (localDraft.uiScale || 1.0))}px</p>
                   </div>
                   <div className="flex items-center gap-4 w-64">
                     <input 
@@ -158,20 +192,23 @@ export const SettingsModal = () => {
                 </div>
               </div>
             </section>
+            </>
+            )}
 
-            <div className="w-full h-px bg-app-border/30"></div>
+            {activeTab === 'paths' && (
+              <section className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-app-text tracking-tight">{t.settings.paths.title}</h3>
+                  <p className="text-[13px] text-app-muted mt-1 font-normal">{t.settings.paths.description}</p>
+                </div>
+                
+                <div className="space-y-5">
+                  <InputField label={t.settings.paths.assetsRoot} field="assetsRoot" icon={HardDrive} placeholder="/path/to/assets" localDraft={localDraft} setLocalDraft={setLocalDraft} />
+                  <InputField label={t.settings.paths.templatesRoot} field="templatesRoot" icon={Folder} placeholder="/path/to/templates" localDraft={localDraft} setLocalDraft={setLocalDraft} />
+                </div>
+              </section>
+            )}
 
-            <section className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-app-text tracking-tight">Storage Locations</h3>
-                <p className="text-[13px] text-app-muted mt-1 font-normal">Configure your workspace folders for native operations.</p>
-              </div>
-              
-              <div className="space-y-5">
-                <InputField label="Assets Root" field="assetsRoot" icon={HardDrive} placeholder="/path/to/assets" />
-                <InputField label="Templates Root" field="templatesRoot" icon={Folder} placeholder="/path/to/templates" />
-              </div>
-            </section>
 
           </div>
         </div>
@@ -179,14 +216,14 @@ export const SettingsModal = () => {
         {/* Footer Actions */}
         <div className="px-8 py-5 border-t border-app-border bg-app-sidebar flex items-center justify-between">
           <div className="text-[12.5px] text-app-muted flex items-center gap-2 font-medium">
-            <HelpCircle className="w-5 h-5 text-app-accent" /> Ready to forge.
+            <HelpCircle className="w-5 h-5 text-app-accent" /> {t.settings.ready}
           </div>
           <div className="flex gap-3">
             <button 
               onClick={() => toggleModal(false)}
               className="px-6 py-2.5 rounded-lg text-[13px] font-medium text-app-muted hover:text-app-text transition-colors"
             >
-              Cancel
+              {t.common.cancel}
             </button>
             <button 
               onClick={handleSave}
@@ -198,7 +235,7 @@ export const SettingsModal = () => {
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              Save Configuration
+              {t.settings.saveConfig}
             </button>
           </div>
         </div>

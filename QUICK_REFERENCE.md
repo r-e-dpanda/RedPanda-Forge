@@ -105,6 +105,32 @@ import { Slider } from '@/components/ui/slider'
 />
 ```
 
+## 🌐 Localization (i18n)
+
+### Translate Strings
+```tsx
+import { useTranslation } from '@/lib/i18n'
+
+export function MyComponent() {
+  const { t } = useTranslation();
+  
+  // Basic Translation
+  return <button>{t.common.save}</button>;
+}
+```
+
+### Translate Rich Text
+```tsx
+// Using {tag} in language string: "Welcome {bold}user{/bold}"
+const Welcome = () => (
+  <div>
+    {t.parseRichText(t.messages.welcome, {
+      bold: (text) => <strong>{text}</strong>
+    })}
+  </div>
+)
+```
+
 ---
 
 ## 📊 Zustand Store Usage

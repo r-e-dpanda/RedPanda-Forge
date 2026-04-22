@@ -3,9 +3,25 @@ import { useEditorStore } from "../stores/editorStore";
 import { Check, LayoutTemplate } from "lucide-react";
 import { cn } from "../lib/utils";
 import { MOCK_MATCHES, MOCK_TEMPLATES } from "../lib/mockData";
-import { Sport, Ratio } from "../types/template";
+import { Sport, Ratio, Match, Template } from "../types/template";
 import { useTranslation } from "../lib/i18n";
 import { resolveAssetPath } from "../lib/assetResolver";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+interface LeftSidebarProps {
+  selectedSport: Sport;
+  selectedRatio: Ratio | "All";
+  selectedLeague: string;
+  activeLeftTab: 'matches' | 'templates';
+  setActiveLeftTab: (val: 'matches' | 'templates') => void;
+  setSelectedRatio: (val: Ratio | "All") => void;
+  templates: Template[];
+  setEditorTemplate: (template: Template) => void;
+  activeTemplate: Template | null;
+  activeMatch: Match | null;
+  setEditorMatch: (match: Match) => void;
+  setIsModalOpen: (isOpen: boolean) => void;
+}
 
 export const LeftSidebar = ({
   selectedSport,
@@ -20,7 +36,7 @@ export const LeftSidebar = ({
   activeMatch,
   setEditorMatch,
   setIsModalOpen
-}: any) => {
+}: LeftSidebarProps) => {
   const { t } = useTranslation();
   const filteredMatches = MOCK_MATCHES.filter(m =>
     m.sport === selectedSport &&
@@ -30,10 +46,10 @@ export const LeftSidebar = ({
   const tab2Templates = templates.filter((t: any) => t.sport === selectedSport);
 
   return (
-    <div className="w-[280px] bg-app-sidebar border-r border-app-border flex flex-col shrink-0 z-10 font-sans relative">
+    <div className="w-[17.5rem] bg-app-sidebar border-r border-app-border flex flex-col shrink-0 z-10 font-sans relative">
 
       {/* ── Tab bar ─────────────────────────────────────────────────── */}
-      <div className="flex border-b border-app-border bg-app-sidebar h-[44px] shrink-0">
+      <div className="flex border-b border-app-border bg-app-sidebar h-[2.75rem] shrink-0">
         <button
           onClick={() => setActiveLeftTab('matches')}
           className={cn(
@@ -65,45 +81,41 @@ export const LeftSidebar = ({
           <div className="p-4 flex flex-col gap-4 relative h-full">
 
             {/* Filters */}
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3 w-full">
-                <span className="text-ui-micro text-app-muted shrink-0 w-16">{t.sidebar.filters.ratio}</span>
-                <select
-                  value={selectedRatio}
-                  onChange={(e) => setSelectedRatio(e.target.value as Ratio | "All")}
-                  className="bg-app-bg border border-app-border rounded px-2 py-1.5 flex-1 min-w-0 text-app-text outline-none focus:border-app-accent text-ui-micro"
-                >
-                  <option value="All">{t.sidebar.filters.allRatios}</option>
-                  <option value="16:9">16:9 Landscape</option>
-                  <option value="9:16">9:16 Portrait</option>
-                  <option value="1:1">1:1 Square</option>
-                </select>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5 w-full">
+                <span className="text-ui-xs text-app-muted font-normal">{t.sidebar.filters.ratio}</span>
+                <Select value={selectedRatio} onValueChange={(val) => setSelectedRatio(val as Ratio | "All")}>
+                  <SelectTrigger className="w-full bg-app-card">
+                    <SelectValue placeholder="Select ratio..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">{t.sidebar.filters.allRatios}</SelectItem>
+                    <SelectItem value="16:9">16:9 Landscape</SelectItem>
+                    <SelectItem value="9:16">9:16 Portrait</SelectItem>
+                    <SelectItem value="1:1">1:1 Square</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div className="flex items-center gap-3 w-full">
-                <span className="text-ui-micro text-app-muted shrink-0 w-16">{t.sidebar.filters.template}</span>
-                <select
-                  value={filteredTemplates.some((t: any) => t.id === activeTemplate?.id) ? (activeTemplate?.id || "") : ""}
-                  onChange={(e) => {
-                    const tpl = templates.find((t: any) => t.id === e.target.value);
+              <div className="flex flex-col gap-1.5 w-full">
+                <span className="text-ui-xs text-app-muted font-normal">{t.sidebar.filters.template}</span>
+                <Select 
+                  value={filteredTemplates.some((t: any) => t.id === activeTemplate?.id) ? (activeTemplate?.id || "") : ""} 
+                  onValueChange={(val) => {
+                    const tpl = templates.find((t: any) => t.id === val);
                     if (tpl) setEditorTemplate(tpl);
                   }}
-                  className="bg-app-bg border border-app-border rounded px-2 py-1.5 flex-1 min-w-0 text-app-text outline-none focus:border-app-accent text-ui-micro truncate"
                   disabled={filteredTemplates.length === 0}
                 >
-                  {filteredTemplates.length === 0 ? (
-                    <option value="" disabled>No template found</option>
-                  ) : (
-                    <>
-                      {(!activeTemplate || !filteredTemplates.some((t: any) => t.id === activeTemplate.id)) && (
-                        <option value="" disabled>Select template...</option>
-                      )}
-                      {filteredTemplates.map((t: any) => (
-                        <option key={t.id} value={t.id}>{t.name}</option>
-                      ))}
-                    </>
-                  )}
-                </select>
+                  <SelectTrigger className="w-full bg-app-card">
+                    <SelectValue placeholder={filteredTemplates.length === 0 ? "No template found" : "Select template..."} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredTemplates.map((t: any) => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

@@ -240,10 +240,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
   };
 
   return (
-    <aside className="w-[340px] bg-app-sidebar border-l border-app-border flex flex-col shrink-0 h-full z-10 transition-all font-sans relative">
+    <aside className="w-[21.25rem] bg-app-sidebar border-l border-app-border flex flex-col shrink-0 h-full z-10 transition-all font-sans relative">
 
       {/* ── Panel tab bar ─────────────────────────────────────────────── */}
-      <div className="flex bg-app-sidebar h-[44px] shrink-0 border-b border-app-border">
+      <div className="flex bg-app-sidebar h-[2.75rem] shrink-0 border-b border-app-border">
         <button
           onClick={() => setActiveRightTab('data')}
           className={cn(
@@ -1194,6 +1194,28 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
             })() : (
               /* ── Layer stack (no element selected) ─────────────────── */
               <div className="animate-in fade-in slide-in-from-left-4 duration-200">
+                <div className="mb-6">
+                  <PropertySection title="Canvas Settings">
+                    <div className="flex items-center justify-between mt-2">
+                       <FieldLabel>Enable Background</FieldLabel>
+                       <Switch
+                         checked={elementOverrides['__canvas']?.bgEnabled !== undefined ? elementOverrides['__canvas'].bgEnabled : true}
+                         onCheckedChange={checked => handleOverride('__canvas', { bgEnabled: checked })}
+                       />
+                     </div>
+                     {(elementOverrides['__canvas']?.bgEnabled !== false) && (
+                       <div className="mt-3">
+                         <UnifiedColorPicker
+                           label="Background Color"
+                           value={elementOverrides['__canvas']?.bgColor !== undefined ? elementOverrides['__canvas'].bgColor : (template?.canvas?.backgroundColor || '')}
+                           onChange={val => handleOverride('__canvas', { bgColor: val })}
+                           placeholder="#0a0a0a"
+                         />
+                       </div>
+                     )}
+                  </PropertySection>
+                </div>
+
                 <h3 className="text-ui-xs text-app-muted font-normal mb-3 flex items-center gap-1.5">
                   <Layers size={ui.icon.sm} /> {t.panels.fields.layerGroups}
                 </h3>

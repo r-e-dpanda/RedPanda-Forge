@@ -234,6 +234,32 @@ APP_URL=http://localhost:3000
 - **Solution**: Updated resolution logic to display HEX values.
 - **Impact**: Clearer data binding overview for designers.
 
+### Issue #6: Theme Accent Glow Missing
+**Status**: ✅ RESOLVED (April 22, 2026)
+- **Problem**: The global Box Shadow glow on elements was missing due to an invalid logic binding to `accent-rgb`.
+- **Solution**: Injected `accent-rgb` variables into `themes.json` mapping.
+- **Impact**: Aesthetic glows now function.
+
+### Issue #7: Hardcoded Layout Scaling Bugs
+**Status**: ✅ RESOLVED (April 22, 2026)
+- **Problem**: UI scale setting was ineffective on structural components because heights/widths were hardcoded to `px`.
+- **Solution**: Replaced `w-[280px]` and `w-[340px]` class variables with `rem` values, allowing `document.documentElement` scale to stretch all boundaries natively.
+
+### Issue #8: Layer Normalization Ambiguity
+**Status**: ✅ RESOLVED (April 22, 2026)
+- **Problem**: Layer configurations allowed for an ambiguous `children` key alongside `elements`.
+- **Solution**: Refactored `normalizeShape()` to forcefully map and destruct out `children` and default only to `elements`.
+
+### Issue #9: Settings Modal State
+**Status**: ✅ RESOLVED (April 22, 2026)
+- **Problem**: The Settings sidebar nav logic was fake/mocked and infinite loop issues occurred.
+- **Solution**: Elevated the Component function blocks, implemented proper `activeTab` state.
+
+### Issue #10: Internationalization (i18n)
+**Status**: ✅ RESOLVED (April 22, 2026)
+- **Problem**: Strings were completely hardcoded and no `vi.ts` language switching mechanics existed.
+- **Solution**: Added `vi.ts`, configured `i18n.tsx` dynamic context hook, and added Dropdown toggle in settings UI.
+
 ---
 
 ## 📈 Performance Metrics

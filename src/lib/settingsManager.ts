@@ -39,13 +39,13 @@ export class SettingsManager {
   }
 
   private async setupDefaultAssetsFolder() {
-    // Giả lập thư mục Documents mặc định
-    const documentsPath = "C:/Users/RedPanda/Documents/RedPanda Workspace"; // Mock path
+    // Giả lập thư mục workspace mặc định (OS-neutral)
+    const workspacePath = "~/RedPanda Workspace"; 
     
     if (!this.settings.assetsRoot) {
       // Peer directories
-      this.settings.assetsRoot = `${documentsPath}/Assets`;
-      this.settings.templatesRoot = `${documentsPath}/Templates`;
+      this.settings.assetsRoot = `${workspacePath}/Assets`;
+      this.settings.templatesRoot = `${workspacePath}/Templates`;
       
       // Ở Desktop thực tế, bạn sẽ chạy:
       // await fs.mkdir(this.settings.assetsRoot, { recursive: true });

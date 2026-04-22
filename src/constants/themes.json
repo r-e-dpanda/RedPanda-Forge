@@ -10,7 +10,8 @@
       "text": "#e4e4e7",
       "muted": "#71717a",
       "accent": "#fbbf24",
-      "accent-content": "#000000"
+      "accent-content": "#000000",
+      "accent-rgb": "251, 191, 36"
     }
   },
   "ice": {
@@ -24,7 +25,8 @@
       "text": "#1a3a3a",
       "muted": "#4e7070",
       "accent": "#20b2aa",
-      "accent-content": "#ffffff"
+      "accent-content": "#ffffff",
+      "accent-rgb": "32, 178, 170"
     }
   },
   "light": {
@@ -38,7 +40,8 @@
       "text": "#0f172a",
       "muted": "#64748b",
       "accent": "#3b82f6",
-      "accent-content": "#ffffff"
+      "accent-content": "#ffffff",
+      "accent-rgb": "59, 130, 246"
     }
   }
 }

@@ -58,6 +58,7 @@ The engine resolves visual elements by merging three layers of data:
 - `{{homeTeam.colors.primary | contrast}}`: Inline pipeline binding with fallback.
 
 ### Supported Pipes (`src/lib/templateEngine.ts`)
+*Note: We strictly use inline pipes within `templateEngine.ts`. Do NOT use or create external file formatters like `src/lib/formatters.ts`.*
 - `uppercase`, `lowercase`, `titlecase`: Text casing.
 - `number`: Formats as `1,234.56`.
 - `boolean:Yes:No`: Converts truthy/falsy values to strings.
@@ -68,16 +69,24 @@ The engine resolves visual elements by merging three layers of data:
 - `replace:old:new`: Replaces substrings.
 - `json`: Pretty-prints array/object data.
 
-## 5. UI & Interaction Logic
+## 5. UI, Interaction, & Localization Logic
 
-### Panel Conventions
-- **Left Sidebar**: Sport selection, Match list, and Template thumbnails.
+### Panel Conventions & Semantics
+- **Left Sidebar (Global Explorer)**: Contains cross-session resources (Sport selection, Match list, Template thumbnails). It drives global state and does not depend on the active canvas.
+- **Right Panel (Contextual Inspector)**: Strictly contextual. It represents the properties of the currently selected element or session on the canvas. If nothing is selected, it defaults to session properties or clears out.
 - **Editor Workspace (Center)**: 
   - **Editor Header**: Contains the **Session Tab Bar** and localized actions (**Undo**, **Redo**, **Export**).
   - **Localized Actions**: Document-specific controls (Save/Export) must remain within the editor workspace context.
-- **Right Panel**: 
-  - **Match Tab**: Data source selection and raw data binding overview.
-  - **Editor Tab**: Property controls (sliders, color pickers, text inputs) for the selected element.
+
+### Responsive Scaling (Rem & CSS Variables)
+To ensure the interface scales globally via the "UI Scale" settings slider:
+- **No Hardcoded `px` Widths/Heights**: All structural boundaries (Sidebar `w-[...]`, Header `h-[...]`) MUST use `rem` values (e.g., `w-[17.5rem]`).
+- **Global Injection**: The slider dynamically updates `document.documentElement.style.fontSize` so Tailwind classes (like `gap-4`, `p-2`) respond automatically without modifying component logic.
+
+### Localization (i18n)
+All UI strings must be routed through the `useTranslation()` context from `src/lib/i18n.tsx`.
+- **Dictionaries**: Locales are stored in `src/locales/` (e.g., `en.ts`, `vi.ts`).
+- **Rich Text / JSX Substitution**: For translations needing inline bolding or react elements, use array structural parsing replacing explicit `{tag}...{/tag}` markers instead of dangerously setting inner HTML or breaking React structures.
 
 ### 5.2 Right Panel Input Feedback (Source vs Value Logic)
 To provide clarity between data engine values and manual overrides, the Design tab distinguishes between the **Source** (where data comes from) and the **Value** (the actual content).
@@ -132,15 +141,17 @@ The `applyTheme` utility (`src/lib/themeUtils.ts`) injects `themes.json` values 
 
 **Theming Constraint**: ALWAYS use `app-` Tailwind classes (e.g., `bg-app-bg`) or shadcn's utility classes. shadcn components are mapped to `app-` variables in `src/index.css` to ensure they adapt automatically to theme changes.
 
-## 7. UI Components & shadcn/ui
+## 7. UI Components, shadcn/ui & Naming Conventions
 We use **shadcn/ui** (built on tailwindcss and radix-ui) for all standard interface elements to provide a professional and accessible experience.
 
 - **Storage**: Components are located in `src/components/ui/`.
 - **Utils**: Helper `cn()` function is in `src/lib/utils.ts`.
 - **Path Aliases**: Use `@/components/ui/...` and `@/lib/...` for imports (mapped to `src/`).
-- **Standardized Elements**:
-  - `Button`, `Input`, `Select`, `Tabs`, `Slider`, `Dialog`, `Separator`.
-  - Use these instead of native HTML elements for consistency and accessibility.
+- **Standardized Elements**: `Button`, `Input`, `Select`, `Tabs`, `Slider`, `Dialog`, `Separator`. Use these instead of native HTML elements for consistency and accessibility.
+
+### File Naming Conventions
+- **Primitive Components (`kebab-case` or lowercase)**: Files placed in `src/components/ui/` (e.g., `button.tsx`, `select.tsx`) MUST be lowercase. These declare dumb, primitive "building blocks" containing zero business logic or state connections. Treating them closely relates them to standard HTML tags.
+- **Smart/Composite Components (`PascalCase`)**: Files mapped outside of the `ui/` folder (e.g., `RightPanel.tsx`, `EditorWorkspace.tsx`) MUST use TitleCase/PascalCase. These represent actual features, layout sections, or stateful views that stitch smaller components together and connect to global stores.
 
 ## 8. Development Principles
 - **Icons**: STRICTLY import from `lucide-react`. Do not use custom SVGs.

@@ -12,6 +12,32 @@ export const strings = {
     untitled: "Untitled graphic",
     all: "All"
   },
+  settings: {
+    header: "App Settings",
+    tabs: {
+      general: "General Preference",
+      paths: "Workspace Paths"
+    },
+    appearance: {
+      title: "Appearance",
+      description: "Select your preferred workspace theme for optimal focus.",
+      themeLibrary: "Theme Library",
+      typography: "Typography & Scale",
+      typographyDesc: "Adjust the interface size to match your screen density and preference.",
+      uiScale: "UI Scale",
+      currentBase: "Current base",
+      language: "Language",
+      languageDesc: "Select the display language for the workspace UI."
+    },
+    paths: {
+      title: "Storage Locations",
+      description: "Configure your workspace folders for native operations.",
+      assetsRoot: "Assets Root",
+      templatesRoot: "Templates Root"
+    },
+    saveConfig: "Save Configuration",
+    ready: "Ready to forge."
+  },
   sidebar: {
     tabs: {
       matches: "Matches",

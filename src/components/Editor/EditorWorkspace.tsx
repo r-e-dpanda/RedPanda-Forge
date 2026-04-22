@@ -3,11 +3,13 @@ import KonvaEditor, { EditorRef as KonvaEditorRef } from "../editor/KonvaEditor"
 import RightPanel from "../panels/RightPanel";
 import { useEditorStore } from "../../stores/editorStore";
 import { cn } from "../../lib/utils";
-import { Plus, X, Image as ImageIcon, RotateCcw, RotateCw, Download, AlertTriangle } from "lucide-react";
+import { Plus, X, Image as ImageIcon, RotateCcw, RotateCw, Download, AlertTriangle, Image, FileCode2, Code } from "lucide-react";
 import { useTranslation } from "../../lib/i18n";
 
 export interface EditorRef {
   exportPNG: () => void;
+  exportHTML: () => Promise<void>;
+  exportSVG: () => Promise<void>;
 }
 
 const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
@@ -32,14 +34,39 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renamingName, setRenamingName] = useState("");
   const [showConfirmClose, setShowConfirmClose] = useState<string | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showDownloadWarning, setShowDownloadWarning] = useState(false);
 
   const activeSession = sessions.find(s => s.id === activeSessionId);
 
+  const handleExport = async (type: 'png' | 'html' | 'svg') => {
+    setShowExportModal(false);
+    
+    // Check if we're in an iframe. If so, show the warning immediately
+    // because downloads often fail silently in sandboxed iframes.
+    const inIframe = window.self !== window.top;
+    if (inIframe) {
+      setShowDownloadWarning(true);
+    }
+    
+    try {
+      if (type === 'png' && innerEditorRef.current) innerEditorRef.current.exportPNG();
+      if (type === 'html' && innerEditorRef.current) await innerEditorRef.current.exportHTML();
+      if (type === 'svg' && innerEditorRef.current) await innerEditorRef.current.exportSVG();
+    } catch (e) {
+      console.error("Export failed:", e);
+    }
+  };
+
   useImperativeHandle(ref, () => ({
     exportPNG: () => {
-      if (innerEditorRef.current) {
-        innerEditorRef.current.exportPNG();
-      }
+      if (innerEditorRef.current) innerEditorRef.current.exportPNG();
+    },
+    exportHTML: async () => {
+      if (innerEditorRef.current) await innerEditorRef.current.exportHTML();
+    },
+    exportSVG: async () => {
+      if (innerEditorRef.current) await innerEditorRef.current.exportSVG();
     }
   }));
 
@@ -82,7 +109,7 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-app-bg border-l border-app-border">
       {/* Editor Tab Bar - Localized to Editor Area with Actions */}
-      <div className="h-[44px] bg-app-sidebar/40 border-b border-app-border shrink-0 flex items-center justify-between px-3 relative z-20 overflow-hidden select-none">
+      <div className="h-[2.75rem] bg-app-sidebar/40 border-b border-app-border shrink-0 flex items-center justify-between px-3 relative z-20 overflow-hidden select-none">
           <div className="flex items-end gap-1 h-full overflow-x-auto overflow-y-hidden scrollbar-hide flex-1">
             {sessions.map(session => (
               <div 
@@ -157,13 +184,32 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
                 </button>
             </div>
 
-            <button 
-              onClick={() => innerEditorRef.current?.exportPNG()}
-              className="h-8 bg-app-accent hover:brightness-110 text-accent-foreground px-4 rounded-md flex items-center justify-center gap-2 text-ui-xs font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-sm"
-              disabled={!activeSession?.template}
-            >
-              <Download size={13} /> {t.workspace.actions.export}
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowExportModal(!showExportModal)}
+                className="h-8 bg-app-accent hover:brightness-110 text-accent-foreground px-4 rounded-md flex items-center justify-center gap-2 text-ui-xs font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-sm relative z-50"
+                disabled={!activeSession?.template}
+              >
+                <Download size={13} /> {t.workspace.actions.export}
+              </button>
+              
+              {showExportModal && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowExportModal(false)}></div>
+                  <div className="absolute top-full right-0 mt-2 w-[15rem] bg-app-card border border-app-border rounded-lg shadow-xl z-50 flex flex-col py-1.5 animate-in fade-in zoom-in-95 duration-100">
+                    <button onClick={(e) => { e.stopPropagation(); handleExport('png'); }} className="flex items-center gap-3 px-4 py-2.5 hover:bg-app-sidebar text-left text-ui-sm text-app-text transition-colors">
+                       <Image size={16} className="text-app-muted" /> <span>Export <strong className="text-app-accent font-medium">PNG</strong></span>
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); handleExport('html'); }} className="flex items-center gap-3 px-4 py-2.5 hover:bg-app-sidebar text-left text-ui-sm text-app-text transition-colors">
+                       <FileCode2 size={16} className="text-app-muted" /> <span>Export <strong className="text-app-accent font-medium">HTML+Assets</strong></span>
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); handleExport('svg'); }} className="flex items-center gap-3 px-4 py-2.5 hover:bg-app-sidebar text-left text-ui-sm text-app-text transition-colors">
+                       <Code size={16} className="text-app-muted" /> <span>Export <strong className="text-app-accent font-medium">SVG</strong></span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
       </div>
 
@@ -181,6 +227,31 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
           setActiveRightTab={setActiveRightTab}
         />
 
+            {/* Global Confirmation for Downloads */}
+        {showDownloadWarning && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-app-sidebar border border-app-border w-full max-w-[400px] p-6 rounded-xl shadow-2xl animate-in zoom-in-95 duration-200">
+              <div className="flex items-center gap-3 text-app-accent mb-4">
+                <AlertTriangle size={20} />
+                <h2 className="text-ui-base font-medium text-app-text">Download Initiated</h2>
+              </div>
+              <p className="text-app-muted text-ui-sm leading-relaxed mb-6">
+                Your download has started. However, if nothing happens, <strong className="text-app-text">Preview Environments (iFrames)</strong> sometimes block file downloads for security.
+                <br /><br />
+                If your download fails or doesn't appear, please click the <strong>"Open in New Tab"</strong> button in the top right corner of the AI Studio window to run the app without sandbox restrictions.
+              </p>
+              <div className="flex flex-col gap-2.5">
+                <button 
+                  onClick={() => setShowDownloadWarning(false)}
+                  className="w-full bg-app-card hover:bg-app-bg text-app-text border border-app-border font-medium py-2.5 rounded-lg transition-all text-ui-sm active:scale-[0.98]"
+                >
+                  Got it
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Global Confirmation for Closing Tab */}
         {showConfirmClose && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
@@ -191,7 +262,9 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
               </div>
               
               <p className="text-app-muted text-ui-sm leading-relaxed mb-6">
-                This graphic has <span className="text-app-text font-medium">unsaved changes</span>. Closing this tab will permanently discard all your adjustments.
+                {t.workspace.modals.closeTab.description.split(/\{changes\}|\{\/changes\}/).map((part, i) => 
+                  i === 1 ? <span key={i} className="text-app-text font-medium">{part}</span> : part
+                )}
               </p>
 
               <div className="flex flex-col gap-2.5">

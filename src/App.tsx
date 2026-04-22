@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useEditorStore } from "./stores/editorStore";
 import { LeftSidebar } from "./components/LeftSidebar";
-import EditorWorkspace from "./components/Editor/EditorWorkspace";
+import EditorWorkspace from "./components/editor/EditorWorkspace";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import PasteTemplateModal from "./components/PasteTemplateModal";
 import { MOCK_TEMPLATES } from "./lib/mockData";
@@ -32,6 +32,10 @@ export default function App() {
     Object.entries(sizes.font).forEach(([key, value]) => {
       root.style.setProperty(`--font-ui-${key}`, value);
     });
+    
+    // Native tailwind rem scaling
+    root.style.fontSize = `${16 * settings.uiScale}px`;
+    root.style.setProperty('--app-ui-scale', String(settings.uiScale));
   }, [settings.theme, settings.uiScale]);
 
   const [activeLeftTab, setActiveLeftTab] = useState<'matches' | 'templates'>('matches');
@@ -150,7 +154,7 @@ export default function App() {
   return (
     <div className="h-screen w-screen bg-app-bg overflow-hidden flex flex-col font-sans select-none">
       {/* Top Header / App Bar - Row 1 */}
-      <header className="h-[52px] border-b border-app-border shrink-0 px-5 flex items-center justify-between bg-app-sidebar relative z-30">
+      <header className="h-[3.25rem] border-b border-app-border shrink-0 px-5 flex items-center justify-between bg-app-sidebar relative z-30">
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-3 pr-5 border-r border-app-border">
             <div className="w-7 h-7 bg-app-accent rounded flex items-center justify-center shadow-[0_0_20px_rgba(var(--app-accent-rgb),0.25)]">

@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { strings as enStrings, LocaleStrings } from '../locales/en';
+import { strings as viStrings } from '../locales/vi';
 
-type Language = 'en'; // Can be expanded to 'vi', etc.
+type Language = 'en' | 'vi'; 
 
 interface I18nContextType {
   t: LocaleStrings;
@@ -14,8 +15,8 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('en');
 
-  // For now, we only have 'en'. In the future, we could load others here.
-  const t = enStrings;
+  // Dynamic mapping based on language state
+  const t = language === 'vi' ? viStrings : enStrings;
 
   return (
     <I18nContext.Provider value={{ t, language, setLanguage }}>

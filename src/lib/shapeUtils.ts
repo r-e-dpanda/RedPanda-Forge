@@ -64,9 +64,12 @@ export function normalizeShape(element: any): any {
 export function normalizeTemplate(template: any): any {
   return {
     ...template,
-    layers: template.layers.map((layer: any) => ({
-      ...layer,
-      elements: (layer.elements || layer.children || []).map(normalizeShape)
-    }))
+    layers: template.layers.map((layer: any) => {
+      const { children, elements, ...rest } = layer;
+      return {
+        ...rest,
+        elements: (elements || children || []).map(normalizeShape)
+      };
+    })
   };
 }

@@ -5,6 +5,7 @@ import { TemplateElement } from "../../types/template";
 import { ZoomIn, ZoomOut, PanelRightOpen } from "lucide-react";
 import { useEditorStore } from "../../stores/editorStore";
 import { resolveBoundData } from "../../lib/templateEngine";
+import { exportHTMLZip, exportSVG } from "../../lib/exportUtils";
 
 const URLImage = ({ imageInfo, commonProps }: { imageInfo: any, commonProps: any }) => {
   const [img] = useImage(imageInfo.src || "", "anonymous");
@@ -32,6 +33,8 @@ interface KonvaEditorProps {
 
 export interface EditorRef {
   exportPNG: () => void;
+  exportHTML: () => Promise<void>;
+  exportSVG: () => Promise<void>;
 }
 
 const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, setRightExpanded, setActiveRightTab }, ref) => {
@@ -56,15 +59,51 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
     commitHistory
   } = useEditorStore();
 
+  let flatElements: any[] = [];
+  if (template) {
+    template.layers.forEach((layer: any) => {
+      const isLayerVisible = elementOverrides[layer.id]?.visible !== undefined 
+        ? elementOverrides[layer.id].visible 
+        : (layer.visible !== false);
+
+      if (isLayerVisible) {
+        const els = layer.elements || layer.children || [];
+        els.forEach((el: any) => {
+          const isElVisible = elementOverrides[el.id]?.visible !== undefined 
+            ? elementOverrides[el.id].visible 
+            : (el.visible !== false);
+
+          if (isElVisible) {
+            flatElements.push({
+              ...el,
+              x: el.position?.x ?? el.x ?? 0,
+              y: el.position?.y ?? el.y ?? 0,
+              width: el.size?.width ?? el.width ?? 100,
+              height: el.size?.height ?? el.height ?? 100,
+              fill: el.style?.fill ?? el.fill ?? '#ffffff',
+              fontSize: el.style?.fontSize ?? el.fontSize ?? 20,
+              fontFamily: el.style?.fontFamily ?? el.fontFamily ?? 'Inter'
+            });
+          }
+        });
+      }
+    });
+  }
+
+  const resolverContext = {
+    packId: activeSession?.packId || "_default_pack",
+    templateId: template?.id || "fallback"
+  };
+  
+  const elementsWithData = flatElements.map(el => resolveBoundData(el, match, manualInputs, elementOverrides[el.id], resolverContext));
+
   useImperativeHandle(ref, () => ({
     exportPNG: () => {
       if (!stageRef.current || !template) return;
       
-      // Save current selection to restore it later
       const prevSelected = selectedElementId;
       setSelectedElementId(null);
       
-      // Extended timeout to ensure Konva layer redraw is complete
       setTimeout(() => {
         if (!stageRef.current) return;
         const fallbackId = match?.id || 'nomatch';
@@ -76,11 +115,22 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
         link.click();
         document.body.removeChild(link);
         
-        // Restore selection if there was one
         if (prevSelected) {
           setTimeout(() => setSelectedElementId(prevSelected), 50);
         }
       }, 150);
+    },
+    exportHTML: async () => {
+      if (!template) return;
+      const fallbackId = match?.id || 'nomatch';
+      const canvasBgColor = elementOverrides['__canvas']?.bgEnabled === false ? 'transparent' : (elementOverrides['__canvas']?.bgColor || template.canvas.backgroundColor || 'transparent');
+      await exportHTMLZip(template, elementsWithData, match, fallbackId, canvasBgColor);
+    },
+    exportSVG: async () => {
+      if (!template) return;
+      const fallbackId = match?.id || 'nomatch';
+      const canvasBgColor = elementOverrides['__canvas']?.bgEnabled === false ? 'transparent' : (elementOverrides['__canvas']?.bgColor || template.canvas.backgroundColor || 'transparent');
+      await exportSVG(template, elementsWithData, fallbackId, canvasBgColor);
     }
   }));
 
@@ -122,44 +172,6 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
     );
   }
 
-  let flatElements: any[] = [];
-  template.layers.forEach((layer: any) => {
-    // Check layer visibility (template + override)
-    const isLayerVisible = elementOverrides[layer.id]?.visible !== undefined 
-      ? elementOverrides[layer.id].visible 
-      : (layer.visible !== false);
-
-    if (isLayerVisible) {
-      const els = layer.elements || layer.children || [];
-      els.forEach((el: any) => {
-        // Check element visibility (template + override)
-        const isElVisible = elementOverrides[el.id]?.visible !== undefined 
-          ? elementOverrides[el.id].visible 
-          : (el.visible !== false);
-
-        if (isElVisible) {
-          flatElements.push({
-            ...el,
-            x: el.position?.x ?? el.x ?? 0,
-            y: el.position?.y ?? el.y ?? 0,
-            width: el.size?.width ?? el.width ?? 100,
-            height: el.size?.height ?? el.height ?? 100,
-            fill: el.style?.fill ?? el.fill ?? '#ffffff',
-            fontSize: el.style?.fontSize ?? el.fontSize ?? 20,
-            fontFamily: el.style?.fontFamily ?? el.fontFamily ?? 'Inter'
-          });
-        }
-      });
-    }
-  });
-
-  const resolverContext = {
-    packId: activeSession?.packId || "_default_pack",
-    templateId: template?.id || "fallback"
-  };
-  
-  const elementsWithData = flatElements.map(el => resolveBoundData(el, match, manualInputs, elementOverrides[el.id], resolverContext));
-
   return (
     <div className="flex-1 flex flex-col relative bg-app-bg overflow-hidden">
       {!rightExpanded && (
@@ -173,14 +185,17 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
       )}
       
       <div ref={containerRef} className="flex-1 overflow-auto flex flex-col items-center justify-center bg-transparent relative p-8">
-        <div style={{ 
-          width: template.canvas.width * scale, 
-          height: template.canvas.height * scale,
-          backgroundColor: template.canvas.backgroundColor || '#111',
-          boxShadow: '0 0 40px rgba(0,0,0,0.2)',
-          border: '1px solid var(--app-border)',
-          position: 'relative'
-        }}>
+        <div 
+          className={(elementOverrides['__canvas']?.bgEnabled === false || (!elementOverrides['__canvas']?.bgColor && !template.canvas.backgroundColor) || elementOverrides['__canvas']?.bgColor === 'transparent' || template.canvas.backgroundColor === 'transparent') ? "bg-checkerboard" : ""}
+          style={{ 
+            width: template.canvas.width * scale, 
+            height: template.canvas.height * scale,
+            backgroundColor: elementOverrides['__canvas']?.bgEnabled === false ? 'transparent' : (elementOverrides['__canvas']?.bgColor || template.canvas.backgroundColor || 'transparent'),
+            boxShadow: '0 0 40px rgba(0,0,0,0.2)',
+            border: '1px solid var(--app-border)',
+            position: 'relative'
+          }}
+        >
           <Stage 
             ref={stageRef}
             width={template.canvas.width * scale} 

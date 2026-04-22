@@ -78,7 +78,7 @@ RedPanda-Forge/
 │   │   ├── mockData.ts            # Mock matches & templates
 │   │   ├── themeUtils.ts          # Theme application
 │   │   ├── colorUtils.ts          # Color contrast, manipulation
-│   │   ├── formatters.ts          # Text formatting utilities
+│   │   ├── i18n.tsx               # Localization context & utilities
 │   │   ├── assetManager.ts        # Asset loading & caching
 │   │   ├── templateRegistry.ts    # Template repository
 │   │   └── utils.ts               # General utilities (cn, etc)
