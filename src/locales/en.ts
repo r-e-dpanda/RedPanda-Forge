@@ -18,8 +18,8 @@ export const strings = {
       templates: "Templates"
     },
     filters: {
-      ratio: "RATIO",
-      template: "TEMPLATE",
+      ratio: "Ratio",
+      template: "Template",
       allRatios: "All Ratios"
     },
     matches: {

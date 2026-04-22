@@ -4,6 +4,8 @@ import { PanelRightClose, Layers, FileJson, AlertTriangle, Eye, EyeOff, FolderOp
 import { useTranslation } from "../../lib/i18n";
 import { useEditorStore } from "../../stores/editorStore";
 import { resolveBoundData, isAutoResolved } from "../../lib/templateEngine";
+import { useSettingsStore } from "../../stores/settingsStore";
+import { getUISizes } from "../../constants/ui";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -28,9 +30,9 @@ interface RightPanelProps {
 }
 
 const PropertySection: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
-  <div className={cn("space-y-4 pb-6 border-b border-app-border/40 last:border-0", className)}>
-    <h4 className="text-[14px] font-bold text-app-text mb-3 leading-none">{title}</h4>
-    <div className="space-y-4">
+  <div className={cn("space-y-5 pb-8 border-b border-app-border/40 last:border-0", className)}>
+    <h4 className="text-ui-base font-bold text-app-text mb-4 leading-none tracking-tight">{title}</h4>
+    <div className="space-y-5">
       {children}
     </div>
   </div>
@@ -38,6 +40,8 @@ const PropertySection: React.FC<{ title: string; children: React.ReactNode; clas
 
 const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded, activeRightTab, setActiveRightTab }) => {
   const { t } = useTranslation();
+  const { settings } = useSettingsStore();
+  const ui = getUISizes(settings.uiScale);
   const sessions = useEditorStore(state => state.sessions);
   const activeSessionId = useEditorStore(state => state.activeSessionId);
   const activeSession = sessions.find(s => s.id === activeSessionId);
@@ -143,14 +147,14 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
   };
 
   return (
-    <aside className="w-[320px] bg-app-sidebar border-l border-app-border flex flex-col shrink-0 h-full z-10 transition-all font-sans relative">
-      <div className="flex bg-app-sidebar h-[48px] shrink-0 border-b border-app-border">
+    <aside className="w-[340px] bg-app-sidebar border-l border-app-border flex flex-col shrink-0 h-full z-10 transition-all font-sans relative">
+      <div className="flex bg-app-sidebar h-[54px] shrink-0 border-b border-app-border">
         <Tabs value={activeRightTab} onValueChange={(val: any) => setActiveRightTab(val)} className="flex-1">
           <TabsList variant="line" className="w-full h-full p-0 gap-0">
-            <TabsTrigger value="data" className="flex-1 h-full rounded-none data-active:after:bg-app-accent data-active:text-app-text text-[12px] font-bold">
+            <TabsTrigger value="data" className="flex-1 h-full rounded-none data-active:after:bg-app-accent data-active:text-app-text text-ui-base font-bold">
               {t.panels.tabs.match}
             </TabsTrigger>
-            <TabsTrigger value="design" className="flex-1 h-full rounded-none data-active:after:bg-app-accent data-active:text-app-text text-[12px] font-bold">
+            <TabsTrigger value="design" className="flex-1 h-full rounded-none data-active:after:bg-app-accent data-active:text-app-text text-ui-base font-bold">
               {t.panels.tabs.design}
             </TabsTrigger>
           </TabsList>
@@ -159,74 +163,81 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
           variant="ghost" 
           size="icon-sm"
           onClick={() => setRightExpanded(false)}
-          className="h-full w-[48px] rounded-none hover:bg-app-card text-app-muted"
+          className="h-full w-[54px] rounded-none hover:bg-app-card text-app-muted"
         >
-          <PanelRightClose size={16} />
+          <PanelRightClose size={ui.icon.base} />
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto w-[320px]">
+      <div className="flex-1 overflow-y-auto w-[340px]">
         {activeRightTab === 'data' && (
           <div className="p-5 overflow-y-auto w-full h-full pb-10 flex flex-col gap-6">
             
             {match && (
               <>
-                <div className="flex items-center gap-3 bg-app-card rounded-[6px] border border-app-border p-3 shadow-sm">
-                  <span className="bg-app-accent text-app-bg px-2 py-0.5 rounded text-[11px] font-semibold capitalize">
+                <div className="flex items-center gap-3 bg-app-card rounded-lg border border-app-border p-3.5 shadow-sm">
+                  <span className="bg-app-accent text-app-bg px-2.5 py-1 rounded text-ui-xs font-bold">
                     {match.sport}
                   </span>
-                  <span className="text-[13px] font-semibold text-app-text">{match.league}</span>
+                  <span className="text-ui-base font-bold text-app-text tracking-tight">{match.league}</span>
                 </div>
 
                 {match.homeTeam && match.awayTeam && (
-                  <div>
-                    <h3 className="text-[12px] text-app-text font-bold mb-3 uppercase tracking-tight">{t.panels.fields.matchup}</h3>
-                    <div className="flex flex-col gap-3 p-3 bg-app-bg rounded-[6px] border border-app-border items-start justify-center">
-                      <div className="flex items-center gap-3 space-y-1">
-                          <img src={match.homeTeam.logo} className="w-6 h-6 object-contain" alt="" />
-                          <span className="text-[14px] font-bold text-app-text">{match.homeTeam.name}</span>
+                  <div className="space-y-3">
+                    <h3 className="text-ui-sm text-app-muted font-bold">{t.panels.fields.matchup}</h3>
+                    <div className="flex flex-col gap-3.5 p-4 bg-app-bg rounded-lg border border-app-border items-start justify-center shadow-inner">
+                      <div className="flex items-center gap-4">
+                          <img src={match.homeTeam.logo} className="w-7 h-7 object-contain opacity-90" alt="" />
+                          <span className="text-ui-base font-bold text-app-text tracking-tight">{match.homeTeam.name}</span>
                       </div>
-                      <div className="text-[12px] text-app-muted font-[900] pl-[10px]">VS</div>
-                      <div className="flex items-center gap-3 space-y-1">
-                          <img src={match.awayTeam.logo} className="w-6 h-6 object-contain" alt="" />
-                          <span className="text-[14px] font-bold text-app-text">{match.awayTeam.name}</span>
+                      <div className="text-[13px] text-app-muted font-[900] pl-[44px] tracking-widest relative">
+                        <div className="absolute left-0 top-1/2 w-8 h-[1px] bg-app-border/50"></div>
+                        VS
+                      </div>
+                      <div className="flex items-center gap-4">
+                          <img src={match.awayTeam.logo} className="w-7 h-7 object-contain opacity-90" alt="" />
+                          <span className="text-ui-base font-bold text-app-text tracking-tight">{match.awayTeam.name}</span>
                       </div>
                     </div>
                   </div>
                 )}
                 
                 {match.player1 && match.player2 && (
-                  <div>
-                    <h3 className="text-[12px] text-app-text font-bold mb-3">{t.panels.fields.matchup}</h3>
-                    <div className="flex flex-col gap-3 p-3 bg-app-bg rounded-[6px] border border-app-border items-start justify-center">
-                      <div className="flex items-center gap-3 space-y-1">
-                          <img src={match.player1.flag} className="w-4 h-3 object-cover" alt="" />
-                          <span className="text-[14px] font-bold text-app-text">{match.player1.name}</span>
+                  <div className="space-y-3">
+                    <h3 className="text-ui-sm text-app-muted font-bold mb-3">{t.panels.fields.matchup}</h3>
+                    <div className="flex flex-col gap-3.5 p-4 bg-app-bg rounded-lg border border-app-border items-start justify-center shadow-inner">
+                      <div className="flex items-center gap-4">
+                          <img src={match.player1.flag} className="w-6 h-4 object-cover rounded-[2px]" alt="" />
+                          <span className="text-ui-base font-bold text-app-text tracking-tight">{match.player1.name}</span>
                       </div>
-                      <div className="flex items-center gap-3 space-y-1">
-                          <img src={match.player2.flag} className="w-4 h-3 object-cover" alt="" />
-                          <span className="text-[14px] font-bold text-app-text">{match.player2.name}</span>
+                      <div className="text-[13px] text-app-muted font-[900] pl-[44px] tracking-widest relative">
+                        <div className="absolute left-0 top-1/2 w-8 h-[1px] bg-app-border/50"></div>
+                        VS
+                      </div>
+                      <div className="flex items-center gap-4">
+                          <img src={match.player2.flag} className="w-6 h-4 object-cover rounded-[2px]" alt="" />
+                          <span className="text-ui-base font-bold text-app-text tracking-tight">{match.player2.name}</span>
                       </div>
                     </div>
                   </div>
                 )}
 
                 <div>
-                  <h3 className="text-[12px] text-app-text font-bold mb-3">{t.panels.fields.details}</h3>
-                  <div className="flex flex-col gap-1.5 text-[12px]">
+                  <h3 className="text-ui-sm text-app-muted font-bold mb-3 pb-2 border-b border-app-border/30">{t.panels.fields.details}</h3>
+                  <div className="flex flex-col gap-2.5 text-[13.5px] mt-4">
                     {match.venue && (
-                      <div className="flex justify-between border-b border-app-border/50 pb-1.5">
-                        <span className="text-app-muted">{t.panels.fields.venue}</span>
-                        <span className="text-app-text font-[600] text-right">{match.venue}</span>
+                      <div className="flex justify-between items-center pb-2.5">
+                        <span className="text-app-muted font-bold text-ui-xs">{t.panels.fields.venue}</span>
+                        <span className="text-app-text font-bold text-right">{match.venue}</span>
                       </div>
                     )}
-                    <div className="flex justify-between border-b border-app-border/50 pb-1.5">
-                      <span className="text-app-muted">{t.panels.fields.date}</span>
-                      <span className="text-app-text font-[600] text-right">{new Date(match.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                    <div className="flex justify-between items-center pb-2.5">
+                      <span className="text-app-muted font-bold text-ui-xs">{t.panels.fields.date}</span>
+                      <span className="text-app-text font-bold text-right">{new Date(match.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                     </div>
-                    <div className="flex justify-between border-b border-app-border/50 pb-1.5">
-                      <span className="text-app-muted">{t.panels.fields.kickoff}</span>
-                      <span className="text-app-text font-[600] text-right">{new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} GMT</span>
+                    <div className="flex justify-between items-center pb-2.5">
+                      <span className="text-app-muted font-bold text-ui-xs">{t.panels.fields.kickoff}</span>
+                      <span className="text-app-text font-bold text-right">{new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} GMT</span>
                     </div>
                   </div>
                 </div>
@@ -234,14 +245,14 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
             )}
 
             {!match && (
-              <div className="text-center text-app-muted text-[12px] italic mb-2 border border-app-border border-dashed p-4 rounded-md">
+              <div className="text-center text-app-muted text-[13px] italic mb-2 border border-app-border border-dashed p-6 rounded-lg bg-app-card/30">
                 No match source selected. Canvas will show placeholder variables.
               </div>
             )}
 
             <div>
-              <h3 className="text-[12px] text-app-text font-bold mb-3">{t.panels.fields.dataSources}</h3>
-              <div className="flex flex-col gap-2">
+              <h3 className="text-ui-sm text-app-muted font-bold mb-4">{t.panels.fields.dataSources}</h3>
+              <div className="flex flex-col gap-3">
                 {elementsWithBinding.map(element => {
                    const resolverContext = {
                      packId: activeSession?.packId || "_default_pack",
@@ -281,14 +292,14 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                    return (
                     <div 
                        key={`bind-${element.id}`} 
-                       className="flex flex-col gap-1.5 text-[12px] p-2.5 rounded-[6px] border border-app-border bg-app-card hover:border-app-accent/50 transition-colors"
+                       className="flex flex-col gap-2.5 text-[13.5px] p-3.5 rounded-xl border border-app-border bg-app-card hover:border-app-accent/50 transition-all hover:bg-app-card/60 shadow-sm"
                        onMouseEnter={() => setHoveredElementId(element.id)}
                        onMouseLeave={() => setHoveredElementId(null)}
                     >
                       <div className="flex justify-between items-center">
-                        <span className="text-[#a0a5b0] font-mono whitespace-nowrap overflow-hidden text-ellipsis mr-2">&#123;&#123;{element.dataKey}&#125;&#125;</span>
+                        <span className="text-[#a0a5b0] font-mono text-[12.5px] whitespace-nowrap overflow-hidden text-ellipsis mr-2 tracking-tighter">&#123;&#123;{element.dataKey}&#125;&#125;</span>
                         {isAuto && (
-                          <span className="text-cyan-400 font-[600] text-right truncate max-w-[120px]" title={displayVal}>
+                          <span className="text-cyan-400 font-bold text-right truncate max-w-[120px]" title={displayVal}>
                             {displayVal || "N/A"}
                           </span>
                         )}
@@ -302,7 +313,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                             setManualInput(element.dataKey!, e.target.value);
                             commitHistory();
                           }}
-                          className="w-full bg-app-bg border border-app-border rounded p-1.5 text-app-text outline-none focus:border-app-accent text-[12px] mt-1"
+                          className="w-full bg-app-bg border border-app-border rounded-lg p-2.5 text-app-text outline-none focus:border-app-accent text-[13px] mt-1 shadow-inner h-9"
                         />
                       )}
                     </div>
@@ -378,14 +389,14 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                 <div className="animate-in fade-in slide-in-from-right-4 duration-200">
                   <button 
                     onClick={() => setSelectedElementId(null)}
-                    className="flex items-center gap-1.5 text-app-muted hover:text-app-text text-[12px] font-bold tracking-[1px] mb-5 transition-colors"
+                    className="flex items-center gap-1.5 text-app-muted hover:text-app-text text-[13.5px] font-bold tracking-[1px] mb-6 transition-colors group"
                   >
-                    <ChevronLeft size={14}/> {t.panels.fields.backToLayers}
+                    <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform"/> {t.panels.fields.backToLayers}
                   </button>
 
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-[14px] text-app-text font-[700] truncate">{el.label || el.name || 'Properties'}</h3>
-                    <span className="bg-app-sidebar text-app-muted px-2 py-0.5 rounded border border-app-border text-[11px] font-medium">
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-[15px] text-app-text font-[700] truncate tracking-tight">{el.label || el.name || 'Properties'}</h3>
+                    <span className="bg-app-sidebar text-app-muted px-2.5 py-1 rounded border border-app-border text-[12px] font-bold uppercase tracking-tight">
                       {isText ? 'Text Layer' : isImage ? 'Image Layer' : shapeSubtype ? `Shape: ${shapeSubtype}` : 'Layer'}
                     </span>
                   </div>
@@ -397,7 +408,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                       {/* Binding Path (was Source) */}
                       <div className="space-y-1.5">
                         <div className="flex justify-between items-end">
-                           <label className="text-[10px] font-medium text-app-muted/80">
+                           <label className="text-[12px] font-bold text-app-muted uppercase tracking-wider">
                              {isText ? "Value - Binding Path" : "Source - Binding Path"}
                            </label>
                         {/* Reset button if overridden */}
@@ -405,9 +416,9 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           ((isText || isImage) && overrides.dataKey !== undefined)) && (
                            <button 
                              onClick={() => {
-                               handleOverride(el.id, { bindingPath: undefined, dataKey: undefined });
+                                handleOverride(el.id, { bindingPath: undefined, dataKey: undefined });
                              }}
-                             className="text-[11px] text-app-accent hover:underline lowercase"
+                             className="text-[12px] text-app-accent hover:underline lowercase font-bold"
                            >
                              {t.panels.fields.reset}
                            </button>
@@ -415,7 +426,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                      </div>
 
                      <>
-                       <div className="flex items-center bg-app-bg border border-app-border rounded-[4px] focus-within:border-app-accent overflow-hidden h-8">
+                       <div className="flex items-center bg-app-bg border border-app-border rounded-lg focus-within:border-app-accent overflow-hidden h-9 shadow-inner transition-all">
                          <input 
                            type="text" 
                            disabled={isText ? (!isEditable('text') && !isEditable('dataKey')) : (!isEditable('src') && !isEditable('dataKey'))}
@@ -429,7 +440,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                              handleOverride(el.id, { bindingPath: e.target.value, dataKey: undefined });
                            }}
                            placeholder={isText ? "e.g. Giải {{match.league}}" : "e.g. @global/teams/{{match.homeTeam.id}}/logo.svg"}
-                           className="w-full bg-transparent h-full px-2 text-app-text text-[12px] outline-none font-mono disabled:opacity-50"
+                           className="w-full bg-transparent h-full px-3 text-app-text text-[13px] outline-none font-mono disabled:opacity-50"
                          />
                        </div>
                        {/* Read-only bindings indicator for Binding Path */}
@@ -442,10 +453,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                          const bindings = matches.map((m: string) => m.replace('{{', '').replace('}}', '').trim());
                          if (bindings.length === 0) return null;
                          return (
-                           <div className="flex gap-2 items-center mt-2 flex-wrap">
-                             <span className="text-[10px] text-app-muted font-medium">Binding Keys:</span>
+                           <div className="flex gap-2 items-center mt-3 flex-wrap">
+                             <span className="text-[11.5px] text-app-muted font-bold tracking-tight">Binding Keys:</span>
                              {bindings.map((b: string, i: number) => (
-                                <span key={i} className="text-[10px] bg-app-sidebar border border-app-border text-app-text px-1.5 py-0.5 rounded font-mono">
+                                <span key={i} className="text-[11.5px] bg-app-sidebar border border-app-border text-app-text px-2 py-0.5 rounded-md font-mono font-bold shadow-sm">
                                   {b.split('|')[0].trim()}
                                 </span>
                              ))}
@@ -457,35 +468,35 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
 
                       {/* Transform (Formatter) */}
                       {isText && (
-                      <div className="space-y-1.5 bg-app-card border border-app-border rounded-md p-3 pb-4 relative">
-                        <label className="text-[10px] font-medium text-app-muted/80 flex justify-between">
+                      <div className="space-y-1.5 bg-app-card border border-app-border rounded-lg p-4 pb-5 relative shadow-sm">
+                        <label className="text-[12px] font-bold text-app-muted uppercase tracking-wider flex justify-between">
                           {t.panels.fields.transform}
                           {activeFormatters.length > 0 && (
                             <button 
                               onClick={() => handleOverride(el.id, { formatters: [] })}
-                              className="text-[11px] text-app-accent hover:underline lowercase"
+                              className="text-[12px] text-app-accent hover:underline lowercase font-bold"
                             >
                               {t.panels.fields.clear}
                             </button>
                           )}
                         </label>
                         
-                        <div className="flex flex-col gap-2 mt-2">
+                        <div className="flex flex-col gap-2.5 mt-3">
                           {activeFormatters.map((fmt: string, idx: number) => (
-                            <div key={idx} className="flex bg-app-bg border border-app-border rounded-[4px] text-[12px] items-center px-2 py-1">
-                               <span className="text-cyan-400 font-mono text-[12px] select-none mr-2">|</span>
-                               <span className="truncate flex-1 font-mono text-[11px]">{fmt}</span>
+                            <div key={idx} className="flex bg-app-bg border border-app-border rounded-md text-[13.5px] items-center px-2.5 py-2 group shadow-inner">
+                               <span className="text-cyan-400 font-mono text-[14px] select-none mr-2.5">|</span>
+                               <span className="truncate flex-1 font-mono text-[12px] font-bold text-app-text">{fmt}</span>
                                <button onClick={() => {
                                    const arr = [...activeFormatters];
                                    arr.splice(idx, 1);
                                    handleOverride(el.id, { formatters: arr });
-                               }} className="text-red-400 hover:text-red-300 ml-2 text-[14px]">×</button>
+                               }} className="text-red-400 hover:text-red-300 ml-2.5 text-[16px] leading-none">×</button>
                             </div>
                           ))}
                         </div>
                         
                         <select 
-                          className="w-full bg-app-bg border border-app-border rounded-[4px] p-1.5 text-app-text text-[12px] outline-none focus:border-app-accent mt-2 cursor-pointer"
+                          className="w-full bg-app-bg border border-app-border rounded-lg p-2.5 text-app-text text-[13px] outline-none focus:border-app-accent mt-3 cursor-pointer h-9 shadow-inner"
                           onChange={(e) => {
                             if (!e.target.value) return;
                             handleOverride(el.id, { formatters: [...activeFormatters, e.target.value] });
@@ -503,13 +514,13 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                       )}
 
                       {/* Value (Rendered/Override) */}
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         <div className="flex justify-between items-end">
-                          <label className="text-[10px] font-medium text-app-muted/80">{isText ? t.panels.fields.value : "Source"}</label>
+                          <label className="text-[12px] font-bold text-app-muted uppercase tracking-wider">{isText ? t.panels.fields.value : "Source"}</label>
                           {(overrides.text !== undefined || overrides.src !== undefined) && (
                             <button 
                               onClick={() => handleOverride(el.id, isText ? { text: undefined } : { src: undefined })} 
-                              className="text-[11px] text-app-accent hover:underline lowercase"
+                              className="text-[12px] text-app-accent hover:underline lowercase font-bold"
                             >
                               {t.panels.fields.reset}
                             </button>
@@ -523,10 +534,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                             placeholder={(() => {
                               return resolved.text || "Rendered value...";
                             })()}
-                            className="h-8 text-[12px] bg-app-bg border-app-border"
+                            className="h-9 text-[13px] bg-app-bg border-app-border px-3"
                           />
                         ) : (
-                          <div className="flex gap-1">
+                          <div className="flex gap-2">
                             <Input 
                               disabled={!isEditable('src')}
                               value={overrides.src ?? ""} 
@@ -536,10 +547,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                 if (!isBound) return "Image URL...";
                                 return resolved.src || "Image URL...";
                               })()}
-                              className="h-8 text-[12px] bg-app-bg border-app-border"
+                              className="h-9 text-[13px] bg-app-bg border-app-border px-3"
                             />
-                            <label className="shrink-0 h-8 w-8 bg-app-card border border-app-border flex items-center justify-center rounded-lg cursor-pointer hover:bg-muted hover:text-foreground transition-all">
-                              <Upload size={14} className="text-app-muted" />
+                            <label className="shrink-0 h-9 w-9 bg-app-card border border-app-border flex items-center justify-center rounded-lg cursor-pointer hover:bg-muted hover:text-foreground transition-all shadow-sm">
+                              <Upload size={16} className="text-app-muted" />
                               <input type="file" accept="image/*" className="hidden" onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
@@ -557,86 +568,96 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
 
                     {/* 2. LAYOUT SECTION */}
                     <PropertySection title={t.panels.sections.layout}>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-medium text-app-muted/80 font-mono">X</label>
-                          <Input 
-                            type="number" 
-                            disabled={!isEditable('x')}
-                            value={overrides.x !== undefined ? overrides.x : el.x} 
-                            onChange={e => handleOverride(el.id, { x: Number(e.target.value) })}
-                            className="h-8 text-[12px] bg-app-bg"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-medium text-app-muted/80 font-mono">Y</label>
-                          <Input 
-                            type="number" 
-                            disabled={!isEditable('y')}
-                            value={overrides.y !== undefined ? overrides.y : el.y} 
-                            onChange={e => handleOverride(el.id, { y: Number(e.target.value) })}
-                            className="h-8 text-[12px] bg-app-bg"
-                          />
-                        </div>
-                      </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[12px] font-bold text-app-muted uppercase tracking-wider font-mono">X</label>
+            <Input 
+              type="number" 
+              disabled={!isEditable('x')}
+              value={overrides.x !== undefined ? overrides.x : el.x} 
+              onChange={e => handleOverride(el.id, { x: Number(e.target.value) })}
+              className="h-9 text-[13px] bg-app-bg px-3"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-ui-sm font-bold text-app-muted">X</label>
+            <Input 
+              type="number" 
+              disabled={!isEditable('x')}
+              value={overrides.x !== undefined ? overrides.x : el.x} 
+              onChange={e => handleOverride(el.id, { x: Number(e.target.value) })}
+              className="h-9 text-ui-sm bg-app-bg px-3"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-ui-sm font-bold text-app-muted">Y</label>
+            <Input 
+              type="number" 
+              disabled={!isEditable('y')}
+              value={overrides.y !== undefined ? overrides.y : el.y} 
+              onChange={e => handleOverride(el.id, { y: Number(e.target.value) })}
+              className="h-9 text-ui-sm bg-app-bg px-3"
+            />
+          </div>
+        </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.width}</label>
-                          <Input 
-                            type="number" 
-                            disabled={!isEditable('width')}
-                            value={overrides.width !== undefined ? overrides.width : el.width} 
-                            onChange={e => handleOverride(el.id, { width: Number(e.target.value) })}
-                            className="h-8 text-[12px] bg-app-bg"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.height}</label>
-                          <Input 
-                            type="number" 
-                            disabled={!isEditable('height')}
-                            value={overrides.height !== undefined ? overrides.height : el.height} 
-                            onChange={e => handleOverride(el.id, { height: Number(e.target.value) })}
-                            className="h-8 text-[12px] bg-app-bg"
-                          />
-                        </div>
-                      </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.width}</label>
+            <Input 
+              type="number" 
+              disabled={!isEditable('width')}
+              value={overrides.width !== undefined ? overrides.width : el.width} 
+              onChange={e => handleOverride(el.id, { width: Number(e.target.value) })}
+              className="h-9 text-ui-sm bg-app-bg px-3"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.height}</label>
+            <Input 
+              type="number" 
+              disabled={!isEditable('height')}
+              value={overrides.height !== undefined ? overrides.height : el.height} 
+              onChange={e => handleOverride(el.id, { height: Number(e.target.value) })}
+              className="h-9 text-ui-sm bg-app-bg px-3"
+            />
+          </div>
+        </div>
 
-                      {el.type === 'Shape' && shapeSubtype !== 'Circle' && shapeSubtype !== 'Ellipse' && (
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.topWidth}</label>
-                          <Input 
-                            type="number" 
-                            disabled={!isEditable('topWidth')}
-                            value={overrides.topWidth !== undefined ? overrides.topWidth : (el.topWidth !== undefined ? el.topWidth : (el.width || 0))} 
-                            onChange={e => {
-                               const val = Number(e.target.value);
-                               const w = overrides.width !== undefined ? overrides.width : (el.width || 0);
-                               handleOverride(el.id, { topWidth: Math.min(val, w) });
-                             }}
-                            className="h-8 text-[12px] bg-app-bg"
-                          />
-                        </div>
-                      )}
+        {el.type === 'Shape' && shapeSubtype !== 'Circle' && shapeSubtype !== 'Ellipse' && (
+          <div className="space-y-1.5">
+            <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.topWidth}</label>
+            <Input 
+              type="number" 
+              disabled={!isEditable('topWidth')}
+              value={overrides.topWidth !== undefined ? overrides.topWidth : (el.topWidth !== undefined ? el.topWidth : (el.width || 0))} 
+              onChange={e => {
+                  const val = Number(e.target.value);
+                  const w = overrides.width !== undefined ? overrides.width : (el.width || 0);
+                  handleOverride(el.id, { topWidth: Math.min(val, w) });
+                }}
+              className="h-8 text-ui-sm bg-app-bg"
+            />
+          </div>
+        )}
 
-                      <div className="grid grid-cols-1 mb-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.skewX}</label>
-                          <Input 
-                            type="number" 
-                            disabled={!isEditable('skewX')}
-                            step={0.05}
-                            value={overrides.skewX !== undefined ? overrides.skewX : (el.skewX || 0)} 
-                            onChange={e => handleOverride(el.id, { skewX: Number(e.target.value) })}
-                            className="h-8 text-[12px] bg-app-bg"
-                          />
-                        </div>
-                      </div>
+        <div className="grid grid-cols-1 mb-4">
+          <div className="space-y-1.5">
+            <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.skewX}</label>
+            <Input 
+              type="number" 
+              disabled={!isEditable('skewX')}
+              step={0.05}
+              value={overrides.skewX !== undefined ? overrides.skewX : (el.skewX || 0)} 
+              onChange={e => handleOverride(el.id, { skewX: Number(e.target.value) })}
+              className="h-8 text-ui-sm bg-app-bg"
+            />
+          </div>
+        </div>
 
-                      <div className="grid grid-cols-2 gap-4 border-t border-app-border/30 pt-4 mt-2">
-                        <div className="space-y-1.5 col-span-2">
-                          <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.mirroring}</label>
+        <div className="grid grid-cols-2 gap-4 border-t border-app-border/30 pt-4 mt-2">
+          <div className="space-y-1.5 col-span-2">
+            <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.mirroring}</label>
                           <div className="flex gap-2">
                              <button
                                onClick={() => {
@@ -669,7 +690,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                       <div className="grid grid-cols-2 gap-4">
                         {isText && (
                           <div className="space-y-1.5">
-                            <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.align}</label>
+                            <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.align}</label>
                             <div className="flex bg-app-bg border border-app-border rounded-[4px] overflow-hidden h-8">
                                {(['left', 'center', 'right'] as const).map(align => {
                                   const isActive = (overrides.align !== undefined ? overrides.align : el.align) === align;
@@ -690,16 +711,16 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           </div>
                         )}
                         <div className={cn("space-y-1.5", !isText && "col-span-2")}>
-                          <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.rotation}</label>
+                          <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.rotation}</label>
                           <div className="relative">
                             <Input 
                               type="number" 
                               disabled={!isEditable('rotation')}
                               value={overrides.rotation !== undefined ? overrides.rotation : el.rotation} 
                               onChange={e => handleOverride(el.id, { rotation: Number(e.target.value) })}
-                              className="h-8 text-[12px] bg-app-bg pr-5"
+                              className="h-8 text-ui-sm bg-app-bg pr-5"
                             />
-                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-app-muted">°</span>
+                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-ui-xs text-app-muted">°</span>
                           </div>
                         </div>
                       </div>
@@ -709,15 +730,14 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                     {isText && (
                       <PropertySection title={t.panels.sections.typography}>
                         <div className="space-y-4">
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.fontFamily}</label>
-                            <Select 
-                              value={overrides.fontFamily !== undefined ? overrides.fontFamily : el.fontFamily}
-                              onValueChange={val => handleOverride(el.id, { fontFamily: val })}
-                            >
-                              <SelectTrigger className="h-8 text-[12px] bg-app-bg border-app-border">
-                                <SelectValue />
-                              </SelectTrigger>
+                          <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.fontFamily}</label>
+                          <Select 
+                            value={overrides.fontFamily !== undefined ? overrides.fontFamily : el.fontFamily}
+                            onValueChange={val => handleOverride(el.id, { fontFamily: val })}
+                          >
+                            <SelectTrigger className="h-9 text-ui-sm bg-app-bg border-app-border px-3">
+                              <SelectValue />
+                            </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="Inter">Inter</SelectItem>
                                 <SelectItem value="Bebas Neue">Bebas Neue</SelectItem>
@@ -728,16 +748,15 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                 <SelectItem value="JetBrains Mono">JetBrains Mono</SelectItem>
                               </SelectContent>
                             </Select>
-                          </div>
 
                           <div className="grid grid-cols-2 gap-4">
-                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.weight}</label>
+                             <div className="space-y-2">
+                                <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.weight}</label>
                                 <Select 
                                   value={String(overrides.fontWeight !== undefined ? overrides.fontWeight : el.fontWeight)}
                                   onValueChange={val => handleOverride(el.id, { fontWeight: val })}
                                 >
-                                  <SelectTrigger className="h-8 text-[11px] bg-app-bg border-app-border">
+                                  <SelectTrigger className="h-9 text-ui-sm bg-app-bg border-app-border px-3">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -749,38 +768,38 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                   </SelectContent>
                                 </Select>
                              </div>
-                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.size}</label>
+                             <div className="space-y-2">
+                                <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.size}</label>
                                 <Input 
                                   type="number" 
                                   value={overrides.fontSize !== undefined ? overrides.fontSize : el.fontSize} 
                                   onChange={e => handleOverride(el.id, { fontSize: Number(e.target.value) })}
-                                  className="h-8 text-[12px] bg-app-bg"
+                                  className="h-9 text-ui-sm bg-app-bg px-3"
                                 />
                              </div>
                           </div>
 
                           <div className="grid grid-cols-2 gap-4">
-                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.lineHeight}</label>
+                             <div className="space-y-2">
+                                <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.lineHeight}</label>
                                 <Input 
                                   type="number" 
                                   step={0.1}
                                   value={overrides.lineHeight !== undefined ? overrides.lineHeight : el.lineHeight} 
                                   onChange={e => handleOverride(el.id, { lineHeight: Number(e.target.value) })}
-                                  className="h-8 text-[12px] bg-app-bg"
+                                  className="h-9 text-ui-sm bg-app-bg px-3"
                                 />
                              </div>
-                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.letterSpacing}</label>
+                             <div className="space-y-2">
+                                <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.letterSpacing}</label>
                                 <Input 
                                   type="number" 
                                   value={overrides.letterSpacing !== undefined ? overrides.letterSpacing : el.letterSpacing} 
                                   onChange={e => handleOverride(el.id, { letterSpacing: Number(e.target.value) })}
-                                  className="h-8 text-[12px] bg-app-bg"
+                                  className="h-9 text-ui-sm bg-app-bg px-3"
                                 />
-                             </div>
-                          </div>
+                              </div>
+                           </div>
                         </div>
                       </PropertySection>
                     )}
@@ -788,29 +807,29 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                     {/* 4. APPEARANCE SECTION */}
                     <PropertySection title={t.panels.sections.appearance}>
                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1.5">
-                             <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.opacity}</label>
+                          <div className="space-y-2">
+                             <label className="text-[12px] font-bold text-app-muted uppercase tracking-wider">{t.panels.fields.opacity}</label>
                              <div className="w-full relative">
                                <Input 
                                  type="number"
                                  min={0} max={100}
                                  value={Math.round((overrides.opacity !== undefined ? overrides.opacity : (el.opacity ?? 1)) * 100)}
                                  onChange={e => handleOverride(el.id, { opacity: Number(e.target.value) / 100 })}
-                                 className="h-8 text-[11px] pr-6 bg-app-bg shadow-none"
+                                 className="h-9 text-[13px] pr-8 bg-app-bg px-3 focus:border-app-accent"
                                />
-                               <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-zinc-500">%</span>
+                               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-zinc-500 font-bold">%</span>
                              </div>
                           </div>
                           
-                          <div className="space-y-1.5">
-                              <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.cornerRadius}</label>
+                          <div className="space-y-2">
+                              <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.cornerRadius}</label>
                               <Input 
                                 type="number" 
                                 disabled={!isEditable('cornerRadius')}
                                 min={0}
                                 value={overrides.cornerRadius !== undefined ? overrides.cornerRadius : (el.cornerRadius || (el as any).style?.cornerRadius || 0)} 
                                 onChange={e => handleOverride(el.id, { cornerRadius: Number(e.target.value) })}
-                                className="h-8 text-[12px] bg-app-bg shadow-none"
+                                className="h-9 text-[13px] bg-app-bg px-3 focus:border-app-accent"
                               />
                           </div>
                        </div>
@@ -818,14 +837,15 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
 
                     {/* 5. FILL SECTION */}
                     {!isImage && (
-                    <PropertySection title={t.panels.sections.fill}>
-                       <div className="space-y-4">
+                      <>
+                        <PropertySection title={t.panels.sections.fill}>
+                           <div className="space-y-4">
                           <div className="grid grid-cols-1 gap-4 items-center">
                              
                              {/* Fill Binding Path */}
                              <div className="space-y-1.5">
                                 <div className="flex justify-between items-end">
-                                   <label className="text-[10px] font-medium text-app-muted/80">Color - Binding Path</label>
+                                   <label className="text-ui-sm font-bold text-app-muted">Color - Binding Path</label>
                                    {overrides.fillBindingPath !== undefined && (
                                       <button 
                                         onClick={() => handleOverride(el.id, { fillBindingPath: undefined })} 
@@ -867,7 +887,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                              {/* Fill Value (Manual Override) */}
                              <div className="space-y-1.5">
                                 <div className="flex justify-between items-center h-4">
-                                  <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.color}</label>
+                                  <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.color}</label>
                                   {overrides.fill !== undefined && (
                                     <button 
                                       onClick={() => handleOverride(el.id, { fill: undefined })} 
@@ -944,13 +964,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           </div>
                        </div>
                     </PropertySection>
-                    )}
-
+                    
                     {/* 6. OUTLINE SECTION */}
                     <PropertySection title={t.panels.sections.outline}>
                        <div className="space-y-4">
                           <div className="flex items-center justify-between">
-                             <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.enable}</label>
+                             <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.enable}</label>
                              <Switch 
                                checked={resolved.strokeEnabled !== undefined ? resolved.strokeEnabled : (resolved.strokeWidth || 0) > 0}
                                onCheckedChange={checked => {
@@ -979,7 +998,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                   />
                                </div>
                                <div className="space-y-1.5">
-                                  <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.width} (px)</label>
+                                  <label className="text-[13px] font-bold text-app-muted uppercase tracking-wider">{t.panels.fields.width} (px)</label>
                                   <Input 
                                     type="number"
                                     min={0}
@@ -1001,7 +1020,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                     <PropertySection title={t.panels.sections.shadow}>
                        <div className="space-y-4">
                           <div className="flex items-center justify-between">
-                             <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.enable}</label>
+                             <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.enable}</label>
                              <Switch 
                                 checked={resolved.shadowEnabled || false}
                                 onCheckedChange={checked => handleOverride(el.id, { shadowEnabled: checked })}
@@ -1010,45 +1029,48 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
 
                           {(resolved.shadowEnabled || false) && (
                             <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                               <div className="flex gap-2 items-center">
-                                  <input 
-                                    type="color" 
-                                    value={resolved.shadowColor || '#000000'}
-                                    onChange={e => handleOverride(el.id, { shadowColor: e.target.value })}
-                                    className="w-8 h-8 rounded border-none outline-none cursor-pointer bg-transparent shadow-[0_0_0_1px_var(--app-border)] p-0 shrink-0"
-                                  />
-                                  <div className="flex-1 flex gap-2">
+                               <div className="flex gap-2.5 items-center">
+                                  <div className="relative w-9 h-9 shrink-0 flex items-center justify-center rounded-lg border border-app-border bg-app-bg cursor-pointer hover:bg-app-bg-hover group transition-colors shadow-inner">
+                                    <div className="w-5 h-5 rounded-[4px] shadow-[0_0_0_1px_rgba(0,0,0,0.1)] transition-transform group-hover:scale-110" style={{ backgroundColor: resolved.shadowColor || '#000000' }} />
+                                    <input 
+                                      type="color" 
+                                      value={resolved.shadowColor || '#000000'}
+                                      onChange={e => handleOverride(el.id, { shadowColor: e.target.value })}
+                                      className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                                    />
+                                  </div>
+                                  <div className="flex-1 flex gap-2.5">
                                      <Input 
                                        value={resolved.shadowColor || '#000000'}
                                        onChange={e => handleOverride(el.id, { shadowColor: e.target.value })}
-                                       className="flex-1 bg-app-bg h-8 text-[12px] font-mono"
+                                       className="flex-1 bg-app-bg h-9 text-[13px] font-mono px-3 shadow-inner"
                                      />
                                      <Input 
                                        type="number"
                                        placeholder={t.panels.fields.blur}
                                        value={resolved.shadowBlur || 0}
                                        onChange={e => handleOverride(el.id, { shadowBlur: Number(e.target.value) })}
-                                       className="w-12 h-8 text-[12px] bg-app-bg"
+                                       className="w-16 h-9 text-[13px] bg-app-bg px-2 shadow-inner"
                                      />
                                   </div>
                                </div>
                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="space-y-1.5">
-                                     <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.offsetX}</label>
+                                  <div className="space-y-2">
+                                     <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.offsetX}</label>
                                      <Input 
                                        type="number"
                                        value={resolved.shadowOffsetX || 0}
                                        onChange={e => handleOverride(el.id, { shadowOffsetX: Number(e.target.value) })}
-                                       className="h-8 text-[12px] bg-app-bg"
+                                       className="h-9 text-[13px] bg-app-bg px-3 shadow-inner"
                                      />
                                   </div>
-                                  <div className="space-y-1.5">
-                                     <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.offsetY}</label>
+                                  <div className="space-y-2">
+                                     <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.offsetY}</label>
                                      <Input 
                                        type="number"
                                        value={resolved.shadowOffsetY || 0}
                                        onChange={e => handleOverride(el.id, { shadowOffsetY: Number(e.target.value) })}
-                                       className="h-8 text-[12px] bg-app-bg"
+                                       className="h-9 text-[13px] bg-app-bg px-3 shadow-inner"
                                      />
                                   </div>
                                </div>
@@ -1056,13 +1078,15 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           )}
                        </div>
                     </PropertySection>
+                  </>
+                )}
 
                     {/* 7. BACKGROUND SECTION */}
                     {isText && (
                       <PropertySection title={t.panels.sections.background}>
                          <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <label className="text-[10px] font-medium text-app-muted/80">{t.panels.fields.enable}</label>
+                              <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.enable}</label>
                                <Switch 
                                  checked={overrides.bgEnabled !== undefined ? overrides.bgEnabled : el.bgEnabled}
                                  onCheckedChange={checked => handleOverride(el.id, { bgEnabled: checked })}
@@ -1086,7 +1110,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                  </div>
                                  <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                       <label className="text-[12px] font-medium text-app-muted/80">{t.panels.fields.padding}</label>
+                                       <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.padding}</label>
                                        <Input 
                                          type="number"
                                          value={overrides.bgPadding !== undefined ? overrides.bgPadding : el.bgPadding}
@@ -1095,7 +1119,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                        />
                                     </div>
                                     <div className="space-y-1.5">
-                                       <label className="text-[12px] font-medium text-app-muted/80">{t.panels.fields.radius}</label>
+                                       <label className="text-ui-sm font-bold text-app-muted">{t.panels.fields.radius}</label>
                                        <Input 
                                          type="number"
                                          value={overrides.bgRadius !== undefined ? overrides.bgRadius : el.bgRadius}
@@ -1114,10 +1138,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
               )
             })() : (
               <div className="animate-in fade-in slide-in-from-left-4 duration-200">
-                <h3 className="text-[12px] tracking-[1px] text-app-muted font-[700] mb-4 flex items-center gap-2">
-                  <Layers size={14}/> {t.panels.fields.layerGroups}
+                <h3 className="text-ui-sm text-app-muted font-bold mb-4 flex items-center gap-2">
+                  <Layers size={ui.icon.md}/> {t.panels.fields.layerGroups}
                 </h3>
-                <div className="space-y-1">
+                <div className="space-y-3">
                    {template.layers.map((layer: any) => {
                     const isExpanded = expandedLayers[layer.id];
                     const isLayerVisible = elementOverrides[layer.id]?.visible !== undefined 
@@ -1127,12 +1151,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                     return (
                       <div key={layer.id} className="flex flex-col">
                         <div 
-                          className="flex items-center gap-2 text-[12px] p-2 bg-app-card rounded-[6px] border border-app-border mb-1 hover:border-app-accent/50 cursor-pointer overflow-hidden transition-colors"
+                          className="flex items-center gap-4 text-[13.5px] p-4 bg-app-card rounded-2xl border border-app-border mb-3 hover:border-app-accent/50 cursor-pointer overflow-hidden transition-all shadow-md group/layer"
                           onClick={() => toggleLayerExpanded(layer.id)}
                         >
                            <button className="text-app-muted hover:text-app-text shrink-0">
                                <div className={cn("transition-transform", isExpanded ? "rotate-90" : "")}>
-                                   <ChevronRight size={14}/>
+                                   <ChevronRight size={ui.icon.base}/>
                                </div>
                            </button>
                            <button 
@@ -1142,12 +1166,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                handleOverride(layer.id, { visible: !isLayerVisible });
                              }}
                            >
-                               {isLayerVisible ? <Eye size={14}/> : <EyeOff size={14} className="opacity-50" />}
+                               {isLayerVisible ? <Eye size={16}/> : <EyeOff size={16} className="opacity-50" />}
                            </button>
                            <div className="text-yellow-500 shrink-0">
-                               {isExpanded ? <FolderOpen size={14}/> : <Folder size={14}/>}
+                               {isExpanded ? <FolderOpen size={16}/> : <Folder size={16}/>}
                            </div>
-                           <span className="font-bold text-app-text truncate flex-1">{layer.name}</span>
+                           <span className="font-bold text-app-text truncate flex-1 tracking-tight">{layer.name}</span>
                         </div>
 
                         {isExpanded && (layer.elements || (layer as any).children || []).map((el: any) => {
@@ -1163,15 +1187,15 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                 <div 
                                     key={el.id} 
                                     className={cn(
-                                        "flex items-center gap-2 text-[12px] py-1.5 pr-2 pl-9 rounded-[4px] border border-transparent transition-all cursor-pointer relative",
-                                        isSelected ? "bg-app-card text-app-text border-app-border" :
+                                        "flex items-center gap-3 text-[13px] py-2.5 pr-3 pl-11 rounded-lg border border-transparent transition-all cursor-pointer relative mb-1",
+                                        isSelected ? "bg-app-card text-app-text border-app-border shadow-md ring-1 ring-app-accent/20" :
                                         hoveredElementId === el.id 
                                         ? "bg-app-card/50 text-app-text" 
                                         : "text-app-muted hover:bg-app-card/50"
                                     )}
                                     style={{
-                                        backgroundImage: "linear-gradient(#333, #333)",
-                                        backgroundPosition: "20px center",
+                                        backgroundImage: "linear-gradient(#444, #444)",
+                                        backgroundPosition: "24px center",
                                         backgroundSize: "1px 100%",
                                         backgroundRepeat: "no-repeat"
                                     }}
@@ -1182,7 +1206,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                     onMouseEnter={() => setHoveredElementId(el.id)}
                                     onMouseLeave={() => setHoveredElementId(null)}
                                 >
-                                    <div className="w-[12px] h-[1px] bg-app-border absolute left-[20px]"></div>
+                                    <div className="w-[14px] h-[1px] bg-app-border absolute left-[24px]"></div>
 
                                     <button 
                                       className="text-app-muted hover:text-app-text transition-colors shrink-0 z-10 bg-transparent pl-1 relative"
@@ -1191,17 +1215,17 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                         handleOverride(el.id, { visible: !isVisible });
                                       }}
                                     >
-                                        {isVisible ? <Eye size={12}/> : <EyeOff size={12} className="opacity-50" />}
+                                        {isVisible ? <Eye size={ui.icon.sm}/> : <EyeOff size={ui.icon.sm} className="opacity-50" />}
                                     </button>
-                                    <div className="shrink-0 text-app-muted flex items-center justify-center w-4 h-4 rounded">
-                                        {isText && <Type size={12}/>}
-                                        {isImage && <LucideImage size={12}/>}
-                                        {isShape && <Square size={12}/>}
+                                    <div className="shrink-0 text-app-muted flex items-center justify-center w-5 h-5 rounded">
+                                        {isText && <Type size={ui.icon.sm}/>}
+                                        {isImage && <LucideImage size={ui.icon.sm}/>}
+                                        {isShape && <Square size={ui.icon.sm}/>}
                                     </div>
-                                    <span className={cn("truncate flex-1 font-medium", isSelected ? "font-bold" : "")}>{el.label || el.name || el.id}</span>
+                                    <span className={cn("truncate flex-1 font-[600] tracking-tight", isSelected ? "font-bold" : "")}>{el.label || el.name || el.id}</span>
                                     {el.dataKey && (
                                         <span 
-                                            className="bg-app-accent/20 text-app-accent px-1 py-0.5 ml-1 rounded leading-none text-[12px] font-bold shrink-0" 
+                                            className="bg-app-accent/20 text-app-accent px-1.5 py-0.5 ml-1.5 rounded leading-none text-[11px] font-[900] shrink-0 uppercase tracking-tighter" 
                                             title={`Bound to: ${el.dataKey}`}
                                         >
                                             &#123;&#123;{el.dataKey}&#125;&#125;

@@ -7,6 +7,7 @@
     "secondary": "#0066B2",
     "accent": "#FFFFFF"
   },
+  "logo": "@global/soccer/teams/bayern-munich/logo.svg",
   "assets": {
     "logo": "@global/soccer/teams/bayern-munich/logo.svg"
   }

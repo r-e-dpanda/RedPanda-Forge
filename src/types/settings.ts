@@ -8,6 +8,7 @@ export interface AppSettings {
   
   // Tùy chọn khác
   defaultRatio: "16:9" | "9:16" | "1:1";
+  uiScale: number; // Logic: 1.0 = base, 1.1 = 110%
   autoSave: boolean;
   lastUsedSport: string;
   
@@ -22,6 +23,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   assetsRoot: "", 
   templatesRoot: "",
   defaultRatio: "16:9",
+  uiScale: 1.0,
   autoSave: true,
   lastUsedSport: "football",
   useCloudAssets: false,

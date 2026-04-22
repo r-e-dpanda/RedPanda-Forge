@@ -82,24 +82,24 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-app-bg border-l border-app-border">
       {/* Editor Tab Bar - Localized to Editor Area with Actions */}
-      <div className="h-[36px] bg-app-sidebar/40 border-b border-app-border shrink-0 flex items-center justify-between px-2 relative z-20 overflow-hidden">
-          <div className="flex items-end gap-0.5 h-full overflow-x-auto scrollbar-hide flex-1">
+      <div className="h-[44px] bg-app-sidebar/40 border-b border-app-border shrink-0 flex items-center justify-between px-3 relative z-20 overflow-hidden select-none">
+          <div className="flex items-end gap-1 h-full overflow-x-auto overflow-y-hidden scrollbar-hide flex-1">
             {sessions.map(session => (
               <div 
                 key={session.id}
                 onClick={() => setActiveSession(session.id)}
                 onDoubleClick={(e) => startRenaming(session.id, session.name, e)}
                 className={cn(
-                  "h-[28px] px-3 flex items-center gap-2 rounded-t-md min-w-[100px] max-w-[180px] cursor-pointer transition-all border-x border-t relative text-[12px] font-bold tracking-wider group",
+                  "h-[34px] px-4 flex items-center gap-2.5 rounded-t-lg min-w-[120px] max-w-[220px] cursor-pointer transition-all border-x border-t relative text-[13px] font-bold tracking-tight group",
                   activeSessionId === session.id 
                     ? "bg-app-bg border-app-border border-b-app-bg -mb-[1px] text-app-text z-10" 
                     : "bg-transparent border-transparent text-app-muted hover:text-app-text hover:bg-app-card/30"
                 )}
               >
-                <div className="w-3.5 h-3.5 shrink-0 flex items-center justify-center">
+                <div className="w-4 h-4 shrink-0 flex items-center justify-center">
                   {session.template?.thumbnail ? (
-                    <img src={session.template.thumbnail} className="w-full h-full object-contain opacity-80" alt="" />
-                  ) : <ImageIcon size={9} className="opacity-40" />}
+                    <img src={session.template.thumbnail} className="w-full h-full object-contain opacity-90" alt="" />
+                  ) : <ImageIcon size={10} className="opacity-40" />}
                 </div>
                 
                 {renamingId === session.id ? (
@@ -110,7 +110,7 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
                     onBlur={submitRename}
                     onKeyDown={e => e.key === 'Enter' && submitRename()}
                     onClick={e => e.stopPropagation()}
-                    className="bg-app-card border border-app-accent rounded px-1 w-full text-[12px] h-6 outline-none font-bold"
+                    className="bg-app-card border border-app-accent rounded px-2 w-full text-[13px] h-7 outline-none font-bold"
                   />
                 ) : (
                   <span className="truncate flex-1 leading-none">{session.name}</span>
@@ -119,50 +119,50 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
                 <button 
                   onClick={(e) => handleCloseSession(session.id, e)}
                   className={cn(
-                    "w-4 h-4 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100",
+                    "w-5 h-5 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100",
                     activeSessionId === session.id ? "opacity-100 bg-app-card text-app-muted hover:bg-red-500 hover:text-white" : "text-app-muted hover:bg-app-accent hover:text-black"
                   )}
                 >
-                  <X size={10} />
+                  <X size={12} />
                 </button>
               </div>
             ))}
             <button 
               onClick={() => addSession()}
-              className="px-2 h-[28px] text-app-muted hover:text-app-accent transition-colors flex items-center justify-center mb-0.5"
+              className="px-3 h-[34px] text-app-muted hover:text-app-accent transition-colors flex items-center justify-center mb-0.5"
               title={t.workspace.actions.newGraphic}
             >
-              <Plus size={14} />
+              <Plus size={16} />
             </button>
           </div>
 
           {/* Localized Actions */}
-          <div className="flex items-center gap-2 pl-4">
-            <div className="flex items-center rounded overflow-hidden border border-app-border h-6 shadow-sm">
+          <div className="flex items-center gap-2.5 pl-5 overflow-y-hidden">
+            <div className="flex items-center rounded overflow-hidden border border-app-border h-8 shadow-sm">
                 <button 
                   onClick={undo}
                   disabled={!canUndo()}
-                  className="w-7 h-full bg-app-bg flex items-center justify-center text-app-muted hover:text-app-text disabled:opacity-30 disabled:pointer-events-none border-r border-app-border transition-colors outline-none"
+                  className="w-10 h-full bg-app-bg flex items-center justify-center text-app-muted hover:text-app-text disabled:opacity-30 disabled:pointer-events-none border-r border-app-border transition-colors outline-none"
                   title={t.workspace.actions.undo}
                 >
-                  <RotateCcw size={11} />
+                  <RotateCcw size={14} />
                 </button>
                 <button 
                   onClick={redo}
                   disabled={!canRedo()}
-                  className="w-7 h-full bg-app-bg flex items-center justify-center text-app-muted hover:text-app-text disabled:opacity-30 disabled:pointer-events-none transition-colors outline-none"
+                  className="w-10 h-full bg-app-bg flex items-center justify-center text-app-muted hover:text-app-text disabled:opacity-30 disabled:pointer-events-none transition-colors outline-none"
                   title={t.workspace.actions.redo}
                 >
-                  <RotateCw size={11} />
+                  <RotateCw size={14} />
                 </button>
             </div>
 
             <button 
               onClick={() => innerEditorRef.current?.exportPNG()}
-              className="h-6 bg-app-accent hover:bg-app-accent/80 text-black px-3 rounded flex items-center justify-center gap-2 text-[12px] font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+              className="h-8 bg-app-accent hover:brightness-110 text-black px-4 rounded flex items-center justify-center gap-2 text-[13px] font-bold tracking-tight transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-sm"
               disabled={!activeSession?.template}
             >
-              <Download size={11} /> {t.workspace.actions.export}
+              <Download size={13} /> {t.workspace.actions.export}
             </button>
           </div>
       </div>
@@ -190,20 +190,20 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
                 <h2 className="text-lg font-bold text-app-text tracking-tight uppercase">{t.workspace.modals.closeTab.header}</h2>
               </div>
               
-              <p className="text-app-muted text-sm leading-relaxed mb-6">
+              <p className="text-app-muted text-[14px] leading-relaxed mb-8">
                 This graphic has <span className="text-app-text font-bold">UNSAVED CHANGES</span>. Closing this tab will permanently discard all your adjustments.
               </p>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 <button 
                   onClick={confirmClose}
-                  className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg transition-colors text-sm uppercase tracking-wider"
+                  className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-lg transition-colors text-[13px] uppercase tracking-wider"
                 >
                   {t.workspace.modals.closeTab.confirm}
                 </button>
                 <button 
                   onClick={() => setShowConfirmClose(null)}
-                  className="w-full bg-app-card hover:bg-app-bg text-app-text border border-app-border font-bold py-3 rounded-lg transition-colors text-sm uppercase tracking-wider"
+                  className="w-full bg-app-card hover:bg-app-bg text-app-text border border-app-border font-bold py-3.5 rounded-lg transition-colors text-[13px] uppercase tracking-wider"
                 >
                   {t.common.cancel}
                 </button>

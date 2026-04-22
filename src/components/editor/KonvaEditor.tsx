@@ -536,11 +536,11 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
           </Stage>
         </div>
 
-        <div className="absolute bottom-[20px] bg-app-card backdrop-blur-md rounded-[100px] px-5 py-2 flex gap-4 border border-app-border text-[12px] text-app-muted items-center">
-          <div className="flex items-center gap-1">
-            <button className="hover:text-app-text" onClick={() => setScale(s => s * 0.9)}><ZoomOut size={14} /></button>
-            Zoom: <span className="text-app-text w-10 text-center">{Math.round(scale * 100)}%</span>
-            <button className="hover:text-app-text" onClick={() => setScale(s => s * 1.1)}><ZoomIn size={14} /></button>
+        <div className="absolute bottom-[24px] bg-app-card backdrop-blur-md rounded-[100px] px-6 py-2.5 flex gap-5 border border-app-border text-[13.5px] text-app-text font-bold items-center shadow-2xl">
+          <div className="flex items-center gap-2">
+            <button className="hover:text-app-accent transition-colors p-1" onClick={() => setScale(s => s * 0.9)}><ZoomOut size={16} /></button>
+            <span className="text-app-muted uppercase font-bold tracking-tight text-[11px] mt-0.5">Zoom</span> <span className="text-app-text w-12 text-center text-[13.5px]">{Math.round(scale * 100)}%</span>
+            <button className="hover:text-app-accent transition-colors p-1" onClick={() => setScale(s => s * 1.1)}><ZoomIn size={16} /></button>
           </div>
         </div>
       </div>
