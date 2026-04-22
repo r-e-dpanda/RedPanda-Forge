@@ -1,12 +1,82 @@
 import { Match, Template } from "../types/template";
-// Mock hydration step: Import local JSON data (Replacing actual async network fetch for demo environment)
-import mciData from "../../public/assets/soccer/teams/manchester-city/team.json" with { type: "json" };
-import munData from "../../public/assets/soccer/teams/manchester-united/team.json" with { type: "json" };
-import rmaData from "../../public/assets/soccer/teams/real-madrid/team.json" with { type: "json" };
-import bayData from "../../public/assets/soccer/teams/bayern-munich/team.json" with { type: "json" };
+// Pre-defined mock data to avoid complex relative public imports which can fail in some dev environments
+const mciData = {
+  "id": "manchester-city",
+  "name": "Manchester City",
+  "shortName": "MCI",
+  "colors": {
+    "primary": "#6CABDD",
+    "secondary": "#FFFFFF",
+    "accent": "#FFC20E"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/manchester-city/logo.svg"
+  }
+};
 
-import ndData from "../../public/assets/tennis/players/novak-djokovic/player.json" with { type: "json" };
-import caData from "../../public/assets/tennis/players/carlos-alcaraz/player.json" with { type: "json" };
+const munData = {
+  "id": "manchester-united",
+  "name": "Manchester United",
+  "shortName": "MUN",
+  "colors": {
+    "primary": "#DA291C",
+    "secondary": "#FFFFFF",
+    "accent": "#FBE122"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/manchester-united/logo.svg"
+  }
+};
+
+const rmaData = {
+  "id": "real-madrid",
+  "name": "Real Madrid",
+  "shortName": "RMA",
+  "colors": {
+    "primary": "#FFFFFF",
+    "secondary": "#FEBE10",
+    "accent": "#00529F"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/real-madrid/logo.svg"
+  }
+};
+
+const bayData = {
+  "id": "bayern-munich",
+  "name": "Bayern Munich",
+  "shortName": "FCB",
+  "colors": {
+    "primary": "#DC052D",
+    "secondary": "#FFFFFF",
+    "accent": "#0066B2"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/bayern-munich/logo.svg"
+  }
+};
+
+const ndData = {
+  "id": "novak-djokovic",
+  "name": "Novak Djokovic",
+  "shortName": "N. Djokovic",
+  "flag": "rs",
+  "colors": {
+    "primary": "#FFFFFF",
+    "secondary": "#000000"
+  }
+};
+
+const caData = {
+  "id": "carlos-alcaraz",
+  "name": "Carlos Alcaraz",
+  "shortName": "C. Alcaraz",
+  "flag": "es",
+  "colors": {
+    "primary": "#FFFFFF",
+    "secondary": "#000000"
+  }
+};
 
 const LOCAL_DB: Record<string, any> = {
   "manchester-city": mciData,
@@ -389,6 +459,7 @@ export const MOCK_TEMPLATES: Template[] = [
             type: "Text",
             name: "Match Date",
             dataKey: "match.date",
+            dataType: "date",
             text: "SUNDAY, 01 DEC 2024",
             formatters: ["date:EEEE, dd MMM yyyy", "uppercase"],
             style: { fill: "#FFFFFF", fontFamily: "Inter", fontSize: 75, fontWeight: "bold", align: "center" },

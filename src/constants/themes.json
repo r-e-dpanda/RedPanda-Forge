@@ -19,10 +19,10 @@
       "bg": "#f5fffa",
       "sidebar": "#e0f2f1",
       "card": "#ffffff",
-      "border": "#b2dfdb",
+      "border": "#99ccca",
       "text": "#1a3a3a",
-      "muted": "#4e7070",
-      "accent": "#20b2aa"
+      "muted": "#3d5a5a",
+      "accent": "#0d9488"
     }
   },
   "light": {

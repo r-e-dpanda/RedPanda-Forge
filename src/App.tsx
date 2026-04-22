@@ -148,7 +148,7 @@ export default function App() {
   }, [settings.theme]);
 
   return (
-    <div className="h-screen w-screen bg-[#050505] overflow-hidden flex flex-col font-sans select-none">
+    <div className="h-screen w-screen bg-app-bg overflow-hidden flex flex-col font-sans select-none">
       {/* Top Header / App Bar - Row 1 */}
       <header className="h-[52px] border-b border-app-border shrink-0 px-5 flex items-center justify-between bg-app-sidebar relative z-30">
         <div className="flex items-center gap-5">
@@ -227,12 +227,12 @@ export default function App() {
             </p>
 
             <div className="flex flex-col gap-2">
-              <button 
-                onClick={openInNewTab}
-                className="w-full bg-app-accent hover:bg-app-accent/90 text-app-bg font-medium py-2.5 rounded-lg transition-colors text-ui-sm"
-              >
-                {t.modals.templateSwitch.openNewTab}
-              </button>
+                          <button 
+                            onClick={openInNewTab}
+                            className="w-full bg-app-accent hover:opacity-90 text-black font-extrabold py-2.5 rounded-lg transition-colors text-ui-sm shadow-lg shadow-app-accent/20"
+                          >
+                            {t.modals.templateSwitch.openNewTab}
+                          </button>
               <button 
                 onClick={confirmSwitch}
                 className="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg transition-colors text-ui-sm"

@@ -37,13 +37,13 @@ const applyPipes = (value: any, pipes: string[]): any => {
       break;
     }
 
-    const firstColIdx = trimmed.indexOf(':');
-    let pName = trimmed.toLowerCase();
+    const firstColIdx = pipeStr.indexOf(':');
+    let pName = pipeStr.trim().toLowerCase();
     let pArgs = '';
     
     if (firstColIdx !== -1) {
-       pName = trimmed.substring(0, firstColIdx).trim().toLowerCase();
-       pArgs = trimmed.substring(firstColIdx + 1).trim();
+       pName = pipeStr.substring(0, firstColIdx).trim().toLowerCase();
+       pArgs = pipeStr.substring(firstColIdx + 1);
     }
 
     if (pName === 'contrast') {
@@ -51,13 +51,17 @@ const applyPipes = (value: any, pipes: string[]): any => {
     } else if (pName === 'uppercase') {
       result = String(result).toUpperCase();
     } else if (pName === 'lowercase') {
-      result = String(result).toLowerCase();
+      // Smart lowercase: keep AM/PM uppercase
+      const val = String(result).toLowerCase();
+      result = val.replace(/\bam\b/g, 'AM').replace(/\bpm\b/g, 'PM');
     } else if (pName === 'titlecase') {
        if (result) {
          result = String(result).replace(
            /\w\S*/g,
            (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
          );
+         // Restore AM/PM
+         result = result.replace(/\bam\b/gi, 'AM').replace(/\bpm\b/gi, 'PM');
        }
     } else if (pName === 'shorten') {
       const len = parseInt(pArgs, 10);
@@ -133,8 +137,9 @@ export const resolveBoundData = (
   
   // Helper to process {{bindings}} and pipes inside style properties
   const processStyleValue = (val: any) => {
+    let hasError = false;
     if (typeof val === 'string' && val.includes('{{') && val.includes('}}')) {
-      return val.replace(/{{([^}]+)}}/g, (matchStr, p1) => {
+      const processed = val.replace(/{{([^}]+)}}/g, (matchStr, p1) => {
         const parts = p1.split('|');
         const key = parts[0].trim();
         const pipes = parts.slice(1);
@@ -154,10 +159,21 @@ export const resolveBoundData = (
            boundVal = applyPipes(boundVal, pipes);
            return String(boundVal);
         }
+        hasError = true;
         return matchStr; // Keep original {{key}} unresolved
       });
+      return { value: processed, hasError };
     }
-    return val;
+    return { value: val, hasError };
+  };
+
+  const processBinding = (prop: string, source: any) => {
+    const result = processStyleValue(source);
+    if (result.hasError) {
+      if (!resolvedElement.errors) resolvedElement.errors = {};
+      resolvedElement.errors[prop] = true;
+    }
+    return result.value;
   };
 
   // 1. Text Data Binding logic (runs regardless of dataKey presence for full string interpolation)
@@ -177,10 +193,10 @@ export const resolveBoundData = (
 
     if (overrideTextVal !== undefined) {
        // Manual override 
-       resolvedElement.text = processStyleValue(overrideTextVal);
+       resolvedElement.text = processBinding('text', overrideTextVal);
     } else if (overrideBindingPath !== undefined) {
        // Binding Path override
-       resolvedElement.text = processStyleValue(overrideBindingPath);
+       resolvedElement.text = processBinding('text', overrideBindingPath);
        if (parsedFormatters.length > 0) {
           resolvedElement.text = applyPipes(resolvedElement.text, parsedFormatters);
        }
@@ -194,8 +210,12 @@ export const resolveBoundData = (
        }
        const isAuto = isAutoResolved(keyWithoutPipes, match);
        
-       if (!isAuto) {
-          resolvedElement.text = manualInputs[finalDataKey] !== undefined ? manualInputs[finalDataKey] : `{{${finalDataKey}}}`;
+       if (!isAuto && (!manualInputs || manualInputs[finalDataKey] === undefined)) {
+          if (!resolvedElement.errors) resolvedElement.errors = {};
+          resolvedElement.errors['text'] = true;
+          resolvedElement.text = `{{${finalDataKey}}}`;
+       } else if (!isAuto) {
+          resolvedElement.text = manualInputs[finalDataKey];
        } else if (match) {
            const cleanKey = keyWithoutPipes.replace(/^match\./, '');
            const val = getByPath(match, cleanKey);
@@ -208,7 +228,11 @@ export const resolveBoundData = (
               else if (cleanKey === "date") resolvedElement.text = match.date;
               else if (cleanKey === "time") resolvedElement.text = match.date;
               else if (cleanKey === "round") resolvedElement.text = "Final";
-              else resolvedElement.text = `{{${finalDataKey}}}`;
+              else {
+                if (!resolvedElement.errors) resolvedElement.errors = {};
+                resolvedElement.errors['text'] = true;
+                resolvedElement.text = `{{${finalDataKey}}}`;
+              }
            }
        }
        
@@ -220,7 +244,7 @@ export const resolveBoundData = (
     } else {
        // No explicit overrides or dataKey -> process raw text
        if (resolvedElement.text !== undefined && typeof resolvedElement.text === 'string') {
-          resolvedElement.text = processStyleValue(resolvedElement.text);
+          resolvedElement.text = processBinding('text', resolvedElement.text);
           if (parsedFormatters.length > 0) {
              resolvedElement.text = applyPipes(resolvedElement.text, parsedFormatters);
           }
@@ -238,23 +262,32 @@ export const resolveBoundData = (
        resolvedElement.src = overrideSrcVal;
     } else if (overrideBindingPath !== undefined) {
        // If binding path is overridden, use it and resolve it
-       resolvedElement.src = processStyleValue(overrideBindingPath);
+       resolvedElement.src = processBinding('src', overrideBindingPath);
     } else if (finalDataKey) {
         const isAuto = isAutoResolved(finalDataKey, match);
         if (!isAuto) {
-             resolvedElement.src = manualInputs[finalDataKey] !== undefined ? manualInputs[finalDataKey] : "";
+             const mInput = manualInputs[finalDataKey];
+             if (mInput !== undefined) {
+               resolvedElement.src = mInput;
+             } else {
+               if (!resolvedElement.errors) resolvedElement.errors = {};
+               resolvedElement.errors['src'] = true;
+               resolvedElement.src = "";
+             }
         } else if (match) {
             const cleanKey = finalDataKey.replace(/^match\./, '');
             const val = getByPath(match, cleanKey);
             if (val !== undefined && typeof val === 'string') {
                 resolvedElement.src = val;
             } else {
+                if (!resolvedElement.errors) resolvedElement.errors = {};
+                resolvedElement.errors['src'] = true;
                 resolvedElement.src = "";
             }
         }
     } else {
        if (resolvedElement.src !== undefined && typeof resolvedElement.src === 'string') {
-          resolvedElement.src = processStyleValue(resolvedElement.src);
+          resolvedElement.src = processBinding('src', resolvedElement.src);
        }
     }
     
@@ -270,16 +303,16 @@ export const resolveBoundData = (
     
     let overrideFillBindingPath = overrides?.fillBindingPath !== undefined ? overrides.fillBindingPath : undefined;
     if (overrideFillBindingPath !== undefined) {
-      resolvedElement.style.fill = processStyleValue(overrideFillBindingPath);
+      resolvedElement.style.fill = processBinding('fill', overrideFillBindingPath);
     } else if (resolvedElement.style.fill) {
-      resolvedElement.style.fill = processStyleValue(resolvedElement.style.fill);
+      resolvedElement.style.fill = processBinding('fill', resolvedElement.style.fill);
     }
     
     let overrideStrokeBindingPath = overrides?.strokeBindingPath !== undefined ? overrides.strokeBindingPath : undefined;
     if (overrideStrokeBindingPath !== undefined) {
-      resolvedElement.style.stroke = processStyleValue(overrideStrokeBindingPath);
+      resolvedElement.style.stroke = processBinding('stroke', overrideStrokeBindingPath);
     } else if (resolvedElement.style.stroke) {
-      resolvedElement.style.stroke = processStyleValue(resolvedElement.style.stroke);
+      resolvedElement.style.stroke = processBinding('stroke', resolvedElement.style.stroke);
     }
   }
 
@@ -324,8 +357,8 @@ export const resolveBoundData = (
     ...cleanOverrides,
     // Fix Fallback parsing - check actualOverrides first, then element.align, then element.style.align
     align: actualOverrides.align !== undefined ? actualOverrides.align : (resolvedElement.align !== undefined ? resolvedElement.align : resolvedElement.style?.align),
-    fill: actualOverrides.fill !== undefined ? processStyleValue(actualOverrides.fill) : (resolvedElement.fill !== undefined ? processStyleValue(resolvedElement.fill) : resolvedElement.style?.fill),
-    stroke: actualOverrides.stroke !== undefined ? processStyleValue(actualOverrides.stroke) : (resolvedElement.stroke !== undefined ? processStyleValue(resolvedElement.stroke) : resolvedElement.style?.stroke),
+    fill: actualOverrides.fill !== undefined ? processBinding('fill', actualOverrides.fill) : (resolvedElement.fill !== undefined ? processBinding('fill', resolvedElement.fill) : resolvedElement.style?.fill),
+    stroke: actualOverrides.stroke !== undefined ? processBinding('stroke', actualOverrides.stroke) : (resolvedElement.stroke !== undefined ? processBinding('stroke', resolvedElement.stroke) : resolvedElement.style?.stroke),
     strokeWidth: actualOverrides.strokeWidth !== undefined ? actualOverrides.strokeWidth : (resolvedElement.strokeWidth !== undefined ? resolvedElement.strokeWidth : resolvedElement.style?.strokeWidth),
     strokeEnabled: actualOverrides.strokeEnabled !== undefined ? actualOverrides.strokeEnabled : (resolvedElement.strokeEnabled !== undefined ? resolvedElement.strokeEnabled : (resolvedElement as any).style?.strokeEnabled),
     shadowEnabled: actualOverrides.shadowEnabled !== undefined ? actualOverrides.shadowEnabled : (resolvedElement.shadowEnabled !== undefined ? resolvedElement.shadowEnabled : (resolvedElement as any).style?.shadowEnabled),
@@ -337,7 +370,8 @@ export const resolveBoundData = (
     fontSize: actualOverrides.fontSize !== undefined ? actualOverrides.fontSize : (resolvedElement.fontSize !== undefined ? resolvedElement.fontSize : resolvedElement.style?.fontSize),
     
     // But prevent style object from being overwritten directly if it wasn't cloned properly
-    style: resolvedElement.style
+    style: resolvedElement.style,
+    errors: resolvedElement.errors
   };
 
   return resolvedElement;

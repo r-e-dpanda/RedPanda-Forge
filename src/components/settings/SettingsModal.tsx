@@ -40,7 +40,7 @@ export const SettingsModal = () => {
           placeholder={placeholder}
           className="flex-1 bg-app-bg border border-app-border rounded-l-lg px-4 py-2.5 text-[13.5px] text-app-text placeholder:text-app-muted/50 focus:outline-none focus:border-app-accent transition-colors shadow-inner"
         />
-        <button className="bg-app-card border-y border-r border-app-border px-4 rounded-r-lg text-[13px] font-bold text-app-accent hover:bg-app-bg transition-colors">
+        <button className="bg-app-card border-y border-r border-app-border px-4 rounded-r-lg text-[13px] font-bold text-app-accent hover:bg-app-bg transition-colors active:text-app-text">
           Browse
         </button>
       </div>
@@ -69,7 +69,7 @@ export const SettingsModal = () => {
         <div className="flex flex-1 overflow-hidden">
           {/* Side Menu */}
           <div className="w-48 border-r border-app-border bg-app-sidebar/30 p-2 space-y-1">
-            <button className="w-full text-left px-4 py-3 rounded-xl bg-app-accent text-app-bg text-[14px] font-bold shadow-lg shadow-app-accent/20">
+            <button className="w-full text-left px-4 py-3 rounded-xl bg-app-accent text-black font-extrabold shadow-lg shadow-app-accent/20">
               General Preference
             </button>
             <button className="w-full text-left px-4 py-3 rounded-xl text-app-muted hover:text-app-text hover:bg-app-bg text-[14px] font-medium transition-colors">
@@ -191,7 +191,7 @@ export const SettingsModal = () => {
             <button 
               onClick={handleSave}
               disabled={isSaving}
-              className="px-8 py-2.5 rounded-xl text-[14px] font-extrabold bg-app-accent text-app-bg hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-app-accent/20 active:scale-95"
+              className="px-8 py-2.5 rounded-xl text-[14px] font-extrabold bg-app-accent text-black hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-app-accent/20 active:scale-95"
             >
               {isSaving ? (
                 <div className="w-5 h-5 border-2 border-app-bg/30 border-t-app-bg rounded-full animate-spin"></div>

@@ -77,7 +77,9 @@ export const strings = {
       layers: "Layers"
     },
     fields: {
+      sourceBindingPath: "Source - Binding Path",
       source: "Source",
+      valueBindingPath: "Value - Binding Path",
       value: "Value",
       transform: "Transform",
       clear: "Clear",
@@ -94,7 +96,7 @@ export const strings = {
       fontFamily: "Font Family",
       weight: "Weight",
       size: "Size",
-      lineHeight: "Line height",
+      lineHeight: "Line Height",
       letterSpacing: "Spacing",
       cornerRadius: "Corner Radius",
       padding: "Padding",

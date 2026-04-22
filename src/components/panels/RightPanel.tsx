@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "../../lib/utils";
-import { PanelRightClose, Layers, Eye, EyeOff, FolderOpen, Folder, ChevronRight, ChevronLeft, Type, Square, Image as LucideImage, Upload, RotateCcw } from "lucide-react";
+import { PanelRightClose, Layers, Eye, EyeOff, FolderOpen, Folder, ChevronRight, ChevronLeft, Type, Square, Image as LucideImage, Upload, RotateCcw, AlertTriangle } from "lucide-react";
 import { useTranslation } from "../../lib/i18n";
 import { useEditorStore } from "../../stores/editorStore";
 import { resolveBoundData, isAutoResolved } from "../../lib/templateEngine";
@@ -44,17 +44,89 @@ const PropertySection: React.FC<{ title: string; children: React.ReactNode; clas
 /** Field label — muted, regular weight, never uppercase */
 const FieldLabel: React.FC<{ children: React.ReactNode; action?: React.ReactNode }> = ({ children, action }) => (
   <div className="flex justify-between items-center mb-1.5">
-    <label className="text-ui-xs text-app-muted font-normal leading-none">{children}</label>
+    <label className="text-ui-micro text-app-muted font-normal leading-none">{children}</label>
     {action}
   </div>
 );
 
 /** Inline reset link — accent color, small, understated */
 const ResetLink: React.FC<{ onClick: () => void; label?: string }> = ({ onClick, label = "Reset" }) => (
-  <button onClick={onClick} className="text-ui-xs text-app-accent hover:underline font-normal">
+  <button onClick={onClick} className="text-ui-micro text-app-accent hover:underline font-normal">
     {label}
   </button>
 );
+
+/** Unified Color Picker with Hex and Alpha support */
+const UnifiedColorPicker: React.FC<{ 
+  label: string; 
+  value: string | undefined; 
+  onChange: (val: string | undefined) => void;
+  action?: React.ReactNode;
+  placeholder?: string;
+}> = ({ label, value, onChange, action, placeholder = "FFFFFF" }) => {
+  const valStr = typeof value === 'string' ? value : "";
+  const hexPart = valStr.startsWith('#') ? valStr.substring(0, 7).toUpperCase() : (valStr || "#FFFFFF").toUpperCase();
+  const alphaPercent = valStr.length === 9 && valStr.startsWith('#')
+    ? Math.round((parseInt(valStr.substring(7, 9), 16) / 255) * 100)
+    : 100;
+
+  const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.trim().toUpperCase();
+    if (!raw) { onChange(undefined); return; }
+    let hex = raw.startsWith('#') ? raw : `#${raw}`;
+    if (hex.length > 7) hex = hex.substring(0, 7);
+    
+    const curAlpha = valStr.length === 9 ? valStr.substring(7, 9) : 'FF';
+    onChange(curAlpha === 'FF' ? hex : `${hex}${curAlpha}`);
+  };
+
+  const handleAlphaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let v = parseInt(e.target.value);
+    if (isNaN(v)) v = 100;
+    v = Math.max(0, Math.min(100, v));
+    const aHex = Math.round((v / 100) * 255).toString(16).padStart(2, '0').toUpperCase();
+    const base = valStr.startsWith('#') ? valStr.substring(0, 7) : (valStr || "#FFFFFF");
+    onChange(aHex === 'FF' ? base : `${base}${aHex}`);
+  };
+
+  return (
+    <div>
+      <FieldLabel action={action}>{label}</FieldLabel>
+      <div className="flex bg-app-bg border border-app-border rounded-md overflow-hidden h-8 group focus-within:border-app-accent/50 transition-colors">
+        <div className="relative w-8 shrink-0 flex items-center justify-center border-r border-app-border cursor-pointer bg-app-sidebar/30">
+          <div
+            className="w-4 h-4 rounded-sm shadow-sm border border-black/10"
+            style={{ backgroundColor: hexPart.length === 7 ? hexPart : '#FFFFFF' }}
+          />
+          <input
+            type="color"
+            value={hexPart.length === 7 ? hexPart : '#FFFFFF'}
+            onChange={e => {
+              const curAlpha = valStr.length === 9 ? valStr.substring(7, 9) : 'FF';
+              onChange(e.target.value.toUpperCase() + (curAlpha === 'FF' ? '' : curAlpha));
+            }}
+            className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+          />
+        </div>
+        <input
+          value={hexPart.replace('#', '')}
+          onChange={handleHexChange}
+          placeholder={placeholder.replace('#', '')}
+          className="flex-1 bg-transparent px-2.5 text-ui-xs font-mono outline-none text-app-text min-w-0 placeholder:text-app-muted/30"
+        />
+        <div className="w-[60px] flex items-center border-l border-app-border px-1.5 gap-0.5 bg-app-sidebar/10">
+          <input
+            type="text"
+            value={alphaPercent}
+            onChange={handleAlphaChange}
+            className="w-full bg-transparent text-ui-xs text-right font-mono outline-none text-app-text"
+          />
+          <span className="text-[10px] text-app-muted font-mono mt-0.5 shrink-0 select-none">%</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -73,6 +145,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
   const selectedElementId = activeSession?.selectedElementId || null;
   const hoveredElementId = activeSession?.hoveredElementId || null;
   const expandedLayers = activeSession?.expandedLayers || {};
+
+  // Formatter input state
+  const [pendingFormatter, setPendingFormatter] = React.useState<{ type: string; label: string; find?: string } | null>(null);
+  const [formatterInput, setFormatterInput] = React.useState("");
 
   const {
     setHoveredElementId,
@@ -360,9 +436,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
               const el = flatElements.find(e => e.id === selectedElementId);
               if (!el) return null;
               const overrides = (elementOverrides[el.id] || {}) as any;
-              const isText = el.type === 'Text' || el.type === 'text';
+              const isText = el.type === 'Text' || el.type === 'text' || el.type === 'RichText';
               const isImage = el.type === 'Image' || el.type === 'image' || el.type === 'BackgroundImage';
-              const isShape = el.type === 'Shape' || el.type === 'Polygon' || el.type === 'Line';
+              const isShape = el.type === 'Shape' || el.type === 'Polygon' || el.type === 'Line' || el.type === 'rect' || el.type === 'quad' || el.type === 'circle' || el.type === 'ellipse' || el.type === 'GradientOverlay' || el.type === 'Group';
+
+              // If it's none of the above, we treat it as an image/unknown by default but we want to show properties
+              const isUnknown = !isText && !isImage && !isShape;
 
               const shapeSubtype = (() => {
                 if (!isShape) return null;
@@ -431,9 +510,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                               )
                             }
                           >
-                            {isText ? "Binding path" : "Source path"}
+                            {isText ? t.panels.fields.valueBindingPath : t.panels.fields.sourceBindingPath}
                           </FieldLabel>
-                          <div className="flex items-center bg-app-bg border border-app-border rounded-md focus-within:border-app-accent overflow-hidden h-8 transition-all">
+                          <div className={cn(
+                            "flex items-center bg-app-bg border rounded-md focus-within:border-app-accent overflow-hidden h-8 transition-all",
+                            (isText ? resolved.errors?.text : resolved.errors?.src) ? "border-red-500/50 ring-1 ring-red-500/20" : "border-app-border"
+                          )}>
                             <input
                               type="text"
                               disabled={isText ? (!isEditable('text') && !isEditable('dataKey')) : (!isEditable('src') && !isEditable('dataKey'))}
@@ -447,6 +529,11 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                               placeholder={isText ? "e.g. {{match.league}}" : "e.g. @global/teams/{{match.homeTeam.id}}/logo.svg"}
                               className="w-full bg-transparent h-full px-2.5 text-app-text text-ui-xs outline-none font-mono disabled:opacity-50"
                             />
+                            {(isText ? resolved.errors?.text : resolved.errors?.src) && (
+                              <div className="px-2 text-red-500 shrink-0" title="Key not found in data source">
+                                <AlertTriangle size={14} />
+                              </div>
+                            )}
                           </div>
                           {/* Binding key pills */}
                           {(() => {
@@ -496,20 +583,92 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                               ))}
                             </div>
                             <select
-                              className="w-full bg-app-bg border border-app-border rounded-md px-2.5 text-app-text text-ui-xs outline-none focus:border-app-accent cursor-pointer h-8"
+                              className={cn(
+                                "w-full bg-app-bg border border-app-border rounded-md px-2.5 text-app-text text-ui-xs outline-none focus:border-app-accent cursor-pointer h-8 transition-colors",
+                                pendingFormatter && "opacity-40 pointer-events-none"
+                              )}
+                              value=""
                               onChange={(e) => {
-                                if (!e.target.value) return;
-                                handleOverride(el.id, { formatters: [...activeFormatters, e.target.value] });
+                                const val = e.target.value;
+                                if (!val) return;
+                                
+                                if (val === 'prefix:' || val === 'suffix:') {
+                                  setPendingFormatter({ type: val, label: val === 'prefix:' ? 'Prefix' : 'Suffix' });
+                                  setFormatterInput("");
+                                } else if (val === 'shorten:') {
+                                  setPendingFormatter({ type: val, label: 'Max Length' });
+                                  setFormatterInput("10");
+                                } else {
+                                  handleOverride(el.id, { formatters: [...activeFormatters, val] });
+                                }
                                 e.target.value = "";
                               }}
                             >
                               <option value="">{t.panels.fields.addPipeline}</option>
-                              <option value="uppercase">Uppercase</option>
-                              <option value="lowercase">Lowercase</option>
-                              <option value="titlecase">Titlecase</option>
-                              <option value="number">Number (1,234)</option>
-                              <option value="shorten:10">Shorten (10 chars)</option>
+                              
+                              <optgroup label="Casing">
+                                <option value="uppercase">Uppercase</option>
+                                <option value="lowercase">Lowercase</option>
+                                <option value="titlecase">Titlecase</option>
+                              </optgroup>
+
+                              {((el as any).dataType === 'date' || (el as any).dataType === 'date-time' || (el as any).dataType === 'time' || el.name?.toLowerCase().includes('date') || el.name?.toLowerCase().includes('time')) && (
+                                <optgroup label="Date & Time">
+                                  <option value="date:dd/MM/yyyy">Date: 31/12/2024</option>
+                                  <option value="date:dd MMM yyyy">Date: 31 Dec 2024</option>
+                                  <option value="date:EEEE, dd MMM">Date: Sunday, 31 Dec</option>
+                                  <option value="time:HH:mm">Time: 14:30 (24h)</option>
+                                  <option value="time:h:mm a">Time: 2:30 PM (12h)</option>
+                                  <option value="date:dd/MM HH:mm">Both: 31/12 14:30</option>
+                                  <option value="date:dd MMM, h:mm a">Both: 31 Dec, 2:30 PM</option>
+                                </optgroup>
+                              )}
+
+                              <optgroup label="General">
+                                <option value="number">Number (1,234)</option>
+                                <option value="shorten:">Shorten...</option>
+                                <option value="prefix:">Add Prefix...</option>
+                                <option value="suffix:">Add Suffix...</option>
+                              </optgroup>
                             </select>
+
+                            {pendingFormatter && (
+                              <div className="bg-app-sidebar/50 border border-app-accent/30 rounded-md p-2 space-y-2 animate-in fade-in zoom-in-95 duration-150">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-ui-micro text-app-accent font-medium">{pendingFormatter.label}</span>
+                                  <button 
+                                    onClick={() => setPendingFormatter(null)}
+                                    className="text-app-muted hover:text-app-text text-ui-micro transition-colors"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                                <div className="flex gap-1.5">
+                                  <input
+                                    autoFocus
+                                    className="flex-1 bg-app-bg border border-app-border rounded px-2 h-7 text-ui-xs text-app-text outline-none focus:border-app-accent transition-colors"
+                                    value={formatterInput}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        handleOverride(el.id, { formatters: [...activeFormatters, pendingFormatter.type + formatterInput] });
+                                        setPendingFormatter(null);
+                                      }
+                                    }}
+                                    onChange={(e) => setFormatterInput(e.target.value)}
+                                    placeholder="Type value..."
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      handleOverride(el.id, { formatters: [...activeFormatters, pendingFormatter.type + formatterInput] });
+                                      setPendingFormatter(null);
+                                    }}
+                                    className="bg-app-accent text-white px-2 rounded text-ui-micro font-medium hover:bg-app-accent-hover transition-colors"
+                                  >
+                                    Add
+                                  </button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -522,24 +681,32 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                               )
                             }
                           >
-                            {isText ? t.panels.fields.value : "Override source"}
+                            {isText ? t.panels.fields.value : t.panels.fields.source}
                           </FieldLabel>
                           {isText ? (
-                            <Input
-                              disabled={!isEditable('text')}
-                              value={overrides.text ?? ""}
-                              onChange={e => handleOverride(el.id, { text: e.target.value || undefined })}
-                              placeholder={resolved.text || "Rendered value..."}
-                              className="h-8 text-ui-xs bg-app-bg border-app-border px-2.5"
-                            />
+                            <div className={cn(
+                              "flex items-center bg-app-bg border rounded-md focus-within:border-app-accent overflow-hidden h-8 transition-all",
+                              resolved.errors?.text ? "border-red-500/50 ring-1 ring-red-500/20" : "border-app-border"
+                            )}>
+                              <Input
+                                disabled={!isEditable('text')}
+                                value={overrides.text ?? ""}
+                                onChange={e => handleOverride(el.id, { text: e.target.value || undefined })}
+                                placeholder={resolved.text || "Rendered value..."}
+                                className="flex-1 bg-transparent border-0 h-full text-ui-xs px-2.5 shadow-none"
+                              />
+                            </div>
                           ) : (
-                            <div className="flex gap-1.5">
+                            <div className="flex gap-1.5 transition-all">
                               <Input
                                 disabled={!isEditable('src')}
                                 value={overrides.src ?? ""}
                                 onChange={e => handleOverride(el.id, { src: e.target.value || undefined })}
                                 placeholder={resolved.src || "Image URL..."}
-                                className="h-8 text-ui-xs bg-app-bg border-app-border px-2.5"
+                                className={cn(
+                                  "h-8 text-ui-xs bg-app-bg px-2.5 flex-1",
+                                  resolved.errors?.src ? "border-red-500/50 ring-1 ring-red-500/20" : "border-app-border"
+                                )}
                               />
                               <label className="shrink-0 h-8 w-8 bg-app-card border border-app-border flex items-center justify-center rounded-md cursor-pointer hover:bg-app-bg transition-all">
                                 <Upload size={13} className="text-app-muted" />
@@ -638,10 +805,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           <button
                             onClick={() => handleOverride(el.id, { flipX: !(overrides.flipX !== undefined ? overrides.flipX : !!el.flipX) })}
                             className={cn(
-                              "flex-1 h-8 rounded text-ui-xs font-normal border transition-all flex items-center justify-center gap-1.5",
+                              "flex-1 h-8 rounded text-ui-xs font-medium border transition-all flex items-center justify-center gap-1.5 shadow-sm",
                               (overrides.flipX !== undefined ? overrides.flipX : !!el.flipX)
-                                ? "bg-app-accent border-app-accent text-black"
-                                : "bg-app-bg border-app-border text-app-muted hover:border-app-accent/50"
+                                ? "bg-app-accent border-app-accent text-black font-bold ring-2 ring-app-accent/20"
+                                : "bg-app-bg border-app-border text-app-muted hover:border-app-muted hover:text-app-text"
                             )}
                           >
                             ↔ {t.panels.fields.flipX}
@@ -649,10 +816,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           <button
                             onClick={() => handleOverride(el.id, { flipY: !(overrides.flipY !== undefined ? overrides.flipY : !!el.flipY) })}
                             className={cn(
-                              "flex-1 h-8 rounded text-ui-xs font-normal border transition-all flex items-center justify-center gap-1.5",
+                              "flex-1 h-8 rounded text-ui-xs font-medium border transition-all flex items-center justify-center gap-1.5 shadow-sm",
                               (overrides.flipY !== undefined ? overrides.flipY : !!el.flipY)
-                                ? "bg-app-accent border-app-accent text-black"
-                                : "bg-app-bg border-app-border text-app-muted hover:border-app-accent/50"
+                                ? "bg-app-accent border-app-accent text-black font-bold ring-2 ring-app-accent/20"
+                                : "bg-app-bg border-app-border text-app-muted hover:border-app-muted hover:text-app-text"
                             )}
                           >
                             ↕ {t.panels.fields.flipY}
@@ -672,8 +839,8 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                     key={align}
                                     onClick={() => handleOverride(el.id, { align })}
                                     className={cn(
-                                      "flex-1 text-ui-xs font-normal capitalize transition-colors",
-                                      isActive ? "bg-app-accent text-black" : "text-app-muted hover:bg-app-card"
+                                      "flex-1 text-ui-xs font-medium capitalize transition-colors",
+                                      isActive ? "bg-app-accent text-black font-bold shadow-sm" : "text-app-muted hover:bg-app-card/60 hover:text-app-text"
                                     )}
                                   >
                                     {align[0]}
@@ -727,18 +894,23 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           <div>
                             <FieldLabel>{t.panels.fields.weight}</FieldLabel>
                             <Select
-                              value={String(overrides.fontWeight !== undefined ? overrides.fontWeight : el.fontWeight)}
+                              value={(() => {
+                                const val = overrides.fontWeight !== undefined ? overrides.fontWeight : (el.fontWeight || el.style?.fontWeight || '400');
+                                if (val === 'normal') return '400';
+                                if (val === 'bold') return '700';
+                                return String(val);
+                              })()}
                               onValueChange={val => handleOverride(el.id, { fontWeight: val })}
                             >
                               <SelectTrigger className="h-8 text-ui-xs bg-app-bg border-app-border px-2.5">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="normal">Normal</SelectItem>
-                                <SelectItem value="bold">Bold</SelectItem>
-                                <SelectItem value="300">Light</SelectItem>
-                                <SelectItem value="500">Medium</SelectItem>
-                                <SelectItem value="900">Black</SelectItem>
+                              <SelectContent className="min-w-[140px] z-[110]">
+                                <SelectItem value="300">Light (300)</SelectItem>
+                                <SelectItem value="400">Normal (400)</SelectItem>
+                                <SelectItem value="500">Medium (500)</SelectItem>
+                                <SelectItem value="700">Bold (700)</SelectItem>
+                                <SelectItem value="900">Black (900)</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -808,7 +980,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                     </PropertySection>
 
                     {/* ── 5. FILL ────────────────────────────────────────── */}
-                    {!isImage && (
+                    {(!isImage || isShape || isText) && (
                       <>
                         <PropertySection title={t.panels.sections.fill}>
                           <div className="space-y-3">
@@ -819,9 +991,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                   <ResetLink onClick={() => handleOverride(el.id, { fillBindingPath: undefined })} />
                                 )}
                               >
-                                Color — binding path
+                                {t.panels.fields.sourceBindingPath}
                               </FieldLabel>
-                              <div className="flex items-center bg-app-bg border border-app-border rounded-md focus-within:border-app-accent overflow-hidden h-8">
+                              <div className={cn(
+                                "flex items-center bg-app-bg border rounded-md focus-within:border-app-accent overflow-hidden h-8",
+                                resolved.errors?.fill ? "border-red-500/50 ring-1 ring-red-500/20" : "border-app-border"
+                              )}>
                                 <input
                                   type="text"
                                   value={overrides.fillBindingPath !== undefined ? overrides.fillBindingPath : ((el as any).style?.fill || "")}
@@ -829,6 +1004,11 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                   placeholder="e.g. {{match.homeTeam.colors.primary}}"
                                   className="w-full bg-transparent h-full px-2.5 text-app-text text-ui-xs outline-none font-mono"
                                 />
+                                {resolved.errors?.fill && (
+                                  <div className="px-2 text-red-500" title="Key not found in data source">
+                                    <AlertTriangle size={14} />
+                                  </div>
+                                )}
                               </div>
                               {(() => {
                                 const fillStr = overrides.fillBindingPath !== undefined ? overrides.fillBindingPath : ((el as any).style?.fill || "");
@@ -850,78 +1030,15 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                             </div>
 
                             {/* Fill value (manual override) */}
-                            <div>
-                              <FieldLabel
-                                action={overrides.fill !== undefined && (
-                                  <ResetLink onClick={() => handleOverride(el.id, { fill: undefined })} />
-                                )}
-                              >
-                                {t.panels.fields.color}
-                              </FieldLabel>
-                              <div className="flex bg-app-bg border border-app-border rounded-md overflow-hidden h-8">
-                                <div className="relative w-8 shrink-0 flex items-center justify-center border-r border-app-border cursor-pointer group">
-                                  <div
-                                    className="w-4 h-4 rounded-sm transition-transform group-hover:scale-110"
-                                    style={{ backgroundColor: resolved.fill?.startsWith('#') ? resolved.fill.substring(0, 7) : resolved.fill || '#ffffff' }}
-                                  />
-                                  <input
-                                    type="color"
-                                    value={resolved.fill?.startsWith('#') ? resolved.fill.substring(0, 7) : '#ffffff'}
-                                    onChange={e => {
-                                      const curFill = overrides.fill !== undefined ? overrides.fill : (resolved.fill || "");
-                                      const curAlpha = typeof curFill === 'string' && curFill.length === 9 ? curFill.substring(7, 9) : 'FF';
-                                      handleOverride(el.id, { fill: e.target.value + (curAlpha !== 'FF' ? curAlpha : '') });
-                                    }}
-                                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-                                  />
-                                </div>
-                                <input
-                                  placeholder={resolved.fill || "FFFFFF"}
-                                  value={(() => {
-                                    const val = overrides.fill !== undefined ? overrides.fill : undefined;
-                                    if (typeof val === 'string') {
-                                      return val.startsWith('#') ? val.substring(1, 7).toUpperCase() : val.toUpperCase();
-                                    }
-                                    return "";
-                                  })()}
-                                  onChange={e => {
-                                    const hex = e.target.value.trim();
-                                    if (!hex) { handleOverride(el.id, { fill: undefined }); return; }
-                                    let validHex = hex.startsWith('#') ? hex.substring(1) : hex;
-                                    const curFill = overrides.fill !== undefined ? overrides.fill : resolved.fill;
-                                    const curAlpha = typeof curFill === 'string' && curFill.length === 9 ? curFill.substring(7, 9) : 'FF';
-                                    handleOverride(el.id, { fill: `#${validHex}${curAlpha !== 'FF' ? curAlpha : ''}` });
-                                  }}
-                                  className="flex-1 bg-transparent px-2 text-ui-xs font-mono outline-none text-app-text min-w-0"
-                                />
-                                <div className="w-12 flex items-center border-l border-app-border px-1.5 gap-0.5">
-                                  <input
-                                    type="text"
-                                    value={(() => {
-                                      const val = overrides.fill !== undefined ? overrides.fill : (resolved.fill || "");
-                                      if (typeof val === 'string' && val.length === 9 && val.startsWith('#')) {
-                                        return Math.round((parseInt(val.substring(7, 9), 16) / 255) * 100).toString();
-                                      }
-                                      return "100";
-                                    })()}
-                                    onChange={e => {
-                                      let v = parseInt(e.target.value);
-                                      if (isNaN(v)) return;
-                                      v = Math.max(0, Math.min(100, v));
-                                      const a = Math.round((v / 100) * 255).toString(16).padStart(2, '0').toUpperCase();
-                                      const curFill = overrides.fill !== undefined ? overrides.fill : (resolved.fill || "");
-                                      let base = '#FFFFFF';
-                                      if (typeof curFill === 'string') {
-                                        base = curFill.startsWith('#') ? curFill.substring(0, 7) : curFill;
-                                      }
-                                      handleOverride(el.id, { fill: a === 'FF' ? base : `${base}${a}` });
-                                    }}
-                                    className="w-full bg-transparent text-ui-xs text-right font-mono outline-none text-app-text"
-                                  />
-                                  <span className="text-ui-xs text-app-muted shrink-0">%</span>
-                                </div>
-                              </div>
-                            </div>
+                            <UnifiedColorPicker
+                              label={t.panels.fields.color}
+                              value={overrides.fill !== undefined ? overrides.fill : (resolved.fill || undefined)}
+                              onChange={val => handleOverride(el.id, { fill: val })}
+                              action={overrides.fill !== undefined && (
+                                <ResetLink onClick={() => handleOverride(el.id, { fill: undefined })} />
+                              )}
+                              placeholder={resolved.fill || "FFFFFF"}
+                            />
                           </div>
                         </PropertySection>
 
@@ -940,26 +1057,19 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           </div>
                           {(resolved.strokeEnabled !== undefined ? resolved.strokeEnabled : (resolved.strokeWidth || 0) > 0) && (
                             <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                              <div className="flex gap-2 items-center">
-                                <input
-                                  type="color"
-                                  value={resolved.stroke || '#000000'}
-                                  onChange={e => handleOverride(el.id, { stroke: e.target.value })}
-                                  className="w-8 h-8 rounded border-none outline-none cursor-pointer bg-transparent shadow-[0_0_0_1px_var(--app-border)] p-0 shrink-0"
-                                />
-                                <Input
-                                  value={resolved.stroke || ''}
-                                  onChange={e => handleOverride(el.id, { stroke: e.target.value })}
-                                  className="flex-1 bg-app-bg h-8 text-ui-xs font-mono px-2.5"
-                                />
-                              </div>
+                              <UnifiedColorPicker
+                                label={t.panels.fields.color}
+                                value={overrides.stroke !== undefined ? overrides.stroke : (resolved.stroke || undefined)}
+                                onChange={val => handleOverride(el.id, { stroke: val })}
+                                placeholder={resolved.stroke || "#000000"}
+                              />
                               <div>
                                 <FieldLabel>{t.panels.fields.width} (px)</FieldLabel>
                                 <Input
                                   type="number"
-                                  min={0} max={5}
+                                  min={0} max={10}
                                   value={resolved.strokeWidth || 0}
-                                  onChange={e => handleOverride(el.id, { strokeWidth: Math.min(5, Math.max(0, Number(e.target.value))) })}
+                                  onChange={e => handleOverride(el.id, { strokeWidth: Math.min(10, Math.max(0, Number(e.target.value))) })}
                                   className="bg-app-bg h-8 text-ui-xs font-mono px-2.5"
                                 />
                               </div>
@@ -980,49 +1090,42 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                       </div>
                       {(resolved.shadowEnabled || false) && (
                         <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                          <div className="flex gap-2 items-center">
-                            <div className="relative w-8 h-8 shrink-0 flex items-center justify-center rounded border border-app-border bg-app-bg cursor-pointer group transition-colors">
-                              <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: resolved.shadowColor || '#000000' }} />
-                              <input
-                                type="color"
-                                value={resolved.shadowColor || '#000000'}
-                                onChange={e => handleOverride(el.id, { shadowColor: e.target.value })}
-                                className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-                              />
-                            </div>
-                            <div className="flex-1 flex gap-2">
-                              <Input
-                                value={resolved.shadowColor || '#000000'}
-                                onChange={e => handleOverride(el.id, { shadowColor: e.target.value })}
-                                className="flex-1 bg-app-bg h-8 text-ui-xs font-mono px-2.5"
-                              />
+                          <UnifiedColorPicker
+                            label={t.panels.fields.color}
+                            value={overrides.shadowColor !== undefined ? overrides.shadowColor : (resolved.shadowColor || undefined)}
+                            onChange={val => handleOverride(el.id, { shadowColor: val })}
+                            placeholder={resolved.shadowColor || "#000000"}
+                          />
+                          <div className="flex flex-col gap-3">
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-ui-xs text-app-muted w-10 shrink-0">{t.panels.fields.blur}</span>
                               <Input
                                 type="number"
                                 placeholder={t.panels.fields.blur}
                                 value={resolved.shadowBlur || 0}
                                 onChange={e => handleOverride(el.id, { shadowBlur: Number(e.target.value) })}
-                                className="w-14 h-8 text-ui-xs bg-app-bg px-2"
+                                className="flex-1 h-8 text-ui-xs bg-app-bg px-2"
                               />
                             </div>
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <FieldLabel>{t.panels.fields.offsetX}</FieldLabel>
-                              <Input
-                                type="number"
-                                value={resolved.shadowOffsetX || 0}
-                                onChange={e => handleOverride(el.id, { shadowOffsetX: Number(e.target.value) })}
-                                className="h-8 text-ui-xs bg-app-bg px-2.5"
-                              />
-                            </div>
-                            <div>
-                              <FieldLabel>{t.panels.fields.offsetY}</FieldLabel>
-                              <Input
-                                type="number"
-                                value={resolved.shadowOffsetY || 0}
-                                onChange={e => handleOverride(el.id, { shadowOffsetY: Number(e.target.value) })}
-                                className="h-8 text-ui-xs bg-app-bg px-2.5"
-                              />
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <FieldLabel>{t.panels.fields.offsetX}</FieldLabel>
+                                <Input
+                                  type="number"
+                                  value={resolved.shadowOffsetX || 0}
+                                  onChange={e => handleOverride(el.id, { shadowOffsetX: Number(e.target.value) })}
+                                  className="h-8 text-ui-xs bg-app-bg px-2.5"
+                                />
+                              </div>
+                              <div>
+                                <FieldLabel>{t.panels.fields.offsetY}</FieldLabel>
+                                <Input
+                                  type="number"
+                                  value={resolved.shadowOffsetY || 0}
+                                  onChange={e => handleOverride(el.id, { shadowOffsetY: Number(e.target.value) })}
+                                  className="h-8 text-ui-xs bg-app-bg px-2.5"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1041,19 +1144,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                         </div>
                         {(overrides.bgEnabled !== undefined ? overrides.bgEnabled : el.bgEnabled) && (
                           <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                            <div className="flex gap-2 items-center">
-                              <input
-                                type="color"
-                                value={overrides.bgColor !== undefined ? overrides.bgColor : el.bgColor}
-                                onChange={e => handleOverride(el.id, { bgColor: e.target.value })}
-                                className="w-8 h-8 rounded border-none outline-none cursor-pointer bg-transparent shadow-[0_0_0_1px_var(--app-border)] p-0 shrink-0"
-                              />
-                              <Input
-                                value={overrides.bgColor !== undefined ? overrides.bgColor : el.bgColor}
-                                onChange={e => handleOverride(el.id, { bgColor: e.target.value })}
-                                className="flex-1 bg-app-bg h-8 text-ui-xs font-mono px-2.5"
-                              />
-                            </div>
+                            <UnifiedColorPicker
+                              label={t.panels.fields.color}
+                              value={overrides.bgColor !== undefined ? overrides.bgColor : (el.bgColor || undefined)}
+                              onChange={val => handleOverride(el.id, { bgColor: val })}
+                              placeholder={el.bgColor || "#000000"}
+                            />
                             <div className="grid grid-cols-2 gap-3">
                               <div>
                                 <FieldLabel>{t.panels.fields.padding}</FieldLabel>
@@ -1118,9 +1214,9 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                         </div>
 
                         {isExpanded && (layer.elements || (layer as any).children || []).map((el: any) => {
-                          const isText = el.type === 'Text' || el.type === 'text';
-                          const isShape = el.type === 'Shape' || el.type === 'rect' || el.type === 'GradientOverlay';
-                          const isImage = !isText && !isShape;
+                          const isText = el.type === 'Text' || el.type === 'text' || el.type === 'RichText';
+                          const isShape = el.type === 'Shape' || el.type === 'Polygon' || el.type === 'Line' || el.type === 'rect' || el.type === 'quad' || el.type === 'circle' || el.type === 'ellipse' || el.type === 'GradientOverlay' || el.type === 'Group';
+                          const isImage = el.type === 'Image' || el.type === 'image' || el.type === 'BackgroundImage' || (!isText && !isShape);
                           const isSelected = selectedElementId === el.id;
                           const isVisible = elementOverrides[el.id]?.visible !== undefined
                             ? elementOverrides[el.id].visible

@@ -6,6 +6,7 @@
 export const UI_BASE_CONFIG = {
   // Typography (Base pixels for 1.0 scale)
   font: {
+    micro: 11,
     xs: 12,
     sm: 13,
     base: 14,
@@ -30,6 +31,7 @@ export const UI_BASE_CONFIG = {
 export const getUISizes = (scale: number = 1.0) => {
   const scaled = {
     font: {
+      micro: `${Math.round(UI_BASE_CONFIG.font.micro * scale)}px`,
       xs: `${Math.round(UI_BASE_CONFIG.font.xs * scale)}px`,
       sm: `${Math.round(UI_BASE_CONFIG.font.sm * scale)}px`,
       base: `${Math.round(UI_BASE_CONFIG.font.base * scale)}px`,

@@ -14,13 +14,13 @@ interface SettingsState {
 
 const getInitialSettings = (): AppSettings => {
   if (typeof window === 'undefined') return DEFAULT_SETTINGS;
-  const data = localStorage.getItem('redpanda_forge_settings');
-  if (data) {
-    try {
+  try {
+    const data = localStorage.getItem('redpanda_forge_settings');
+    if (data) {
       return { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
-    } catch (e) {
-      return DEFAULT_SETTINGS;
     }
+  } catch (e) {
+    console.error("Failed to load settings from localStorage:", e);
   }
   return DEFAULT_SETTINGS;
 };

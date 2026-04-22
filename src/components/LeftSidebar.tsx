@@ -66,12 +66,12 @@ export const LeftSidebar = ({
 
             {/* Filters */}
             <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <span className="text-ui-xs text-app-muted shrink-0 w-16">{t.sidebar.filters.ratio}</span>
+              <div className="flex items-center gap-3 w-full">
+                <span className="text-ui-micro text-app-muted shrink-0 w-16">{t.sidebar.filters.ratio}</span>
                 <select
                   value={selectedRatio}
                   onChange={(e) => setSelectedRatio(e.target.value as Ratio | "All")}
-                  className="bg-app-bg border border-app-border rounded px-2 py-1.5 flex-1 text-app-text outline-none focus:border-app-accent text-ui-xs"
+                  className="bg-app-bg border border-app-border rounded px-2 py-1.5 flex-1 min-w-0 text-app-text outline-none focus:border-app-accent text-ui-micro"
                 >
                   <option value="All">{t.sidebar.filters.allRatios}</option>
                   <option value="16:9">16:9 Landscape</option>
@@ -80,15 +80,15 @@ export const LeftSidebar = ({
                 </select>
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="text-ui-xs text-app-muted shrink-0 w-16">{t.sidebar.filters.template}</span>
+              <div className="flex items-center gap-3 w-full">
+                <span className="text-ui-micro text-app-muted shrink-0 w-16">{t.sidebar.filters.template}</span>
                 <select
                   value={filteredTemplates.some((t: any) => t.id === activeTemplate?.id) ? (activeTemplate?.id || "") : ""}
                   onChange={(e) => {
                     const tpl = templates.find((t: any) => t.id === e.target.value);
                     if (tpl) setEditorTemplate(tpl);
                   }}
-                  className="bg-app-bg border border-app-border rounded px-2 py-1.5 flex-1 text-app-text outline-none focus:border-app-accent text-ui-xs truncate"
+                  className="bg-app-bg border border-app-border rounded px-2 py-1.5 flex-1 min-w-0 text-app-text outline-none focus:border-app-accent text-ui-micro truncate"
                   disabled={filteredTemplates.length === 0}
                 >
                   {filteredTemplates.length === 0 ? (
@@ -139,8 +139,8 @@ export const LeftSidebar = ({
                       <div className="flex flex-col flex-1 gap-1.5">
                         {/* League + date row */}
                         <div className="flex justify-between items-center">
-                          <span className="text-ui-xs text-app-muted">{m.league}</span>
-                          <span className="text-ui-xs text-app-muted">
+                          <span className="text-ui-micro text-app-muted">{m.league}</span>
+                          <span className="text-ui-micro text-app-muted">
                             {new Date(m.date).toLocaleDateString()}
                           </span>
                         </div>
