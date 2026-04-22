@@ -17,13 +17,13 @@
   --color-popover: var(--app-card);
   --color-popover-foreground: var(--app-text);
   --color-primary: var(--app-accent);
-  --color-primary-foreground: #000;
+  --color-primary-foreground: var(--app-accent-content, #000);
   --color-secondary: var(--app-sidebar);
   --color-secondary-foreground: var(--app-text);
   --color-muted: var(--app-muted);
   --color-muted-foreground: var(--app-muted);
   --color-accent: var(--app-accent);
-  --color-accent-foreground: #000;
+  --color-accent-foreground: var(--app-accent-content, #000);
   --color-border: var(--app-border);
   --color-input: var(--app-border);
   --color-ring: var(--app-accent);

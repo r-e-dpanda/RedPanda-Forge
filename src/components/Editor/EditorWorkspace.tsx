@@ -138,7 +138,7 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
 
           {/* Localized Actions */}
           <div className="flex items-center gap-2.5 pl-5 overflow-y-hidden">
-            <div className="flex items-center rounded overflow-hidden border border-app-border h-8 shadow-sm">
+            <div className="flex items-center rounded-md overflow-hidden border border-app-border h-8 shadow-sm">
                 <button 
                   onClick={undo}
                   disabled={!canUndo()}
@@ -159,7 +159,7 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
 
             <button 
               onClick={() => innerEditorRef.current?.exportPNG()}
-              className="h-8 bg-app-accent hover:brightness-110 text-black px-4 rounded flex items-center justify-center gap-2 text-ui-xs font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-sm"
+              className="h-8 bg-app-accent hover:brightness-110 text-accent-foreground px-4 rounded-md flex items-center justify-center gap-2 text-ui-xs font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-sm"
               disabled={!activeSession?.template}
             >
               <Download size={13} /> {t.workspace.actions.export}
@@ -194,16 +194,16 @@ const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
                 This graphic has <span className="text-app-text font-medium">unsaved changes</span>. Closing this tab will permanently discard all your adjustments.
               </p>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 <button 
                   onClick={confirmClose}
-                  className="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg transition-colors text-ui-sm"
+                  className="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg transition-all text-ui-sm active:scale-[0.98]"
                 >
                   {t.workspace.modals.closeTab.confirm}
                 </button>
                 <button 
                   onClick={() => setShowConfirmClose(null)}
-                  className="w-full bg-app-card hover:bg-app-bg text-app-text border border-app-border font-normal py-2.5 rounded-lg transition-colors text-ui-sm"
+                  className="w-full bg-app-card hover:bg-app-bg text-app-muted hover:text-app-text border border-app-border font-medium py-2.5 rounded-lg transition-all text-ui-sm active:scale-[0.98]"
                 >
                   {t.common.cancel}
                 </button>

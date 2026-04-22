@@ -89,7 +89,7 @@ export default function PasteTemplateModal({ isOpen, existingTemplates, onClose,
         
         {/* Header */}
         <div className="flex justify-between items-center px-8 py-5 border-b border-app-border">
-          <h2 className="text-[15px] font-bold text-white flex items-center gap-2">
+          <h2 className="text-[15px] font-semibold text-app-text flex items-center gap-2">
             <FileJson size={20} className="text-app-accent" /> Import Template JSON
           </h2>
           <button onClick={handleClose} className="p-2 rounded-lg text-app-muted hover:text-white hover:bg-white/5 transition-colors">
@@ -104,19 +104,19 @@ export default function PasteTemplateModal({ isOpen, existingTemplates, onClose,
               <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 flex items-start gap-4 mb-4">
                 <AlertTriangle className="text-red-400 mt-0.5 shrink-0" size={28} />
                 <div>
-                  <h3 className="text-white font-bold text-[15px] mb-1.5">Template ID Conflict</h3>
+                  <h3 className="text-app-text font-semibold text-[15px] mb-1.5">Template ID Conflict</h3>
                   <p className="text-app-muted text-[13.5px] leading-relaxed">
-                    A template with ID <span className="text-red-300 font-mono font-bold">"{conflictTemplate.new.id}"</span> already exists.
+                    A template with ID <span className="text-red-400 font-mono font-semibold">"{conflictTemplate.new.id}"</span> already exists.
                   </p>
                   
                   <div className="mt-5 flex flex-col gap-3 bg-black/40 p-4 rounded-xl border border-white/5">
                     <div className="flex justify-between text-[13px]">
                       <span className="text-app-muted">Current Version:</span>
-                      <span className="text-white font-mono font-bold">{conflictTemplate.old.version || '1.0.0'}</span>
+                      <span className="text-app-text font-mono font-semibold">{conflictTemplate.old.version || '1.0.0'}</span>
                     </div>
                     <div className="flex justify-between text-[13px]">
                       <span className="text-app-muted">Importing Version:</span>
-                      <span className="text-app-accent font-bold font-mono">{conflictTemplate.new.version || '1.0.0'}</span>
+                      <span className="text-app-accent font-semibold font-mono">{conflictTemplate.new.version || '1.0.0'}</span>
                     </div>
                   </div>
                   
@@ -131,13 +131,13 @@ export default function PasteTemplateModal({ isOpen, existingTemplates, onClose,
             <div className="px-8 py-5 border-t border-app-border bg-app-card flex justify-end gap-3">
               <button 
                 onClick={() => setConflictTemplate(null)} 
-                className="px-6 py-2.5 text-[13px] font-bold text-app-muted hover:text-white transition-colors"
+                className="px-6 py-2.5 text-[13px] font-medium text-app-muted hover:text-white transition-colors"
               >
                 GO BACK
               </button>
               <button 
                 onClick={() => finalizeSave(conflictTemplate.new, true)} 
-                className="px-8 py-2.5 bg-red-600 text-white rounded-xl text-[13.5px] font-bold hover:bg-red-500 transition-all flex items-center gap-2 shadow-lg shadow-red-600/10"
+                className="px-8 py-2.5 bg-red-600 text-white rounded-lg text-[13.5px] font-medium hover:bg-red-500 transition-all flex items-center gap-2 shadow-lg shadow-red-600/10 active:scale-[0.98]"
               >
                 <AlertTriangle size={16} />
                 OVERWRITE TEMPLATE
@@ -149,11 +149,11 @@ export default function PasteTemplateModal({ isOpen, existingTemplates, onClose,
           <>
             <div className="p-8 space-y-6">
               <div className="flex justify-between items-end">
-                <label className="text-[13px] text-app-muted uppercase tracking-[1.5px] font-bold block">
+                <label className="text-[12px] text-app-muted uppercase tracking-[1.5px] font-medium block">
                   Paste JSON
                 </label>
                 <div className="flex items-center gap-3">
-                  <span className="text-[11px] text-app-muted italic font-medium">or</span>
+                  <span className="text-[11px] text-app-muted italic font-normal">or</span>
                   <input 
                     type="file" 
                     accept=".json"
@@ -163,7 +163,7 @@ export default function PasteTemplateModal({ isOpen, existingTemplates, onClose,
                   />
                   <button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-app-border transition-colors text-[12.5px] font-bold"
+                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-app-border transition-colors text-[12.5px] font-medium"
                   >
                     <Upload size={16} className="text-app-accent" />
                     Upload .json File
@@ -182,7 +182,7 @@ export default function PasteTemplateModal({ isOpen, existingTemplates, onClose,
                   }}
                   spellCheck={false}
                 />
-                {error && <p className="text-red-500 text-[13px] mt-2.5 flex items-center gap-1.5 font-bold"><AlertTriangle size={16} /> {error}</p>}
+                {error && <p className="text-red-500 text-[13px] mt-2.5 flex items-center gap-1.5 font-medium"><AlertTriangle size={16} /> {error}</p>}
               </div>
             </div>
 
@@ -190,14 +190,14 @@ export default function PasteTemplateModal({ isOpen, existingTemplates, onClose,
             <div className="px-8 py-5 border-t border-app-border bg-app-card flex justify-end gap-3">
               <button 
                 onClick={handleClose} 
-                className="px-6 py-2.5 text-[13px] font-bold text-app-muted hover:text-white transition-colors"
+                className="px-6 py-2.5 text-[13px] font-medium text-app-muted hover:text-white transition-colors"
               >
                 CANCEL
               </button>
               <button 
                 onClick={handleInitialImport} 
                 disabled={!jsonText.trim()}
-                className="px-8 py-2.5 bg-app-accent text-app-bg rounded-xl text-[13.5px] font-bold hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-app-accent/20"
+                className="px-8 py-2.5 bg-app-accent text-accent-foreground rounded-lg text-[13.5px] font-medium hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-app-accent/10 active:scale-[0.98]"
               >
                 IMPORT
               </button>

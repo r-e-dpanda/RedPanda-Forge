@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "../../lib/utils";
-import { PanelRightClose, Layers, Eye, EyeOff, FolderOpen, Folder, ChevronRight, ChevronLeft, Type, Square, Image as LucideImage, Upload, RotateCcw, AlertTriangle } from "lucide-react";
+import { PanelRightClose, Layers, Eye, EyeOff, FolderOpen, Folder, ChevronRight, ChevronLeft, Type, Square, Image as LucideImage, Upload, RotateCcw, AlertTriangle, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { useTranslation } from "../../lib/i18n";
 import { useEditorStore } from "../../stores/editorStore";
 import { resolveBoundData, isAutoResolved } from "../../lib/templateEngine";
@@ -244,21 +244,33 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
 
       {/* ── Panel tab bar ─────────────────────────────────────────────── */}
       <div className="flex bg-app-sidebar h-[44px] shrink-0 border-b border-app-border">
-        <Tabs value={activeRightTab} onValueChange={(val: any) => setActiveRightTab(val)} className="flex-1">
-          <TabsList variant="line" className="w-full h-full p-0 gap-0">
-            <TabsTrigger value="data" className="flex-1 h-full rounded-none data-active:after:bg-app-accent data-active:text-app-text text-ui-sm font-medium">
-              {t.panels.tabs.match}
-            </TabsTrigger>
-            <TabsTrigger value="design" className="flex-1 h-full rounded-none data-active:after:bg-app-accent data-active:text-app-text text-ui-sm font-medium">
-              {t.panels.tabs.design}
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <button
+          onClick={() => setActiveRightTab('data')}
+          className={cn(
+            "flex-1 text-ui-base font-medium transition-colors border-b-2 h-full",
+            activeRightTab === 'data'
+              ? "border-app-accent text-app-text"
+              : "border-transparent text-app-muted hover:text-app-text hover:bg-app-card"
+          )}
+        >
+          {t.panels.tabs.match}
+        </button>
+        <button
+          onClick={() => setActiveRightTab('design')}
+          className={cn(
+            "flex-1 text-ui-base font-medium transition-colors border-b-2 h-full",
+            activeRightTab === 'design'
+              ? "border-app-accent text-app-text"
+              : "border-transparent text-app-muted hover:text-app-text hover:bg-app-card"
+          )}
+        >
+          {t.panels.tabs.design}
+        </button>
         <Button
           variant="ghost"
           size="icon-sm"
           onClick={() => setRightExpanded(false)}
-          className="h-full w-[44px] rounded-none hover:bg-app-card text-app-muted"
+          className="h-full w-[44px] rounded-none hover:bg-app-card text-app-muted border-l border-app-border"
         >
           <PanelRightClose size={ui.icon.sm} />
         </Button>
@@ -805,10 +817,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           <button
                             onClick={() => handleOverride(el.id, { flipX: !(overrides.flipX !== undefined ? overrides.flipX : !!el.flipX) })}
                             className={cn(
-                              "flex-1 h-8 rounded text-ui-xs font-medium border transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                              "flex-1 h-8 rounded text-ui-xs transition-all flex items-center justify-center gap-1.5 shadow-sm border",
                               (overrides.flipX !== undefined ? overrides.flipX : !!el.flipX)
-                                ? "bg-app-accent border-app-accent text-black font-bold ring-2 ring-app-accent/20"
-                                : "bg-app-bg border-app-border text-app-muted hover:border-app-muted hover:text-app-text"
+                                ? "bg-app-accent border-app-accent text-accent-foreground font-semibold shadow-md shadow-app-accent/10 hover:brightness-110"
+                                : "bg-app-bg border-app-border text-app-muted font-normal hover:border-app-muted hover:text-app-text"
                             )}
                           >
                             ↔ {t.panels.fields.flipX}
@@ -816,10 +828,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                           <button
                             onClick={() => handleOverride(el.id, { flipY: !(overrides.flipY !== undefined ? overrides.flipY : !!el.flipY) })}
                             className={cn(
-                              "flex-1 h-8 rounded text-ui-xs font-medium border transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                              "flex-1 h-8 rounded text-ui-xs transition-all flex items-center justify-center gap-1.5 shadow-sm border",
                               (overrides.flipY !== undefined ? overrides.flipY : !!el.flipY)
-                                ? "bg-app-accent border-app-accent text-black font-bold ring-2 ring-app-accent/20"
-                                : "bg-app-bg border-app-border text-app-muted hover:border-app-muted hover:text-app-text"
+                                ? "bg-app-accent border-app-accent text-accent-foreground font-semibold shadow-md shadow-app-accent/10 hover:brightness-110"
+                                : "bg-app-bg border-app-border text-app-muted font-normal hover:border-app-muted hover:text-app-text"
                             )}
                           >
                             ↕ {t.panels.fields.flipY}
@@ -839,11 +851,13 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
                                     key={align}
                                     onClick={() => handleOverride(el.id, { align })}
                                     className={cn(
-                                      "flex-1 text-ui-xs font-medium capitalize transition-colors",
-                                      isActive ? "bg-app-accent text-black font-bold shadow-sm" : "text-app-muted hover:bg-app-card/60 hover:text-app-text"
+                                      "flex-1 h-full flex items-center justify-center transition-all",
+                                      isActive ? "bg-app-accent text-accent-foreground shadow-sm hover:brightness-110" : "text-app-muted hover:bg-app-card hover:text-app-text"
                                     )}
                                   >
-                                    {align[0]}
+                                    {align === 'left' && <AlignLeft size={14} />}
+                                    {align === 'center' && <AlignCenter size={14} />}
+                                    {align === 'right' && <AlignRight size={14} />}
                                   </button>
                                 );
                               })}

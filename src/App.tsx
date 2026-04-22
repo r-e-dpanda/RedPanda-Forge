@@ -226,22 +226,22 @@ export default function App() {
               You have manual adjustments in this session. Switching templates will <span className="text-app-text font-medium">discard</span> all your edits.
             </p>
 
-            <div className="flex flex-col gap-2">
-                          <button 
-                            onClick={openInNewTab}
-                            className="w-full bg-app-accent hover:opacity-90 text-black font-extrabold py-2.5 rounded-lg transition-colors text-ui-sm shadow-lg shadow-app-accent/20"
-                          >
-                            {t.modals.templateSwitch.openNewTab}
-                          </button>
+            <div className="flex flex-col gap-2.5">
+              <button 
+                onClick={openInNewTab}
+                className="w-full bg-app-accent hover:opacity-90 text-accent-foreground font-medium py-2.5 rounded-lg transition-all text-ui-sm shadow-md shadow-app-accent/10 active:scale-[0.98]"
+              >
+                {t.modals.templateSwitch.openNewTab}
+              </button>
               <button 
                 onClick={confirmSwitch}
-                className="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg transition-colors text-ui-sm"
+                className="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg transition-all text-ui-sm active:scale-[0.98]"
               >
                 {t.modals.templateSwitch.discardReplace}
               </button>
               <button 
                 onClick={() => setShowConfirmRestart(null)}
-                className="w-full bg-app-card hover:bg-app-bg text-app-text border border-app-border font-normal py-2.5 rounded-lg transition-colors text-ui-sm"
+                className="w-full bg-app-card hover:bg-app-bg text-app-muted hover:text-app-text border border-app-border font-medium py-2.5 rounded-lg transition-all text-ui-sm active:scale-[0.98]"
               >
                 {t.common.cancel}
               </button>
