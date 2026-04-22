@@ -1,0 +1,11 @@
+{
+  "id": "premier-league",
+  "type": "league",
+  "name": "Premier League",
+  "code": "EPL",
+  "countryCode": "GB-ENG",
+  "assets": {
+    "logo": "@global/soccer/competitions/premier-league/logo.svg",
+	"country": "@global/common/countries/gb-eng.svg"
+  }
+}

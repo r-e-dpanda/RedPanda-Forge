@@ -7,7 +7,6 @@
     "secondary": "#FFFFFF",
     "accent": "#1C2C5B"
   },
-  "logo": "@global/soccer/teams/manchester-city/logo.svg",
   "assets": {
     "logo": "@global/soccer/teams/manchester-city/logo.svg",
     "kit": {

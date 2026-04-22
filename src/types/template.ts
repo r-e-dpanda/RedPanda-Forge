@@ -50,7 +50,11 @@ export interface Player {
 
 export interface MatchCompetition {
   id: string;
+  type?: "league" | "cup";
   name: string;
+  code?: string;
+  countryCode?: string;
+  flag?: string;
   logo?: string;
   trophy?: string;
 }
@@ -59,15 +63,25 @@ export interface MatchTeamOverrides {
   kit?: TeamKit;
 }
 
+export interface MatchScore {
+  ht?: number[];
+  ft?: number[];
+  pk?: number[];
+}
+
 export interface Match {
   id: string;
   sport: Sport;
   league: string;
   competition?: MatchCompetition; // structured competition
-  date: string; // ISO
+  round?: string;
+  date: string; // Date string or ISO
+  time?: string;
+  timezone?: string;
   venue?: string;
   isLive?: boolean;
-  score?: string;
+  status?: string; // e.g. "NS", "FT"
+  score?: string | MatchScore;
   liveBadge?: boolean;
   homeTeam?: Team;
   awayTeam?: Team;
@@ -134,6 +148,10 @@ export interface BaseElement {
   fallback?: string;       // Fallback value if dataKey is empty
   formatters?: string[];   // Array of formatter pipelines (e.g., ["uppercase", "shorten:10"])
   
+  // UI Overrides
+  bgEnabled?: boolean;
+  bgColor?: string;
+
   // Legacy / existing formatting (keep for backward compatibility)
   position: Coordinates;
   size?: Dimensions; // Line có thể không có size mà dùng points

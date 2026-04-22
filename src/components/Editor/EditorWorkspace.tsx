@@ -1,292 +1,171 @@
-import React, { useState, forwardRef, useImperativeHandle, useRef } from "react";
-import KonvaEditor, { EditorRef as KonvaEditorRef } from "../editor/KonvaEditor";
+import React, { forwardRef, useState, useRef, useImperativeHandle } from "react";
+import KonvaEditor from "./KonvaEditor";
 import RightPanel from "../panels/RightPanel";
 import { useEditorStore } from "../../stores/editorStore";
-import { cn } from "../../lib/utils";
-import { Plus, X, Image as ImageIcon, RotateCcw, RotateCw, Download, AlertTriangle, Image, FileCode2, Code } from "lucide-react";
 import { useTranslation } from "../../lib/i18n";
+import { 
+  Undo2, Redo2, Download, Image as ImageIcon, Code, FileText, View, LayoutTemplate
+} from "lucide-react";
+import { cn } from "../../lib/utils";
 
-export interface EditorRef {
-  exportPNG: () => void;
-  exportHTML: () => Promise<void>;
-  exportSVG: () => Promise<void>;
-}
-
-const EditorWorkspace = forwardRef<EditorRef, any>((props, ref) => {
-  const { t } = useTranslation();
+const EditorWorkspace = forwardRef((props, ref) => {
   const [rightExpanded, setRightExpanded] = useState(true);
   const [activeRightTab, setActiveRightTab] = useState<'data' | 'design'>('data');
-  const innerEditorRef = useRef<KonvaEditorRef>(null);
-
+  const konvaRef = useRef<any>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  
+  const { t } = useTranslation();
   const { 
     sessions, 
     activeSessionId, 
     setActiveSession, 
-    addSession, 
-    closeSession,
-    renameSession,
-    undo,
-    redo,
-    canUndo,
-    canRedo
+    closeSession, 
+    undo, 
+    redo 
   } = useEditorStore();
 
-  const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renamingName, setRenamingName] = useState("");
-  const [showConfirmClose, setShowConfirmClose] = useState<string | null>(null);
-  const [showExportModal, setShowExportModal] = useState(false);
-  const [showDownloadWarning, setShowDownloadWarning] = useState(false);
+  useImperativeHandle(ref, () => ({
+     // Forward ref if App.tsx needs it
+  }));
 
   const activeSession = sessions.find(s => s.id === activeSessionId);
 
-  const handleExport = async (type: 'png' | 'html' | 'svg') => {
-    setShowExportModal(false);
-    
-    // Check if we're in an iframe. If so, show the warning immediately
-    // because downloads often fail silently in sandboxed iframes.
-    const inIframe = window.self !== window.top;
-    if (inIframe) {
-      setShowDownloadWarning(true);
-    }
-    
-    try {
-      if (type === 'png' && innerEditorRef.current) innerEditorRef.current.exportPNG();
-      if (type === 'html' && innerEditorRef.current) await innerEditorRef.current.exportHTML();
-      if (type === 'svg' && innerEditorRef.current) await innerEditorRef.current.exportSVG();
-    } catch (e) {
-      console.error("Export failed:", e);
-    }
-  };
-
-  useImperativeHandle(ref, () => ({
-    exportPNG: () => {
-      if (innerEditorRef.current) innerEditorRef.current.exportPNG();
-    },
-    exportHTML: async () => {
-      if (innerEditorRef.current) await innerEditorRef.current.exportHTML();
-    },
-    exportSVG: async () => {
-      if (innerEditorRef.current) await innerEditorRef.current.exportSVG();
-    }
-  }));
-
-  const handleCloseSession = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const session = sessions.find(s => s.id === id);
-    const isDirty = session && (
-      Object.keys(session.elementOverrides).length > 0 || 
-      Object.keys(session.manualInputs).length > 0 ||
-      session.historyIndex >= 0
-    );
-
-    if (isDirty) {
-      setShowConfirmClose(id);
-    } else {
-      closeSession(id);
-    }
-  };
-
-  const confirmClose = () => {
-    if (showConfirmClose) {
-      closeSession(showConfirmClose);
-      setShowConfirmClose(null);
-    }
-  };
-
-  const startRenaming = (id: string, name: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setRenamingId(id);
-    setRenamingName(name);
-  };
-
-  const submitRename = () => {
-    if (renamingId && renamingName.trim()) {
-      renameSession(renamingId, renamingName.trim());
-    }
-    setRenamingId(null);
-  };
+  if (sessions.length === 0) {
+     return (
+       <div className="flex-1 flex flex-col items-center justify-center bg-app-bg text-app-muted relative">
+         <div className="w-24 h-24 mb-6 rounded-full bg-app-sidebar border border-app-border/40 flex items-center justify-center shadow-sm">
+           <LayoutTemplate className="w-10 h-10 text-app-accent/40" />
+         </div>
+         <h2 className="text-xl font-semibold text-app-text mb-2">RedPanda Forge</h2>
+         <p className="text-ui-base text-center max-w-md">
+           Select a match or template from the sidebar to begin editing a new graphic session.
+         </p>
+       </div>
+     );
+  }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-app-bg border-l border-app-border">
-      {/* Editor Tab Bar - Localized to Editor Area with Actions */}
-      <div className="h-[2.75rem] bg-app-sidebar/40 border-b border-app-border shrink-0 flex items-center justify-between px-3 relative z-20 overflow-hidden select-none">
-          <div className="flex items-end gap-1 h-full overflow-x-auto overflow-y-hidden scrollbar-hide flex-1">
-            {sessions.map(session => (
-              <div 
-                key={session.id}
-                onClick={() => setActiveSession(session.id)}
-                onDoubleClick={(e) => startRenaming(session.id, session.name, e)}
-                className={cn(
-                  "h-[34px] px-3.5 flex items-center gap-2 rounded-t-lg min-w-[120px] max-w-[220px] cursor-pointer transition-all border-x border-t relative text-ui-sm font-normal group",
-                  activeSessionId === session.id 
-                    ? "bg-app-bg border-app-border border-b-app-bg -mb-[1px] text-app-text z-10" 
-                    : "bg-transparent border-transparent text-app-muted hover:text-app-text hover:bg-app-card/30"
-                )}
-              >
-                <div className="w-4 h-4 shrink-0 flex items-center justify-center">
-                  {session.template?.thumbnail ? (
-                    <img src={session.template.thumbnail} className="w-full h-full object-contain opacity-90" alt="" />
-                  ) : <ImageIcon size={10} className="opacity-40" />}
-                </div>
-                
-                {renamingId === session.id ? (
-                  <input 
-                    autoFocus
-                    value={renamingName}
-                    onChange={e => setRenamingName(e.target.value)}
-                    onBlur={submitRename}
-                    onKeyDown={e => e.key === 'Enter' && submitRename()}
-                    onClick={e => e.stopPropagation()}
-                    className="bg-app-card border border-app-accent rounded px-2 w-full text-ui-xs h-7 outline-none"
-                  />
-                ) : (
-                  <span className="truncate flex-1 leading-none">{session.name}</span>
-                )}
-
-                <button 
-                  onClick={(e) => handleCloseSession(session.id, e)}
-                  className={cn(
-                    "w-5 h-5 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100",
-                    activeSessionId === session.id ? "opacity-100 bg-app-card text-app-muted hover:bg-red-500 hover:text-white" : "text-app-muted hover:bg-app-accent hover:text-black"
-                  )}
-                >
-                  <X size={12} />
-                </button>
-              </div>
+    <div className="flex-1 flex flex-col min-w-0 bg-app-bg relative">
+      {/* Top Header */}
+      <div className="h-[3.5rem] bg-app-card border-b border-app-border flex items-center justify-between shrink-0 select-none px-2 z-10 w-full overflow-hidden">
+         {/* TABS */}
+         <div className="flex items-center overflow-x-auto no-scrollbar h-full pt-2">
+            {sessions.map(s => (
+               <button 
+                 key={s.id} 
+                 onClick={() => setActiveSession(s.id)}
+                 className={cn(
+                   "h-full px-4 text-ui-sm rounded-t-lg transition-colors flex items-center gap-3 relative min-w-[120px] max-w-[200px] group",
+                   s.id === activeSessionId 
+                     ? "bg-app-bg text-app-text font-medium border-t border-x border-app-border border-b-0 after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[1px] after:bg-app-bg" 
+                     : "bg-transparent text-app-muted hover:bg-app-sidebar hover:text-app-text border-t border-x border-transparent"
+                 )}
+               >
+                 <span className="truncate flex-1 text-left">{s.name || "Untitled Session"}</span>
+                 <span 
+                   className={cn(
+                     "w-5 h-5 rounded-md flex items-center justify-center transition-colors text-[14px]",
+                     s.id === activeSessionId ? "hover:bg-app-card opacity-100" : "opacity-0 group-hover:opacity-100 hover:bg-app-card"
+                   )}
+                   onClick={(e) => { 
+                     e.stopPropagation(); 
+                     closeSession(s.id); 
+                   }}
+                 >
+                   &times;
+                 </span>
+               </button>
             ))}
+         </div>
+
+         {/* Actions */}
+         <div className="flex items-center gap-1.5 pl-4 ml-auto bg-gradient-to-r from-transparent via-app-card to-app-card shrink-0">
             <button 
-              onClick={() => addSession()}
-              className="px-3 h-[34px] text-app-muted hover:text-app-accent transition-colors flex items-center justify-center mb-0.5"
-              title={t.workspace.actions.newGraphic}
+              onClick={undo} 
+              disabled={!activeSession?.history || activeSession.historyIndex <= -1} 
+              className="w-8 h-8 flex items-center justify-center text-app-muted hover:text-app-text hover:bg-app-bg disabled:opacity-30 disabled:hover:bg-transparent rounded-md transition-colors"
+              title={t.editor.undo}
             >
-              <Plus size={16} />
+              <Undo2 size={18} />
             </button>
-          </div>
-
-          {/* Localized Actions */}
-          <div className="flex items-center gap-2.5 pl-5 overflow-y-hidden">
-            <div className="flex items-center rounded-md overflow-hidden border border-app-border h-8 shadow-sm">
-                <button 
-                  onClick={undo}
-                  disabled={!canUndo()}
-                  className="w-10 h-full bg-app-bg flex items-center justify-center text-app-muted hover:text-app-text disabled:opacity-30 disabled:pointer-events-none border-r border-app-border transition-colors outline-none"
-                  title={t.workspace.actions.undo}
-                >
-                  <RotateCcw size={14} />
-                </button>
-                <button 
-                  onClick={redo}
-                  disabled={!canRedo()}
-                  className="w-10 h-full bg-app-bg flex items-center justify-center text-app-muted hover:text-app-text disabled:opacity-30 disabled:pointer-events-none transition-colors outline-none"
-                  title={t.workspace.actions.redo}
-                >
-                  <RotateCw size={14} />
-                </button>
-            </div>
-
+            <button 
+              onClick={redo} 
+              disabled={!activeSession?.history || activeSession.historyIndex >= activeSession.history.length - 1} 
+              className="w-8 h-8 flex items-center justify-center text-app-muted hover:text-app-text hover:bg-app-bg disabled:opacity-30 disabled:hover:bg-transparent rounded-md transition-colors"
+              title={t.editor.redo}
+            >
+              <Redo2 size={18} />
+            </button>
+            
+            <div className="w-px h-5 bg-app-border mx-2" />
+            
             <div className="relative">
-              <button 
-                onClick={() => setShowExportModal(!showExportModal)}
-                className="h-8 bg-app-accent hover:brightness-110 text-accent-foreground px-4 rounded-md flex items-center justify-center gap-2 text-ui-xs font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-sm relative z-50"
-                disabled={!activeSession?.template}
-              >
-                <Download size={13} /> {t.workspace.actions.export}
-              </button>
-              
-              {showExportModal && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowExportModal(false)}></div>
-                  <div className="absolute top-full right-0 mt-2 w-[15rem] bg-app-card border border-app-border rounded-lg shadow-xl z-50 flex flex-col py-1.5 animate-in fade-in zoom-in-95 duration-100">
-                    <button onClick={(e) => { e.stopPropagation(); handleExport('png'); }} className="flex items-center gap-3 px-4 py-2.5 hover:bg-app-sidebar text-left text-ui-sm text-app-text transition-colors">
-                       <Image size={16} className="text-app-muted" /> <span>Export <strong className="text-app-accent font-medium">PNG</strong></span>
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleExport('html'); }} className="flex items-center gap-3 px-4 py-2.5 hover:bg-app-sidebar text-left text-ui-sm text-app-text transition-colors">
-                       <FileCode2 size={16} className="text-app-muted" /> <span>Export <strong className="text-app-accent font-medium">HTML+Assets</strong></span>
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleExport('svg'); }} className="flex items-center gap-3 px-4 py-2.5 hover:bg-app-sidebar text-left text-ui-sm text-app-text transition-colors">
-                       <Code size={16} className="text-app-muted" /> <span>Export <strong className="text-app-accent font-medium">SVG</strong></span>
-                    </button>
-                  </div>
-                </>
-              )}
+               <button 
+                 onClick={() => setExportOpen(!exportOpen)}
+                 className="flex items-center gap-1.5 px-3 py-1.5 bg-app-accent hover:opacity-90 text-accent-foreground text-ui-sm font-medium rounded-md shadow-sm transition-all"
+               >
+                 <Download size={16} />
+                 {t.editor.export}
+               </button>
+               
+               {exportOpen && (
+                 <>
+                   <div 
+                     className="fixed inset-0 z-40" 
+                     onClick={() => setExportOpen(false)} 
+                   />
+                   <div className="absolute top-full right-0 mt-2 w-56 bg-app-card border border-app-border rounded-xl shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                      <button 
+                        onClick={() => { setExportOpen(false); konvaRef.current?.exportPNG(); }} 
+                        className="w-full text-left px-4 py-2 text-ui-sm text-app-text hover:bg-app-bg flex items-center gap-2.5 transition-colors"
+                      >
+                        <ImageIcon size={16} className="text-blue-500" /> 
+                        Export PNG
+                      </button>
+                      <button 
+                        onClick={() => { setExportOpen(false); konvaRef.current?.exportSVG(); }} 
+                        className="w-full text-left px-4 py-2 text-ui-sm text-app-text hover:bg-app-bg flex items-center gap-2.5 transition-colors"
+                      >
+                        <View size={16} className="text-orange-500" /> 
+                        Export SVG
+                      </button>
+                      <div className="w-full h-px bg-app-border/50 my-1"></div>
+                      <button 
+                        onClick={() => { setExportOpen(false); konvaRef.current?.exportHTML(); }} 
+                        className="w-full text-left px-4 py-2 text-ui-sm text-app-text hover:bg-app-bg flex items-center gap-2.5 transition-colors title='Export to a standalone HTML template structure'"
+                      >
+                        <Code size={16} className="text-green-500" /> 
+                        Export HTML Bundle
+                      </button>
+                   </div>
+                 </>
+               )}
             </div>
-          </div>
+         </div>
       </div>
-
-      <div className="flex-1 flex overflow-hidden relative">
-        <KonvaEditor 
-          ref={innerEditorRef} 
-          rightExpanded={rightExpanded} 
-          setRightExpanded={setRightExpanded} 
-          setActiveRightTab={setActiveRightTab} 
-        />
+      
+      {/* Main Workspace Area */}
+      <div className="flex-1 flex min-h-0 relative">
+        <div className="flex-1 flex relative items-center justify-center bg-app-sidebar/30 overflow-hidden">
+           <KonvaEditor 
+              ref={konvaRef}
+              rightExpanded={rightExpanded}
+              setRightExpanded={setRightExpanded}
+              setActiveRightTab={setActiveRightTab}
+           />
+        </div>
+        
+        {/* Right Panel Wrapper */}
         <RightPanel 
-          rightExpanded={rightExpanded}
-          setRightExpanded={setRightExpanded}
-          activeRightTab={activeRightTab}
-          setActiveRightTab={setActiveRightTab}
+           rightExpanded={rightExpanded}
+           setRightExpanded={setRightExpanded}
+           activeRightTab={activeRightTab}
+           setActiveRightTab={setActiveRightTab}
         />
-
-            {/* Global Confirmation for Downloads */}
-        {showDownloadWarning && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-app-sidebar border border-app-border w-full max-w-[400px] p-6 rounded-xl shadow-2xl animate-in zoom-in-95 duration-200">
-              <div className="flex items-center gap-3 text-app-accent mb-4">
-                <AlertTriangle size={20} />
-                <h2 className="text-ui-base font-medium text-app-text">Download Initiated</h2>
-              </div>
-              <p className="text-app-muted text-ui-sm leading-relaxed mb-6">
-                Your download has started. However, if nothing happens, <strong className="text-app-text">Preview Environments (iFrames)</strong> sometimes block file downloads for security.
-                <br /><br />
-                If your download fails or doesn't appear, please click the <strong>"Open in New Tab"</strong> button in the top right corner of the AI Studio window to run the app without sandbox restrictions.
-              </p>
-              <div className="flex flex-col gap-2.5">
-                <button 
-                  onClick={() => setShowDownloadWarning(false)}
-                  className="w-full bg-app-card hover:bg-app-bg text-app-text border border-app-border font-medium py-2.5 rounded-lg transition-all text-ui-sm active:scale-[0.98]"
-                >
-                  Got it
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Global Confirmation for Closing Tab */}
-        {showConfirmClose && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-app-sidebar border border-app-border w-full max-w-[400px] p-6 rounded-xl shadow-2xl animate-in zoom-in-95 duration-200">
-              <div className="flex items-center gap-3 text-red-500 mb-4">
-                <AlertTriangle size={20} />
-                <h2 className="text-ui-base font-medium text-app-text">{t.workspace.modals.closeTab.header}</h2>
-              </div>
-              
-              <p className="text-app-muted text-ui-sm leading-relaxed mb-6">
-                {t.workspace.modals.closeTab.description.split(/\{changes\}|\{\/changes\}/).map((part, i) => 
-                  i === 1 ? <span key={i} className="text-app-text font-medium">{part}</span> : part
-                )}
-              </p>
-
-              <div className="flex flex-col gap-2.5">
-                <button 
-                  onClick={confirmClose}
-                  className="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg transition-all text-ui-sm active:scale-[0.98]"
-                >
-                  {t.workspace.modals.closeTab.confirm}
-                </button>
-                <button 
-                  onClick={() => setShowConfirmClose(null)}
-                  className="w-full bg-app-card hover:bg-app-bg text-app-muted hover:text-app-text border border-app-border font-medium py-2.5 rounded-lg transition-all text-ui-sm active:scale-[0.98]"
-                >
-                  {t.common.cancel}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 });
 
+EditorWorkspace.displayName = "EditorWorkspace";
 export default EditorWorkspace;

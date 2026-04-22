@@ -1,12 +1,11 @@
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { TemplateBase } from '../types/template';
-import { MatchData } from '../types/match';
+import { Template, Match } from '../types/template';
 
 export async function exportHTMLZip(
-  template: TemplateBase, 
+  template: Template, 
   elements: any[], 
-  match: MatchData | null, 
+  match: Match | null, 
   fallbackId: string,
   canvasBgColor: string = 'transparent'
 ) {
@@ -116,7 +115,7 @@ export async function exportHTMLZip(
 }
 
 export async function exportSVG(
-  template: TemplateBase, 
+  template: Template, 
   elements: any[], 
   fallbackId: string,
   canvasBgColor: string = 'transparent'

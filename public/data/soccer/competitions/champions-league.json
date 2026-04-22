@@ -1,0 +1,9 @@
+{
+  "id": "champions-league",
+  "type": "cup",
+  "name": "Champions League",
+  "code": "UCL",
+  "assets": {
+    "logo": "@global/soccer/competitions/champions-league/logo.svg"
+  }
+}

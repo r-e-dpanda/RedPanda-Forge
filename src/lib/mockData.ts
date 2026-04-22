@@ -91,44 +91,204 @@ const hydrateTeam = (teamId: string) => {
   return LOCAL_DB[teamId] || { id: teamId };
 };
 
-const RAW_MOCK_MATCHES = [
+const RAW_MOCK_MATCHES: Match[] = [
   {
     id: "m_fb_1",
-    sport: "football" as const,
+    sport: "football",
     league: "Premier League",
+    competition: {
+      id: "premier-league",
+      type: "league",
+      name: "Premier League",
+      code: "EPL",
+      countryCode: "GB-ENG",
+      logo: "@global/soccer/competitions/premier-league/logo.svg",
+      flag: "@global/common/countries/gb-eng.svg"
+    },
+    round: "Matchday 32",
     date: "2026-04-25T15:00:00Z",
+    time: "15:00",
     venue: "Old Trafford",
-    liveBadge: true,
+    liveBadge: false,
+    status: "NS", // Not Started
     score: "",
     homeTeam: { id: "manchester-united" },
     awayTeam: { id: "manchester-city" },
     awayTeamOverrides: {
       kit: {
-        type: "away" as const,
+        type: "away",
         primary: "#000000"
       }
     }
   },
   {
     id: "m_fb_2",
-    sport: "football" as const,
+    sport: "football",
     league: "Champions League",
+    competition: {
+      id: "champions-league",
+      type: "cup",
+      name: "Champions League",
+      code: "UCL",
+      logo: "@global/soccer/competitions/champions-league/logo.svg"
+    },
+    round: "Semi-Final 1st Leg",
     date: "2026-05-10T19:45:00Z",
+    time: "19:45",
     venue: "Santiago Bernabéu",
     liveBadge: false,
-    score: "1 - 1",
+    status: "FT", // Full Time
+    score: {
+      ht: [0, 1],
+      ft: [1, 1]
+    },
     homeTeam: { id: "real-madrid" },
     awayTeam: { id: "bayern-munich" }
   },
   {
     id: "m_te_1",
-    sport: "tennis" as const,
+    sport: "tennis",
     league: "ATP Tour - Wimbledon",
+    competition: {
+      id: "wimbledon",
+      type: "cup",
+      name: "Wimbledon",
+      countryCode: "GB-ENG",
+      logo: "@global/tennis/competitions/wimbledon/logo.svg"
+    },
+    round: "Final",
     date: "2026-07-12T14:00:00Z",
+    time: "14:00",
     venue: "Centre Court",
     liveBadge: true,
+    status: "LIVE",
+    score: "2 - 1",
     player1: { id: "novak-djokovic" },
     player2: { id: "carlos-alcaraz" }
+  },
+  {
+    id: "m_fb_3",
+    sport: "football",
+    league: "Premier League",
+    competition: {
+      id: "premier-league",
+      type: "league",
+      name: "Premier League",
+      code: "EPL",
+      countryCode: "GB-ENG",
+      logo: "@global/soccer/competitions/premier-league/logo.svg",
+      flag: "@global/common/countries/gb-eng.svg"
+    },
+    round: "Matchday 5",
+    date: "2026-04-22T17:30:00Z",
+    time: "",
+    venue: "Amex Stadium",
+    liveBadge: false,
+    status: "FT",
+    score: "3-0",
+    homeTeam: { 
+      id: "brighton",
+      name: "Brighton",
+      shortName: "BHA",
+      logo: "@global/soccer/teams/brighton/logo.svg"
+    },
+    awayTeam: { 
+      id: "chelsea",
+      name: "Chelsea",
+      shortName: "CHE",
+      logo: "@global/soccer/teams/chelsea/logo.svg"
+    }
+  },
+  {
+    id: "m_fb_4",
+    sport: "football",
+    league: "Premier League",
+    competition: {
+      id: "premier-league",
+      type: "league",
+      name: "Premier League",
+      code: "EPL",
+      countryCode: "GB-ENG",
+      logo: "@global/soccer/competitions/premier-league/logo.svg",
+      flag: "@global/common/countries/gb-eng.svg"
+    },
+    round: "Matchday 8",
+    date: "2026-04-19T15:00:00Z",
+    time: "",
+    venue: "Stamford Bridge",
+    liveBadge: true,
+    status: "FT",
+    score: "0-1",
+    homeTeam: { 
+      id: "chelsea",
+      name: "Chelsea",
+      shortName: "CHE",
+      logo: "@global/soccer/teams/chelsea/logo.svg"
+    },
+    awayTeam: { 
+      id: "manchester-united"
+    }
+  },
+  {
+    id: "m_fb_5",
+    sport: "football",
+    league: "Premier League",
+    competition: {
+      id: "premier-league",
+      type: "league",
+      name: "Premier League",
+      code: "EPL",
+      countryCode: "GB-ENG",
+      logo: "@global/soccer/competitions/premier-league/logo.svg",
+      flag: "@global/common/countries/gb-eng.svg"
+    },
+    round: "Matchday 12",
+    date: "2026-04-12T20:00:00Z",
+    time: "",
+    venue: "Stamford Bridge",
+    liveBadge: false,
+    status: "FT",
+    score: "0-3",
+    homeTeam: { 
+      id: "chelsea",
+      name: "Chelsea",
+      shortName: "CHE",
+      logo: "@global/soccer/teams/chelsea/logo.svg"
+    },
+    awayTeam: { 
+      id: "manchester-city"
+    }
+  },
+  {
+    id: "m_fb_6",
+    sport: "football",
+    league: "Champions League",
+    competition: {
+      id: "champions-league",
+      type: "cup",
+      name: "Champions League",
+      code: "UCL",
+      logo: "@global/soccer/competitions/champions-league/logo.svg"
+    },
+    round: "Semi-Final 2nd Leg",
+    date: "2026-05-18T19:45:00Z",
+    time: "19:45",
+    venue: "Allianz Arena",
+    liveBadge: false,
+    status: "NS",
+    score: "",
+    homeTeam: { 
+      id: "bayern-munich",
+      name: "Bayern Munich",
+      shortName: "FCB",
+      logo: "@global/soccer/teams/bayern-munich/logo.svg"
+    },
+    awayTeam: { 
+      id: "real-madrid",
+      name: "Real Madrid",
+      shortName: "RMA",
+      logo: "@global/soccer/teams/real-madrid/logo.svg"
+    }
   }
 ];
 

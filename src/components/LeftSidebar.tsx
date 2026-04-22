@@ -108,11 +108,13 @@ export const LeftSidebar = ({
                   disabled={filteredTemplates.length === 0}
                 >
                   <SelectTrigger className="w-full bg-app-card">
-                    <SelectValue placeholder={filteredTemplates.length === 0 ? "No template found" : "Select template..."} />
+                    <SelectValue placeholder={filteredTemplates.length === 0 ? "No template found" : "Select template..."}>
+                      {activeTemplate ? `${activeTemplate.name} (${activeTemplate.ratio})` : undefined}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {filteredTemplates.map((t: any) => (
-                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                      <SelectItem key={t.id} value={t.id}>{`${t.name} (${t.ratio})`}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -142,43 +144,79 @@ export const LeftSidebar = ({
                       key={m.id}
                       onClick={() => activeTemplate && setEditorMatch(m)}
                       className={cn(
-                        "p-3.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer",
-                        activeMatch?.id === m.id
-                          ? "bg-app-accent/10 border-app-accent text-app-text shadow-[0_0_16px_rgba(var(--app-accent-rgb),0.10)]"
-                          : "bg-app-bg border-app-border hover:border-app-muted text-app-muted"
+                        "flex flex-col bg-app-card rounded-xl border overflow-hidden transition-all cursor-pointer shadow-sm hover:shadow-md h-24 shrink-0",
+                        activeMatch?.id === m.id ? "border-app-accent ring-1 ring-app-accent/20" : "border-app-border"
                       )}
                     >
-                      <div className="flex flex-col flex-1 gap-1.5">
-                        {/* League + date row */}
-                        <div className="flex justify-between items-center">
-                          <span className="text-ui-micro text-app-muted">{m.league}</span>
-                          <span className="text-ui-micro text-app-muted">
-                            {new Date(m.date).toLocaleDateString()}
-                          </span>
-                        </div>
-                        {/* Teams row */}
-                        <div className="flex items-center gap-3">
-                          <div className="w-6 h-6 flex items-center justify-center bg-white/5 rounded border border-app-border shrink-0">
-                            <img
-                              src={
-                                m.sport === 'tennis'
-                                  ? resolveAssetPath(m.player1?.flag || "", { packId: "", templateId: "" })
-                                  : resolveAssetPath(m.homeTeam?.assets?.logo || "", { packId: "", templateId: "" })
-                              }
-                              className="w-4 h-4 object-contain opacity-90"
-                              alt=""
-                            />
+                      {/* Main Matchup Area */}
+                      <div className="flex items-center justify-between px-3 h-[4.25rem] w-full">
+                        {/* Home */}
+                        <div className="flex flex-col items-center justify-center gap-1.5 flex-1 min-w-0">
+                          <div className="w-8 h-8 shrink-0 flex items-center justify-center">
+                            <img src={resolveAssetPath(m.sport === 'tennis' ? m.player1?.flag || "" : m.homeTeam?.assets?.logo || m.homeTeam?.logo || "", { packId: "", templateId: "" })} className="w-full h-full object-contain drop-shadow-sm" alt="" />
                           </div>
-                          <span className={cn(
-                            "text-ui-sm font-medium truncate flex-1",
-                            activeMatch?.id === m.id ? "text-app-text" : "text-app-text/80"
-                          )}>
-                            {m.sport === 'tennis'
-                              ? `${m.player1?.name} vs ${m.player2?.name}`
-                              : `${m.homeTeam?.shortName || m.homeTeam?.id} vs ${m.awayTeam?.shortName || m.awayTeam?.id}`}
+                          <span className="text-[11px] font-semibold text-app-text truncate w-full text-center">
+                            {m.sport === 'tennis' ? m.player1?.name : (m.homeTeam?.shortName || m.homeTeam?.name || m.homeTeam?.id)}
                           </span>
-                          {activeMatch?.id === m.id && <Check size={14} className="text-app-accent ml-1 shrink-0" />}
                         </div>
+
+                        {/* Center: Score / Time */}
+                        <div className="flex flex-col items-center justify-center px-0.5 shrink-0 w-[5.5rem]">
+                          {m.status === 'NS' || !m.status ? (
+                            <>
+                              <span className="text-[22px] font-bold text-app-text leading-none tracking-tight">{m.time || '-:-'}</span>
+                              <span className="text-[10px] text-app-muted font-medium mt-1 text-center leading-tight lowercase">
+                                {new Date(m.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex items-center justify-center gap-2 text-[22px] font-bold text-app-text leading-none tracking-tight">
+                                <span>{typeof m.score === 'object' ? m.score?.ft?.[0] : m.score?.split('-')[0]?.trim() || "-"}</span>
+                                <span className="text-app-muted/40 font-medium text-[16px] mb-0.5">-</span>
+                                <span>{typeof m.score === 'object' ? m.score?.ft?.[1] : m.score?.split('-')[1]?.trim() || "-"}</span>
+                              </div>
+                              <span className={cn(
+                                "text-[9px] font-medium mt-1.5 text-center leading-tight", 
+                                (m.status === 'LIVE' || m.isLive) ? "text-red-500 font-bold uppercase" : "text-app-muted/80 lowercase"
+                              )}>
+                                {
+                                  (m.status === 'LIVE' || m.isLive) ? "LIVE" :
+                                  (m.status === 'FT' || m.status === 'FINISHED' || m.status === 'Finished' || m.status === 'Chung cuộc') ? 
+                                    `${new Date(m.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }).replace(',', '')} - FT` : 
+                                    m.status
+                                }
+                              </span>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Away */}
+                        <div className="flex flex-col items-center justify-center gap-1.5 flex-1 min-w-0">
+                          <div className="w-8 h-8 shrink-0 flex items-center justify-center">
+                            <img src={resolveAssetPath(m.sport === 'tennis' ? m.player2?.flag || "" : m.awayTeam?.assets?.logo || m.awayTeam?.logo || "", { packId: "", templateId: "" })} className="w-full h-full object-contain drop-shadow-sm" alt="" />
+                          </div>
+                          <span className="text-[11px] font-semibold text-app-text truncate w-full text-center">
+                            {m.sport === 'tennis' ? m.player2?.name : (m.awayTeam?.shortName || m.awayTeam?.name || m.awayTeam?.id)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Footer: Competition */}
+                      <div className="bg-black/[0.02] dark:bg-white/[0.02] border-t border-app-border/40 px-3 flex-1 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                          {m.competition?.logo && (
+                            <img src={resolveAssetPath(m.competition.logo, { packId: "", templateId: "" })} className="w-3.5 h-3.5 object-contain opacity-70 shrink-0" alt="" />
+                          )}
+                          <span className="text-[9px] font-medium text-app-muted truncate" title={m.competition?.name || m.league}>
+                            {m.competition?.name || m.league}
+                          </span>
+                        </div>
+                        {m.round && (
+                          <span className="text-[9px] text-app-muted/60 font-medium shrink-0 ml-2 border-l border-app-border/30 pl-2">
+                            {m.round}
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))

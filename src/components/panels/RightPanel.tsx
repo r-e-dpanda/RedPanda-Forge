@@ -4,6 +4,7 @@ import { PanelRightClose, Layers, Eye, EyeOff, FolderOpen, Folder, ChevronRight,
 import { useTranslation } from "../../lib/i18n";
 import { useEditorStore } from "../../stores/editorStore";
 import { resolveBoundData, isAutoResolved } from "../../lib/templateEngine";
+import { resolveAssetPath } from "../../lib/assetResolver";
 import { useSettingsStore } from "../../stores/settingsStore";
 import { getUISizes } from "../../constants/ui";
 
@@ -286,68 +287,207 @@ const RightPanel: React.FC<RightPanelProps> = ({ rightExpanded, setRightExpanded
 
             {match && (
               <>
-                {/* Sport + league badge */}
-                <div className="flex items-center gap-2.5 bg-app-card rounded-lg border border-app-border p-3 shadow-sm">
-                  <span className="bg-app-accent/15 text-app-accent px-2 py-0.5 rounded text-ui-xs font-medium capitalize">
-                    {match.sport}
-                  </span>
-                  <span className="text-ui-sm font-medium text-app-text truncate">{match.league}</span>
+                {/* Single Context Card built using table-style layout */}
+                <div className="flex flex-col bg-app-card rounded-xl border border-app-border overflow-hidden shadow-sm">
+                  {/* Competition Header */}
+                  <div className="flex items-center gap-2 px-3 py-2 border-b border-app-border/40 bg-black/[0.02] dark:bg-white/[0.02]">
+                    <span className="bg-app-accent/15 text-app-accent px-1.5 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-widest shrink-0">
+                      {match.sport}
+                    </span>
+                    {match.competition?.logo && (
+                      <div className="w-4 h-4 flex items-center justify-center shrink-0 rounded-[3px] bg-black/5 dark:bg-white/5 border border-app-border/40 overflow-hidden shadow-sm">
+                        <img 
+                          src={resolveAssetPath(match.competition.logo, { packId: "", templateId: "" })} 
+                          className="w-full h-full object-contain" 
+                          alt="" 
+                        />
+                      </div>
+                    )}
+                    <span className="font-semibold text-[11px] text-app-text truncate">
+                      {match.competition?.name || match.league}
+                    </span>
+                    {match.competition?.countryCode && (
+                      <img 
+                        src={resolveAssetPath(match.competition.flag || '', { packId: "", templateId: "" })} 
+                        className="w-[14px] h-[10px] object-cover rounded-[1px] opacity-85 shadow-[0_0_0_1px_rgba(0,0,0,0.1)] shrink-0 ml-auto" 
+                        alt="" 
+                      />
+                    )}
+                  </div>
+
+                  {/* Match Info Area */}
+                  {match.sport === 'football' && match.homeTeam && match.awayTeam && (
+                    <div className="flex relative">
+                      {/* Teams & Scores */}
+                      <div className="flex flex-col gap-2 p-3 flex-1 min-w-0 pr-4">
+                        {/* Home row */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                              <img 
+                                src={resolveAssetPath(match.homeTeam.assets?.logo || match.homeTeam.logo || "", { packId: "", templateId: "" })} 
+                                className="w-full h-full object-contain drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]" 
+                                alt="" 
+                              />
+                            </div>
+                            <span className="text-[13px] font-medium text-app-text truncate">
+                              {match.homeTeam.name || match.homeTeam.id}
+                            </span>
+                          </div>
+                          {(match.status !== 'NS' && match.score) && (
+                            <span className="font-bold text-[15px] text-app-text shrink-0">
+                              {typeof match.score === 'object' ? match.score?.ft?.[0] : match.score?.split('-')[0]?.trim()}
+                            </span>
+                          )}
+                        </div>
+                        {/* Away row */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                              <img 
+                                src={resolveAssetPath(match.awayTeam.assets?.logo || match.awayTeam.logo || "", { packId: "", templateId: "" })} 
+                                className="w-full h-full object-contain drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]" 
+                                alt="" 
+                              />
+                            </div>
+                            <span className="text-[13px] font-medium text-app-text truncate">
+                              {match.awayTeam.name || match.awayTeam.id}
+                            </span>
+                          </div>
+                          {(match.status !== 'NS' && match.score) && (
+                            <span className="font-bold text-[15px] text-app-text shrink-0">
+                              {typeof match.score === 'object' ? match.score?.ft?.[1] : match.score?.split('-')[1]?.trim()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Date / Status area */}
+                      <div className="flex flex-col items-center justify-center p-3 w-[6rem] shrink-0 text-center border-l border-app-border/40 bg-black/[0.02] dark:bg-white/[0.02]">
+                        {match.round && (
+                          <span className="text-[9px] font-medium text-app-muted truncate w-full mb-1">{match.round}</span>
+                        )}
+                        {match.status === 'NS' || !match.score ? (
+                          <>
+                            <span className="text-[13px] font-semibold text-app-text leading-tight">{match.time || '-:-'}</span>
+                            <span className="text-[10px] font-medium text-app-muted mt-0.5 text-center leading-tight">
+                              {new Date(match.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-[10px] font-medium text-app-muted text-center mb-0.5 leading-tight">
+                              {new Date(match.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            </span>
+                            <span className={cn(
+                              "text-[11px] font-bold tracking-wide mt-0.5",
+                              (match.status === 'LIVE' || match.isLive) ? "text-red-500 uppercase" : "text-app-muted/80 uppercase"
+                            )}>
+                              {(match.status === 'LIVE' || match.isLive) ? 'LIVE' : (match.status === 'FINISHED' || match.status === 'FT' || match.status === 'Chung cuộc' ? 'FT' : match.status)}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tennis Match Info Area */}
+                  {match.sport === 'tennis' && match.player1 && match.player2 && (
+                    <div className="flex relative">
+                      {/* Teams & Scores */}
+                      <div className="flex flex-col gap-2 p-3 flex-1 min-w-0 pr-4">
+                        {/* Player 1 row */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-5 h-4 flex items-center justify-center shrink-0 overflow-hidden rounded-[2px] shadow-[0_0_0_1px_rgba(0,0,0,0.1)]">
+                              <img 
+                                src={resolveAssetPath(match.player1.flag || "", { packId: "", templateId: "" })} 
+                                className="w-full h-full object-cover" 
+                                alt="" 
+                              />
+                            </div>
+                            <span className="text-[13px] font-medium text-app-text truncate">
+                              {match.player1.name || match.player1.id}
+                            </span>
+                          </div>
+                          {(match.status !== 'NS' && match.score) && (
+                            <span className="font-bold text-[14px] text-app-text shrink-0">
+                              {typeof match.score === 'string' ? match.score.split('-')[0]?.trim() : ''}
+                            </span>
+                          )}
+                        </div>
+                        {/* Player 2 row */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-5 h-4 flex items-center justify-center shrink-0 overflow-hidden rounded-[2px] shadow-[0_0_0_1px_rgba(0,0,0,0.1)]">
+                              <img 
+                                src={resolveAssetPath(match.player2.flag || "", { packId: "", templateId: "" })} 
+                                className="w-full h-full object-cover" 
+                                alt="" 
+                              />
+                            </div>
+                            <span className="text-[13px] font-medium text-app-text truncate">
+                              {match.player2.name || match.player2.id}
+                            </span>
+                          </div>
+                          {(match.status !== 'NS' && match.score) && (
+                            <span className="font-bold text-[14px] text-app-text shrink-0">
+                              {typeof match.score === 'string' ? match.score.split('-')[1]?.trim() : ''}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Date / Status area */}
+                      <div className="flex flex-col items-center justify-center p-3 w-[6rem] shrink-0 text-center border-l border-app-border/40 bg-black/[0.02] dark:bg-white/[0.02]">
+                        {match.round && (
+                          <span className="text-[9px] font-medium text-app-muted truncate w-full mb-1">{match.round}</span>
+                        )}
+                        {match.status === 'NS' || !match.score ? (
+                          <>
+                            <span className="text-[13px] font-semibold text-app-text leading-tight">{match.time || '-:-'}</span>
+                            <span className="text-[10px] font-medium text-app-muted mt-0.5 text-center leading-tight">
+                              {new Date(match.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-[10px] font-medium text-app-muted text-center mb-0.5 leading-tight">
+                              {new Date(match.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            </span>
+                            <span className={cn(
+                              "text-[11px] font-bold tracking-wide mt-0.5",
+                              (match.status === 'LIVE' || match.isLive) ? "text-red-500 uppercase" : "text-app-muted/80 uppercase"
+                            )}>
+                              {(match.status === 'LIVE' || match.isLive) ? 'LIVE' : (match.status === 'FINISHED' || match.status === 'FT' || match.status === 'Chung cuộc' ? 'FT' : match.status)}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {/* Football matchup */}
-                {match.homeTeam && match.awayTeam && (
-                  <div className="space-y-2">
-                    <h3 className="text-ui-xs text-app-muted font-normal">{t.panels.fields.matchup}</h3>
-                    <div className="flex flex-col gap-3 p-3.5 bg-app-bg rounded-lg border border-app-border">
-                      <div className="flex items-center gap-3">
-                        <img src={match.homeTeam.logo} className="w-6 h-6 object-contain opacity-90" alt="" />
-                        <span className="text-ui-sm font-medium text-app-text">{match.homeTeam.name}</span>
-                      </div>
-                      <div className="text-ui-xs text-app-muted font-normal pl-9">vs</div>
-                      <div className="flex items-center gap-3">
-                        <img src={match.awayTeam.logo} className="w-6 h-6 object-contain opacity-90" alt="" />
-                        <span className="text-ui-sm font-medium text-app-text">{match.awayTeam.name}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Tennis matchup */}
-                {match.player1 && match.player2 && (
-                  <div className="space-y-2">
-                    <h3 className="text-ui-xs text-app-muted font-normal">{t.panels.fields.matchup}</h3>
-                    <div className="flex flex-col gap-3 p-3.5 bg-app-bg rounded-lg border border-app-border">
-                      <div className="flex items-center gap-3">
-                        <img src={match.player1.flag} className="w-6 h-4 object-cover rounded-sm" alt="" />
-                        <span className="text-ui-sm font-medium text-app-text">{match.player1.name}</span>
-                      </div>
-                      <div className="text-ui-xs text-app-muted font-normal pl-9">vs</div>
-                      <div className="flex items-center gap-3">
-                        <img src={match.player2.flag} className="w-6 h-4 object-cover rounded-sm" alt="" />
-                        <span className="text-ui-sm font-medium text-app-text">{match.player2.name}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Match details */}
                 <div>
                   <h3 className="text-ui-xs text-app-muted font-normal mb-2.5 pb-2 border-b border-app-border/30">{t.panels.fields.details}</h3>
                   <div className="flex flex-col gap-0">
                     {match.venue && (
-                      <div className="flex justify-between items-center py-2 border-b border-app-border/20">
+                      <div className="flex justify-between items-center py-2.5 border-b border-app-border/20">
                         <span className="text-ui-xs text-app-muted">{t.panels.fields.venue}</span>
-                        <span className="text-ui-xs text-app-text font-medium">{match.venue}</span>
+                        <span className="text-ui-xs text-app-text font-medium text-right max-w-[60%] truncate">{match.venue}</span>
                       </div>
                     )}
-                    <div className="flex justify-between items-center py-2 border-b border-app-border/20">
+                    <div className="flex justify-between items-center py-2.5 border-b border-app-border/20">
                       <span className="text-ui-xs text-app-muted">{t.panels.fields.date}</span>
                       <span className="text-ui-xs text-app-text font-medium">{new Date(match.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                     </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-ui-xs text-app-muted">{t.panels.fields.kickoff}</span>
-                      <span className="text-ui-xs text-app-text font-medium">{new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} GMT</span>
-                    </div>
+                    {(match.time || match.date) && (
+                      <div className="flex justify-between items-center py-2.5">
+                        <span className="text-ui-xs text-app-muted">{t.panels.fields.kickoff}</span>
+                        <span className="text-ui-xs text-app-text font-medium">{match.time ? `${match.time} ${match.timezone || ''}` : `${new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} GMT`}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </>
