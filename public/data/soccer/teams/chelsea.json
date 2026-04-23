@@ -1,16 +1,16 @@
 {
-	"id": "chelsea",
-	"name": "Chelsea",
-	"shortName": "CHE",
-	"colors": {
-		"primary": "#034694",
-		"onPrimary": "#FFFFFF",
-		"secondary": "#FFFFFF",
-		"onSecondary": "#034694",
-		"tertiary": "#DBA111",
-		"onTertiary": "#034694"
-	},
-	"assets": {
-		"logo": "@global/soccer/teams/chelsea/logo.svg"
-	}
+  "id": "chelsea",
+  "name": "Chelsea",
+  "shortName": "CHE",
+  "colors": {
+    "primary": "#034694",
+    "onPrimary": "#FFFFFF",
+    "secondary": "#FFFFFF",
+    "onSecondary": "#034694",
+    "tertiary": "#DBA111",
+    "onTertiary": "#034694"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/chelsea/logo.svg"
+  }
 }

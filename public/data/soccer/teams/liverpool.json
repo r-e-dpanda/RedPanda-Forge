@@ -1,16 +1,16 @@
 {
-	"id": "liverpool",
-	"name": "Liverpool",
-	"shortName": "LIV",
-	"colors": {
-		"primary": "#C8102E",
-		"onPrimary": "#FFFFFF",
-		"secondary": "#00B2A9",
-		"onSecondary": "#FFFFFF",
-		"tertiary": "#F6EB61",
-		"onTertiary": "#C8102E"
-	},
-	"assets": {
-		"logo": "@global/soccer/teams/liverpool/logo.svg"
-	}
+  "id": "liverpool",
+  "name": "Liverpool",
+  "shortName": "LIV",
+  "colors": {
+    "primary": "#C8102E",
+    "onPrimary": "#FFFFFF",
+    "secondary": "#00B2A9",
+    "onSecondary": "#FFFFFF",
+    "tertiary": "#F6EB61",
+    "onTertiary": "#C8102E"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/liverpool/logo.svg"
+  }
 }

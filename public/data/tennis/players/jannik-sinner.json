@@ -1,0 +1,13 @@
+{
+  "id": "jannik-sinner",
+  "name": "J. Sinner",
+  "fullName": "Jannik Sinner",
+  "countryCode": "it",
+  "atpRanking": 1,
+  "birthDay": "2001-08-16",
+  "assets": {
+    "flag": "@global/common/countries/it.png",
+    "cutout": "@global/tennis/players/jannik-sinner/cutout.png",
+    "headshot": "@global/tennis/players/jannik-sinner/headshot.png"
+  }
+}

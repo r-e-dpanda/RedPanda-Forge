@@ -1,16 +1,16 @@
 {
-	"id": "real-madrid",
-	"name": "Real Madrid",
-	"shortName": "RMA",
-	"colors": {
-		"primary": "#FFFFFF",
-		"onPrimary": "#00529F",
-		"secondary": "#00529F",
-		"onSecondary": "#FFFFFF",
-		"tertiary": "#FEBE10",
-		"onTertiary": "#00529F"
-	},
-	"assets": {
-		"logo": "@global/soccer/teams/real-madrid/logo.svg"
-	}
+  "id": "real-madrid",
+  "name": "Real Madrid",
+  "shortName": "RMA",
+  "colors": {
+    "primary": "#FFFFFF",
+    "onPrimary": "#00529F",
+    "secondary": "#00529F",
+    "onSecondary": "#FFFFFF",
+    "tertiary": "#FEBE10",
+    "onTertiary": "#00529F"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/real-madrid/logo.svg"
+  }
 }

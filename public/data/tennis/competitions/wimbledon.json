@@ -4,7 +4,7 @@
   "name": "Wimbledon",
   "countryCode": "GB-ENG",
   "assets": {
-    "logo": "@global/tennis/competitions/wimbledon/logo.png"
-	"country": "@global/common/countries/gb-eng.svg"
+    "logo": "@global/tennis/competitions/wimbledon/logo.png",
+    "country": "@global/common/countries/gb-eng.svg"
   }
 }

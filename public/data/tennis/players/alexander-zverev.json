@@ -1,0 +1,13 @@
+{
+  "id": "alexander-zverev",
+  "name": "A. Zverev",
+  "fullName": "Alexander Zverev",
+  "countryCode": "de",
+  "atpRanking": 3,
+  "birthDay": "1997-04-20",
+  "assets": {
+    "flag": "@global/common/countries/de.png",
+    "cutout": "@global/tennis/players/alexander-zverev/cutout.png",
+    "headshot": "@global/tennis/players/alexander-zverev/headshot.png"
+  }
+}

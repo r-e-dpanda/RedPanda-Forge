@@ -1,16 +1,16 @@
 {
-	"id": "tottenham-hotspur",
-	"name": "Tottenham Hotspur",
-	"shortName": "TOT",
-	"colors": {
-		"primary": "#132257",
-		"onPrimary": "#FFFFFF",
-		"secondary": "#FFFFFF",
-		"onSecondary": "#132257",
-		"tertiary": null,
-		"onTertiary": null
-	},
-	"assets": {
-		"logo": "@global/soccer/teams/tottenham-hotspur/logo.svg"
-	}
+  "id": "tottenham-hotspur",
+  "name": "Tottenham Hotspur",
+  "shortName": "TOT",
+  "colors": {
+    "primary": "#132257",
+    "onPrimary": "#FFFFFF",
+    "secondary": "#FFFFFF",
+    "onSecondary": "#132257",
+    "tertiary": null,
+    "onTertiary": null
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/tottenham-hotspur/logo.svg"
+  }
 }

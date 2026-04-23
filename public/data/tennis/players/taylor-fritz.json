@@ -1,0 +1,13 @@
+{
+  "id": "taylor-fritz",
+  "name": "T. Fritz",
+  "fullName": "Taylor Fritz",
+  "countryCode": "us",
+  "atpRanking": 5,
+  "birthDay": "1997-10-28",
+  "assets": {
+    "flag": "@global/common/countries/us.png",
+    "cutout": "@global/tennis/players/taylor-fritz/cutout.png",
+    "headshot": "@global/tennis/players/taylor-fritz/headshot.png"
+  }
+}

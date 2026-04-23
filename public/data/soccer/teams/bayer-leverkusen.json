@@ -1,16 +1,16 @@
 {
-	"id": "bayer-leverkusen",
-	"name": "Bayer Leverkusen",
-	"shortName": "B04",
-	"colors": {
-		"primary": "#E32221",
-		"onPrimary": "#FFFFFF",
-		"secondary": "#000000",
-		"onSecondary": "#FFFFFF",
-		"tertiary": "#F3E500",
-		"onTertiary": "#000000"
-	},
-	"assets": {
-		"logo": "@global/soccer/teams/bayer-leverkusen/logo.svg"
-	}
+  "id": "bayer-leverkusen",
+  "name": "Bayer Leverkusen",
+  "shortName": "B04",
+  "colors": {
+    "primary": "#E32221",
+    "onPrimary": "#FFFFFF",
+    "secondary": "#000000",
+    "onSecondary": "#FFFFFF",
+    "tertiary": "#F3E500",
+    "onTertiary": "#000000"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/bayer-leverkusen/logo.svg"
+  }
 }

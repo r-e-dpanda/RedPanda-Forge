@@ -1,24 +1,24 @@
 {
-	"id": "manchester-united",
-	"name": "Manchester United",
-	"shortName": "MUN",
-	"colors": {
-		"primary": "#DA291C",
-		"onPrimary": "#FFFFFF",
-		"secondary": "#FBE122",
-		"onSecondary": "#000000",
-		"tertiary": "#000000",
-		"onTertiary": "#FFFFFF"
-	},
-	"assets": {
-		"logo": "@global/soccer/teams/manchester-united/logo.svg",
-		"kit": {
-			"home": {
-				"type": "home",
-				"primary": "#DA291C",
-				"image": ""
-			}
-		},
-		"background": "@global/soccer/venues/old-trafford.jpg"
-	}
+  "id": "manchester-united",
+  "name": "Manchester United",
+  "shortName": "MUN",
+  "colors": {
+    "primary": "#DA291C",
+    "onPrimary": "#FFFFFF",
+    "secondary": "#FBE122",
+    "onSecondary": "#000000",
+    "tertiary": "#000000",
+    "onTertiary": "#FFFFFF"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/manchester-united/logo.svg",
+    "kit": {
+      "home": {
+        "type": "home",
+        "primary": "#DA291C",
+        "image": ""
+      }
+    },
+    "background": "@global/soccer/venues/old-trafford.jpg"
+  }
 }

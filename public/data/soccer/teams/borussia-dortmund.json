@@ -1,16 +1,16 @@
 {
-	"id": "borussia-dortmund",
-	"name": "Borussia Dortmund",
-	"shortName": "BVB",
-	"colors": {
-		"primary": "#FDE100",
-		"onPrimary": "#000000",
-		"secondary": "#000000",
-		"onSecondary": "#FDE100",
-		"tertiary": null,
-		"onTertiary": null
-	},
-	"assets": {
-		"logo": "@global/soccer/teams/borussia-dortmund/logo.svg"
-	}
+  "id": "borussia-dortmund",
+  "name": "Borussia Dortmund",
+  "shortName": "BVB",
+  "colors": {
+    "primary": "#FDE100",
+    "onPrimary": "#000000",
+    "secondary": "#000000",
+    "onSecondary": "#FDE100",
+    "tertiary": null,
+    "onTertiary": null
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/borussia-dortmund/logo.svg"
+  }
 }

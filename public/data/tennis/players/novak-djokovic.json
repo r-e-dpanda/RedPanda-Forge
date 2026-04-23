@@ -1,0 +1,13 @@
+{
+  "id": "novak-djokovic",
+  "name": "N. Djokovic",
+  "fullName": "Novak Djokovic",
+  "countryCode": "rs",
+  "atpRanking": 4,
+  "birthDay": "1987-05-22",
+  "assets": {
+    "flag": "@global/common/countries/rs.png",
+    "cutout": "@global/tennis/players/novak-djokovic/cutout.png",
+    "headshot": "@global/tennis/players/novak-djokovic/headshot.png"
+  }
+}

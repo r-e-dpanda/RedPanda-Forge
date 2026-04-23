@@ -1,0 +1,13 @@
+{
+  "id": "carlos-alcaraz",
+  "name": " C.Alcaraz",
+  "fullName": "Carlos Alcaraz",
+  "countryCode": "es",
+  "atpRanking": 2,
+  "birthDay": "2003-05-05",
+  "assets": {
+    "flag": "@global/common/countries/es.png",
+    "cutout": "@global/tennis/players/carlos-alcaraz/cutout.png",
+    "headshot": "@global/tennis/players/carlos-alcaraz/headshot.png"
+  }
+}

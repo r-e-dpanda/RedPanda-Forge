@@ -4,9 +4,9 @@
 
 ```text
 ┌────────────────────────────────────────────────────────────────┐
-│                     React App (Vite)                         │
+│                     React App (Vite)                           │
 ├────────────────────────────────────────────────────────────────┤
-│                                                              │
+│                                                                │
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │           UI Layer (Components)                          │  │
 │  │  ┌───────────────┬─────────────────┬──────────────────┐  │  │
@@ -141,14 +141,14 @@ Templates (JSON)          Match Data          Editor State
 
 ```typescript
 interface WorkflowSession {
-  id: string
-  name: string
-  template: Template | null
-  match: Match | null
-  elementOverrides: Map<string, Partial<TemplateElement>>
-  manualInputs: Map<string, string>
-  history: SessionHistoryEntry[]
-  historyIndex: number
+  id: string;
+  name: string;
+  template: Template | null;
+  match: Match | null;
+  elementOverrides: Map<string, Partial<TemplateElement>>;
+  manualInputs: Map<string, string>;
+  history: SessionHistoryEntry[];
+  historyIndex: number;
 }
 
 // Benefits:
@@ -165,21 +165,21 @@ function resolveElementProperty(
   element: TemplateElement,
   property: string,
   overrides?: Partial<TemplateElement>,
-  match?: Match
+  match?: Match,
 ): any {
   // 1. User override (highest)
   if (overrides?.[property] !== undefined) {
-    return overrides[property]
+    return overrides[property];
   }
-  
+
   // 2. Data binding (if available)
   if (element.dataKey) {
-    const boundValue = resolveDataKey(match, element.dataKey)
-    if (boundValue !== undefined) return boundValue
+    const boundValue = resolveDataKey(match, element.dataKey);
+    if (boundValue !== undefined) return boundValue;
   }
-  
+
   // 3. Template default (lowest)
-  return element[property]
+  return element[property];
 }
 ```
 
@@ -191,18 +191,18 @@ function resolveElementProperty(
 
 ```typescript
 // template.ts
-Template          // Root container (width, height, ratio, sport)
-TemplateLayer     // Organizational group (visible, expanded)
-TemplateElement   // Rendered object (text, image, shape)
-ElementProperty   // Individual property (position, style, etc)
+Template; // Root container (width, height, ratio, sport)
+TemplateLayer; // Organizational group (visible, expanded)
+TemplateElement; // Rendered object (text, image, shape)
+ElementProperty; // Individual property (position, style, etc)
 
 // asset.ts
-AssetReference    // Image/logo reference
-AssetMetadata     // Asset metadata (size, format, etc)
+AssetReference; // Image/logo reference
+AssetMetadata; // Asset metadata (size, format, etc)
 
 // settings.ts
-AppSettings       // User preferences
-ThemeDefinition   // Theme colors and variables
+AppSettings; // User preferences
+ThemeDefinition; // Theme colors and variables
 ```
 
 ### `src/stores/` - State Management
@@ -287,8 +287,8 @@ components/
 
 ```typescript
 interface MyFeature {
-  id: string
-  name: string
+  id: string;
+  name: string;
   // ... properties
 }
 ```
@@ -298,7 +298,7 @@ interface MyFeature {
 ```typescript
 interface WorkflowSession {
   // ... existing
-  myFeature?: MyFeature
+  myFeature?: MyFeature;
 }
 ```
 
@@ -315,14 +315,14 @@ export function processMyFeature(data: MyFeature): ProcessedData {
 ```tsx
 export const MyFeatureComponent = ({ feature }) => {
   // React component
-}
+};
 ```
 
 1. **Connect Store** (`src/components/...`)
 
 ```tsx
-const feature = useEditorStore(state => state.activeSession?.myFeature)
-const updateFeature = useEditorStore(state => state.updateFeature)
+const feature = useEditorStore((state) => state.activeSession?.myFeature);
+const updateFeature = useEditorStore((state) => state.updateFeature);
 ```
 
 ---
@@ -335,14 +335,14 @@ const updateFeature = useEditorStore(state => state.updateFeature)
 /* src/index.css */
 :root {
   /* Light/Dark modes */
-  --app-bg: #0a0b0d;              /* Background */
-  --app-sidebar: #131518;         /* Sidebar background */
-  --app-card: #1a1d22;            /* Card background */
-  --app-text: #ffffff;            /* Text color */
-  --app-muted: #888888;           /* Muted text */
-  --app-accent: #00d9ff;          /* Accent color */
-  --app-border: #2a2d33;          /* Border color */
-  
+  --app-bg: #0a0b0d; /* Background */
+  --app-sidebar: #131518; /* Sidebar background */
+  --app-card: #1a1d22; /* Card background */
+  --app-text: #ffffff; /* Text color */
+  --app-muted: #888888; /* Muted text */
+  --app-accent: #00d9ff; /* Accent color */
+  --app-border: #2a2d33; /* Border color */
+
   /* Tailwind aliases */
   --foreground: var(--app-text);
   --background: var(--app-bg);
@@ -361,44 +361,44 @@ React.useEffect(() => {
 }, [settings.uiScale]);
 ```
 
-*Note: All layout boundaries (heights, widths) must use Tailwind's rem-based utility classes (e.g., `h-[2.75rem]` instead of `h-[44px]`).*
+_Note: All layout boundaries (heights, widths) must use Tailwind's rem-based utility classes (e.g., `h-[2.75rem]` instead of `h-[44px]`)._
 
 ### Component Styling
 
 ```tsx
 // Use app-* classes for consistency
-<div className="bg-app-bg text-app-text border-app-border">
-  Content
-</div>
+<div className="bg-app-bg text-app-text border-app-border">Content</div>;
 
 // Or cn() utility for dynamic classes
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils";
 
-<div className={cn(
-  'bg-app-card p-4 rounded-lg',
-  isActive && 'ring-2 ring-app-accent'
-)}>
+<div
+  className={cn(
+    "bg-app-card p-4 rounded-lg",
+    isActive && "ring-2 ring-app-accent",
+  )}
+>
   Content
-</div>
+</div>;
 ```
 
 ### Theme Switching
 
 ```typescript
 // src/lib/themeUtils.ts
-export function applyTheme(themeName: 'dark' | 'light' | 'custom') {
-  const theme = themes[themeName]
-  
+export function applyTheme(themeName: "dark" | "light" | "custom") {
+  const theme = themes[themeName];
+
   // Inject CSS variables
   Object.entries(theme).forEach(([key, value]) => {
-    document.documentElement.style.setProperty(`--app-${key}`, value)
-  })
-  
+    document.documentElement.style.setProperty(`--app-${key}`, value);
+  });
+
   // Update dark mode class for shadcn/ui
-  if (themeName === 'dark') {
-    document.documentElement.classList.add('dark')
+  if (themeName === "dark") {
+    document.documentElement.classList.add("dark");
   } else {
-    document.documentElement.classList.remove('dark')
+    document.documentElement.classList.remove("dark");
   }
 }
 ```
@@ -411,12 +411,12 @@ export function applyTheme(themeName: 'dark' | 'light' | 'custom') {
 
 ```typescript
 // src/lib/__tests__/templateEngine.test.ts
-describe('resolveDataKey', () => {
-  it('should resolve dot notation', () => {
-    const data = { homeTeam: { name: 'City' } }
-    expect(resolveDataKey(data, 'homeTeam.name')).toBe('City')
-  })
-})
+describe("resolveDataKey", () => {
+  it("should resolve dot notation", () => {
+    const data = { homeTeam: { name: "City" } };
+    expect(resolveDataKey(data, "homeTeam.name")).toBe("City");
+  });
+});
 ```
 
 ### Component Tests
@@ -441,29 +441,29 @@ describe('Button', () => {
 // Use React.memo for expensive components
 const KonvaEditor = React.memo(({ stage, ...props }) => {
   // Prevents re-render if props unchanged
-})
+});
 
 // Memoize expensive calculations
-const memoizedScale = useMemo(() => 
-  calculateScale(canvasWidth, templateWidth),
-  [canvasWidth, templateWidth]
-)
+const memoizedScale = useMemo(
+  () => calculateScale(canvasWidth, templateWidth),
+  [canvasWidth, templateWidth],
+);
 ```
 
 ### Asset Loading
 
 ```typescript
 // Cache assets to prevent re-fetching
-const assetCache = new Map<string, HTMLImageElement>()
+const assetCache = new Map<string, HTMLImageElement>();
 
 async function loadAsset(path: string) {
   if (assetCache.has(path)) {
-    return assetCache.get(path)
+    return assetCache.get(path);
   }
-  
-  const img = await fetchImage(path)
-  assetCache.set(path, img)
-  return img
+
+  const img = await fetchImage(path);
+  assetCache.set(path, img);
+  return img;
 }
 ```
 
@@ -488,9 +488,9 @@ const PasteModal = lazy(() => import('./PasteTemplateModal'))
 // Always validate external data
 function validateTemplate(data: unknown): Template {
   if (!isValidTemplate(data)) {
-    throw new Error('Invalid template structure')
+    throw new Error("Invalid template structure");
   }
-  return data as Template
+  return data as Template;
 }
 ```
 
@@ -507,16 +507,16 @@ function validateTemplate(data: unknown): Template {
 
 ```typescript
 // Validate file types and sizes
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 function validateFile(file: File): void {
   if (file.size > MAX_FILE_SIZE) {
-    throw new Error('File too large')
+    throw new Error("File too large");
   }
-  
-  const allowedTypes = ['image/png', 'image/jpeg', 'image/webp']
+
+  const allowedTypes = ["image/png", "image/jpeg", "image/webp"];
   if (!allowedTypes.includes(file.type)) {
-    throw new Error('Invalid file type')
+    throw new Error("Invalid file type");
   }
 }
 ```
@@ -530,12 +530,12 @@ function validateFile(file: File): void {
 ```javascript
 // .eslintrc.js (to implement)
 module.exports = {
-  extends: ['eslint:recommended', 'plugin:react/recommended'],
+  extends: ["eslint:recommended", "plugin:react/recommended"],
   rules: {
-    'react/react-in-jsx-scope': 'off', // React 17+
-    'no-unused-vars': 'warn'
-  }
-}
+    "react/react-in-jsx-scope": "off", // React 17+
+    "no-unused-vars": "warn",
+  },
+};
 ```
 
 ### Prettier Configuration
@@ -650,16 +650,14 @@ const useSettingsStore = create(store => ({
 
 ```typescript
 // Log state changes
-useEditorStore.subscribe(
-  (state) => console.log('Store changed:', state)
-)
+useEditorStore.subscribe((state) => console.log("Store changed:", state));
 ```
 
 ### Debug Data Binding
 
 ```typescript
 // Add temporary log in templateEngine
-console.log('Resolving:', dataKey, 'from:', match)
+console.log("Resolving:", dataKey, "from:", match);
 ```
 
 ### React DevTools
@@ -686,13 +684,13 @@ npm run dev
 
 ### Common Issues & Solutions
 
-| Issue | Solution |
-| ------- | ---------- |
+| Issue               | Solution                      |
+| ------------------- | ----------------------------- |
 | Canvas not updating | Check override logic in store |
-| Theme not applying | Verify CSS variable injection |
-| Image not loading | Check asset path in public/ |
-| Undo/Redo broken | Inspect history stack |
-| Performance lag | Profile with React DevTools |
+| Theme not applying  | Verify CSS variable injection |
+| Image not loading   | Check asset path in public/   |
+| Undo/Redo broken    | Inspect history stack         |
+| Performance lag     | Profile with React DevTools   |
 
 ### Documentation References
 

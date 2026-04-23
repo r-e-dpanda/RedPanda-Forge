@@ -8,12 +8,12 @@ This document defines the standard data structure for team colors used in genera
 
 When referencing an image or asset in a `template.json`, the engine uses `Prefixes` to route the path correctly at runtime. Do **NOT** use hardcoded absolute URLs (e.g., `https://...`) in production setups.
 
-| Prefix     | Scope              | Description                                           | Runtime Resolution (Example) |
-| :---       | :---               | :---                                                  | :---                         |
-| `@global/` | **System-Wide**    | Shared across all packs/templates (e.g. Logos, Flags) | `/assets/{path}`             |
-| `@shared/` | **Pack-Level**     | Shared between templates inside the same Pack         | `/templates/{pack-id}/shared_assets/{path}` |
+| Prefix     | Scope              | Description                                           | Runtime Resolution (Example)                                       |
+| :--------- | :----------------- | :---------------------------------------------------- | :----------------------------------------------------------------- |
+| `@global/` | **System-Wide**    | Shared across all packs/templates (e.g. Logos, Flags) | `/assets/{path}`                                                   |
+| `@shared/` | **Pack-Level**     | Shared between templates inside the same Pack         | `/templates/{pack-id}/shared_assets/{path}`                        |
 | `@local/`  | **Template-Level** | Strictly used by one specific template                | `/templates/{pack-id}/templates/{template-id}/local_assets/{path}` |
-| `@system/` | **Fallback**       | System fallbacks for broken links                     | `/assets/_system/{path}`     |
+| `@system/` | **Fallback**       | System fallbacks for broken links                     | `/assets/_system/{path}`                                           |
 
 ## 2. Directory Taxonomy (`/public`)
 
@@ -39,16 +39,16 @@ Global data represents real-world entities (teams, players). The folder names MU
 │   │
 │   ├── 📁 tennis/
 │   ├── 📁 multi-sport/
-│   │ 
+│   │
 │   └── 📁 common/
 │       └── countries/                  # E.g.: vn.json, us.json
 ```
 
 ### 2.2 Why Not `@data/`?
 
-**You do NOT need an `@data/` resolving prefix.** 
+**You do NOT need an `@data/` resolving prefix.**
 
-The `@global`, `@shared`, and `@local` prefixes are built exclusively for the **Konva Graphic Renderer (Template Engine)** to safely resolve visual *image pixels* (`src`) without hardcoding URLs inside templates. Data JSONs in `/public/data` represent pure domain state that are fetched normally via standard API/HTTP calls (`/data/...`) *before* the canvas starts rendering. Once your API loads the data, it populates the main state tree (`match`), allowing the template engine to use string mapping like `{{match.homeTeam.colors.primary}}` directly.
+The `@global`, `@shared`, and `@local` prefixes are built exclusively for the **Konva Graphic Renderer (Template Engine)** to safely resolve visual _image pixels_ (`src`) without hardcoding URLs inside templates. Data JSONs in `/public/data` represent pure domain state that are fetched normally via standard API/HTTP calls (`/data/...`) _before_ the canvas starts rendering. Once your API loads the data, it populates the main state tree (`match`), allowing the template engine to use string mapping like `{{match.homeTeam.colors.primary}}` directly.
 
 **Example Data Format (`manchester-city.json`):**
 
@@ -75,55 +75,53 @@ The `@global`, `@shared`, and `@local` prefixes are built exclusively for the **
 }
 ```
 
-**Field Descriptions**
+**Field Descriptions:**
 
-
-| Field | 	Type |	Description |
-|:-- | -- |:-- |
-| id  | `string` | Unique identifier for the team, lowercase with hyphens (e.g., manchester-united)
-| name | `string` | Full official name of the club
-| shortName | `string` | Abbreviation (3-4 chars), typically used in scoreboards or small thumbnails
-| colors.primary | `hex` | Main brand color (home kit, primary logo color)
-| colors.onPrimary | `hex` | Text/icon color when placed on primary background — ensures proper contrast
-| colors.secondary | `hex` | Secondary color (away kit, borders, secondary text)
-| colors.onSecondary | `hex` | Text/icon color when placed on secondary background
-| colors.tertiary | `hex` or `null` | Tertiary accent color (e.g., gold/yellow for highlights). Set to null if team has only 2 colors
-| colors.onTertiary | `hex` or `null` | Text/icon color when placed on tertiary. Set to null if tertiary is null
-
+| Field              | Type            | Description                                                                                     |
+| :----------------- | --------------- | :---------------------------------------------------------------------------------------------- |
+| id                 | `string`        | Unique identifier for the team, lowercase with hyphens (e.g., manchester-united)                |
+| name               | `string`        | Full official name of the club                                                                  |
+| shortName          | `string`        | Abbreviation (3-4 chars), typically used in scoreboards or small thumbnails                     |
+| colors.primary     | `hex`           | Main brand color (home kit, primary logo color)                                                 |
+| colors.onPrimary   | `hex`           | Text/icon color when placed on primary background — ensures proper contrast                     |
+| colors.secondary   | `hex`           | Secondary color (away kit, borders, secondary text)                                             |
+| colors.onSecondary | `hex`           | Text/icon color when placed on secondary background                                             |
+| colors.tertiary    | `hex` or `null` | Tertiary accent color (e.g., gold/yellow for highlights). Set to null if team has only 2 colors |
+| colors.onTertiary  | `hex` or `null` | Text/icon color when placed on tertiary. Set to null if tertiary is null                        |
 
 What Is NOT Included in This Schema
 
-| Item | Reason for Exclusion |
-|:-- | -- |
-| neutral  | Neutral colors (black, white, gray) are interface constants, not team brand data. Handled by template CSS. |
-| container, surface | Generated automatically from primary/secondary using CSS color-mix. |
-| overlay | Overlay opacity (e.g., rgba(0,0,0,0.6)) is a design constant, handled by the template. |
-| gradient | Generated dynamically in CSS using primary and secondary. |
-| border, outline | Derived from primary color with adjusted lightness in CSS. |
+| Item               | Reason for Exclusion                                                                                       |
+| :----------------- | ---------------------------------------------------------------------------------------------------------- |
+| neutral            | Neutral colors (black, white, gray) are interface constants, not team brand data. Handled by template CSS. |
+| container, surface | Generated automatically from primary/secondary using CSS color-mix.                                        |
+| overlay            | Overlay opacity (e.g., rgba(0,0,0,0.6)) is a design constant, handled by the template.                     |
+| gradient           | Generated dynamically in CSS using primary and secondary.                                                  |
+| border, outline    | Derived from primary color with adjusted lightness in CSS.                                                 |
 
 ```json
 {
-	"id": "manchester-city",
-	"name": "Manchester City",
-	"shortName": "MCI",
-	"colors": {
-		"primary": "#6CABDD",
-		"onPrimary": "#1C2C5B",
-		"secondary": "#1C2C5B",
-		"onSecondary": "#FFFFFF",
-		"tertiary": "#FFC659",
-		"onTertiary": "#1C2C5B"
-	},
-	"assets": {
-		"logo": "@global/soccer/teams/manchester-city/logo.svg",
-		"kit": {
-			"away": {
-				"type": "away",
-				"primary": "#000000",
-				"image": ""
-			}
-		}
-	}
+  "id": "manchester-city",
+  "name": "Manchester City",
+  "shortName": "MCI",
+  "colors": {
+    "primary": "#6CABDD",
+    "onPrimary": "#1C2C5B",
+    "secondary": "#1C2C5B",
+    "onSecondary": "#FFFFFF",
+    "tertiary": "#FFC659",
+    "onTertiary": "#1C2C5B"
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/manchester-city/logo.svg",
+    "kit": {
+      "away": {
+        "type": "away",
+        "primary": "#000000",
+        "image": ""
+      }
+    }
+  }
 }
 ```
 
@@ -133,7 +131,7 @@ Visual media files are stored systematically matching their data entity counterp
 
 ```text
 📁 public/
-├── 📁 assets/						# ← Media files (pure assets)
+├── 📁 assets/      # ← Media files (pure assets)
 │   │
 │   ├── 📁 soccer/
 │   │   ├── 📁 teams/
@@ -222,7 +220,7 @@ If a template is single or imported independently, it defaults to the `/_default
     └── 📁 neon-matchday/               <-- Pack ID
         ├── pack.json                    <-- High level info (Author, version)
         ├── 📁 shared_assets/           <-- Theme files (@shared/)
-        │   ├── bg-neon.webp          
+        │   ├── bg-neon.webp
         │   └── mask-grid.svg
         │
         └── 📁 templates/
