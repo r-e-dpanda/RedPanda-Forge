@@ -163,8 +163,8 @@ const RAW_MOCK_MATCHES: Match[] = [
     liveBadge: true,
     status: "LIVE",
     score: "2 - 1",
-    player1: { id: "novak-djokovic" },
-    player2: { id: "carlos-alcaraz" }
+    player1: { id: "novak-djokovic", name: "Novak Djokovic" },
+    player2: { id: "carlos-alcaraz", name: "Carlos Alcaraz" }
   },
   {
     id: "m_fb_3",

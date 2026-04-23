@@ -1,0 +1,16 @@
+{
+	"id": "inter-milan",
+	"name": "Inter Milan",
+	"shortName": "INT",
+	"colors": {
+		"primary": "#0066B2",
+		"onPrimary": "#FFFFFF",
+		"secondary": "#000000",
+		"onSecondary": "#FFFFFF",
+		"tertiary": null,
+		"onTertiary": null
+	},
+	"assets": {
+		"logo": "@global/soccer/teams/inter-milan/logo.svg"
+	}
+}

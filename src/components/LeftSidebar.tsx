@@ -153,7 +153,9 @@ export const LeftSidebar = ({
                         {/* Home */}
                         <div className="flex flex-col items-center justify-center gap-1.5 flex-1 min-w-0">
                           <div className="w-8 h-8 shrink-0 flex items-center justify-center">
-                            <img src={resolveAssetPath(m.sport === 'tennis' ? m.player1?.flag || "" : m.homeTeam?.assets?.logo || m.homeTeam?.logo || "", { packId: "", templateId: "" })} className="w-full h-full object-contain drop-shadow-sm" alt="" />
+                            {m.homeTeam?.assets?.logo || m.homeTeam?.logo || m.sport === 'tennis' && m.player1?.flag ? (
+                              <img src={resolveAssetPath(m.sport === 'tennis' ? m.player1?.flag || "" : m.homeTeam?.assets?.logo || m.homeTeam?.logo || "", { packId: "", templateId: "" })} className="w-full h-full object-contain drop-shadow-sm" alt="" />
+                            ) : null}
                           </div>
                           <span className="text-[11px] font-semibold text-app-text truncate w-full text-center">
                             {m.sport === 'tennis' ? m.player1?.name : (m.homeTeam?.shortName || m.homeTeam?.name || m.homeTeam?.id)}
@@ -194,7 +196,9 @@ export const LeftSidebar = ({
                         {/* Away */}
                         <div className="flex flex-col items-center justify-center gap-1.5 flex-1 min-w-0">
                           <div className="w-8 h-8 shrink-0 flex items-center justify-center">
-                            <img src={resolveAssetPath(m.sport === 'tennis' ? m.player2?.flag || "" : m.awayTeam?.assets?.logo || m.awayTeam?.logo || "", { packId: "", templateId: "" })} className="w-full h-full object-contain drop-shadow-sm" alt="" />
+                            {m.awayTeam?.assets?.logo || m.awayTeam?.logo || m.sport === 'tennis' && m.player2?.flag ? (
+                              <img src={resolveAssetPath(m.sport === 'tennis' ? m.player2?.flag || "" : m.awayTeam?.assets?.logo || m.awayTeam?.logo || "", { packId: "", templateId: "" })} className="w-full h-full object-contain drop-shadow-sm" alt="" />
+                            ) : null}
                           </div>
                           <span className="text-[11px] font-semibold text-app-text truncate w-full text-center">
                             {m.sport === 'tennis' ? m.player2?.name : (m.awayTeam?.shortName || m.awayTeam?.name || m.awayTeam?.id)}
@@ -245,11 +249,13 @@ export const LeftSidebar = ({
                 >
                   {/* Thumbnail */}
                   <div className="relative h-[120px] bg-app-card flex items-center justify-center p-3">
-                    <img
-                      src={template.thumbnail}
-                      className="max-w-full max-h-full object-contain pointer-events-none drop-shadow-xl opacity-95 transition-transform group-hover:scale-[1.03]"
-                      alt=""
-                    />
+                    {template.thumbnail && (
+                      <img
+                        src={template.thumbnail}
+                        className="max-w-full max-h-full object-contain pointer-events-none drop-shadow-xl opacity-95 transition-transform group-hover:scale-[1.03]"
+                        alt=""
+                      />
+                    )}
                     <div className="absolute top-2 right-2">
                       <span className="bg-app-bg/80 backdrop-blur-md text-app-muted text-ui-xs px-2 py-0.5 rounded border border-app-border font-mono">
                         {template.ratio}

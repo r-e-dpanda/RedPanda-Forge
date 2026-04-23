@@ -1,16 +1,23 @@
 {
-  "id": "manchester-city",
-  "name": "Manchester City",
-  "shortName": "MCI",
-  "colors": {
-    "primary": "#6CABDD",
-    "secondary": "#FFFFFF",
-    "accent": "#1C2C5B"
-  },
-  "assets": {
-    "logo": "@global/soccer/teams/manchester-city/logo.svg",
-    "kit": {
-      "away": { "type": "away", "primary": "#000000", "image": "" }
-    }
-  }
+	"id": "manchester-city",
+	"name": "Manchester City",
+	"shortName": "MCI",
+	"colors": {
+		"primary": "#6CABDD",
+		"onPrimary": "#1C2C5B",
+		"secondary": "#1C2C5B",
+		"onSecondary": "#FFFFFF",
+		"tertiary": "#FFC659",
+		"onTertiary": "#1C2C5B"
+	},
+	"assets": {
+		"logo": "@global/soccer/teams/manchester-city/logo.svg",
+		"kit": {
+			"away": {
+				"type": "away",
+				"primary": "#000000",
+				"image": ""
+			}
+		}
+	}
 }

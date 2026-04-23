@@ -1,0 +1,16 @@
+{
+  "id": "brighton",
+  "name": "Brighton & Hove Albion",
+  "shortName": "BHA",
+  "colors": {
+		"primary": "#0057B8",
+		"onPrimary": "#FFFFFF",
+		"secondary": "#FFCD00",
+		"onSecondary": "#FFFFFF",
+		"tertiary": null,
+		"onTertiary": null
+  },
+  "assets": {
+    "logo": "@global/soccer/teams/brighton/logo.svg"
+  }
+}

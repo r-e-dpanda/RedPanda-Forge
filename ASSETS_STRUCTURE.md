@@ -2,6 +2,8 @@
 
 RedPanda Forge uses a 3-tier Scope-based Taxonomy for assets to ensure templates are highly portable, encapsulated, and efficient. It separates visual media (`assets`) from dynamic JSON data (`data`).
 
+This document defines the standard data structure for team colors used in generating **Thumbnails, Posters, and Banners** for sports graphics. It is designed to be lightweight, easy to maintain, and directly bindable to design templates.
+
 ## 1. Asset Resolution Pipeline (Tiers)
 
 When referencing an image or asset in a `template.json`, the engine uses `Prefixes` to route the path correctly at runtime. Do **NOT** use hardcoded absolute URLs (e.g., `https://...`) in production setups.
@@ -49,22 +51,79 @@ Global data represents real-world entities (teams, players). The folder names MU
 The `@global`, `@shared`, and `@local` prefixes are built exclusively for the **Konva Graphic Renderer (Template Engine)** to safely resolve visual *image pixels* (`src`) without hardcoding URLs inside templates. Data JSONs in `/public/data` represent pure domain state that are fetched normally via standard API/HTTP calls (`/data/...`) *before* the canvas starts rendering. Once your API loads the data, it populates the main state tree (`match`), allowing the template engine to use string mapping like `{{match.homeTeam.colors.primary}}` directly.
 
 **Example Data Format (`manchester-city.json`):**
+
 ```json
 {
-  "id": "manchester-city",
-  "name": "Manchester City",
-  "shortName": "MCI",
+  "id": "string",
+  "name": "string",
+  "shortName": "string",
   "colors": {
-    "primary": "#6CABDD",
-    "secondary": "#FFFFFF",
-    "accent": "#1C2C5B"
+    "primary": "hex",
+    "onPrimary": "hex",
+    "secondary": "hex",
+    "onSecondary": "hex",
+    "tertiary": "hex | null",
+    "onTertiary": "hex | null"
   },
   "assets": {
-    "logo": "@global/soccer/teams/manchester-city/logo.svg",
+    "logo": "string",
     "kit": {
-      "away": { "type": "away", "primary": "#000000", "image": "" }
+      "home": { "type": "home", "primary": "hex", "image": "string" },
+      "away": { "type": "away", "primary": "hex", "image": "string" }
     }
   }
+}
+```
+
+**Field Descriptions**
+
+
+| Field | 	Type |	Description |
+|:-- | -- |:-- |
+| id  | `string` | Unique identifier for the team, lowercase with hyphens (e.g., manchester-united)
+| name | `string` | Full official name of the club
+| shortName | `string` | Abbreviation (3-4 chars), typically used in scoreboards or small thumbnails
+| colors.primary | `hex` | Main brand color (home kit, primary logo color)
+| colors.onPrimary | `hex` | Text/icon color when placed on primary background — ensures proper contrast
+| colors.secondary | `hex` | Secondary color (away kit, borders, secondary text)
+| colors.onSecondary | `hex` | Text/icon color when placed on secondary background
+| colors.tertiary | `hex` or `null` | Tertiary accent color (e.g., gold/yellow for highlights). Set to null if team has only 2 colors
+| colors.onTertiary | `hex` or `null` | Text/icon color when placed on tertiary. Set to null if tertiary is null
+
+
+What Is NOT Included in This Schema
+
+| Item | Reason for Exclusion |
+|:-- | -- |
+| neutral  | Neutral colors (black, white, gray) are interface constants, not team brand data. Handled by template CSS. |
+| container, surface | Generated automatically from primary/secondary using CSS color-mix. |
+| overlay | Overlay opacity (e.g., rgba(0,0,0,0.6)) is a design constant, handled by the template. |
+| gradient | Generated dynamically in CSS using primary and secondary. |
+| border, outline | Derived from primary color with adjusted lightness in CSS. |
+
+```json
+{
+	"id": "manchester-city",
+	"name": "Manchester City",
+	"shortName": "MCI",
+	"colors": {
+		"primary": "#6CABDD",
+		"onPrimary": "#1C2C5B",
+		"secondary": "#1C2C5B",
+		"onSecondary": "#FFFFFF",
+		"tertiary": "#FFC659",
+		"onTertiary": "#1C2C5B"
+	},
+	"assets": {
+		"logo": "@global/soccer/teams/manchester-city/logo.svg",
+		"kit": {
+			"away": {
+				"type": "away",
+				"primary": "#000000",
+				"image": ""
+			}
+		}
+	}
 }
 ```
 

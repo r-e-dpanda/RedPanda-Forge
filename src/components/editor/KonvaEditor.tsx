@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import React, { useRef, useState, useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
 import { Stage, Layer, Image, Text, Rect, Line, Group, Shape, Ellipse, Circle } from "react-konva";
 import useImage from "use-image";
 import { TemplateElement } from "../../types/template";
@@ -41,6 +41,7 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
   const stageRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
+  const lastTemplateIdRef = useRef<string | null>(null);
 
   const sessions = useEditorStore(state => state.sessions);
   const activeSessionId = useEditorStore(state => state.activeSessionId);
@@ -134,25 +135,37 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
     }
   }));
 
-  useEffect(() => {
-    if (!containerRef.current || !template || !template.canvas) return;
+  const fitToScreen = useCallback(() => {
+    if (!containerRef.current || !template?.canvas) return;
     
-    const containerWidth = containerRef.current.clientWidth || 800;
-    const containerHeight = containerRef.current.clientHeight || 600;
+    // Use clientWidth/Height for more immediate values than getBoundingClientRect during transitions
+    const containerWidth = containerRef.current.clientWidth;
+    const containerHeight = containerRef.current.clientHeight;
     
+    // Safety: ignore calls with zero or suspicious dimensions during layout shifts
+    if (containerWidth < 200 || containerHeight < 200) return;
+
     const canvasWidth = template.canvas.width || 1920;
     const canvasHeight = template.canvas.height || 1080;
     
-    const scaleX = (containerWidth - 60) / canvasWidth;
-    const scaleY = (containerHeight - 120) / canvasHeight;
+    // Fit with healthy margins (50px padding)
+    const scaleX = (containerWidth - 100) / canvasWidth;
+    const scaleY = (containerHeight - 100) / canvasHeight;
     
-    const newScale = Math.min(scaleX, scaleY);
-    if (!isNaN(newScale) && isFinite(newScale) && newScale > 0) {
-      setScale(newScale);
-    } else {
-      setScale(0.5); // Fallback
-    }
-  }, [template, rightExpanded]);
+    const newScale = Math.max(0.1, Math.min(scaleX, scaleY, 1.0)); // Don't auto-zoom past 100%
+    setScale(newScale);
+  }, [template]);
+
+  useEffect(() => {
+    if (!containerRef.current || !template?.id) return;
+    
+    // Force re-fit only when the template ID actually changes
+    if (lastTemplateIdRef.current === template.id) return;
+    lastTemplateIdRef.current = template.id;
+
+    const timer = setTimeout(fitToScreen, 200); // Slightly longer delay to allow flex layout to stabilize
+    return () => clearTimeout(timer);
+  }, [template?.id, fitToScreen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -164,38 +177,49 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [setSelectedElementId]);
 
-  if (!template) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center text-app-muted bg-app-bg p-8 m-[1px]">
-        <p>Select a template to open the editor.</p>
-      </div>
-    );
-  }
+  // Handle Ctrl + Scroll Zoom
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+
+      const direction = e.deltaY > 0 ? 0.9 : 1.1;
+      setScale(prev => {
+        const next = prev * direction;
+        return Math.max(0.05, Math.min(next, 5)); // 5% to 500%
+      });
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('wheel', handleWheel, { passive: false });
+    }
+    return () => {
+      if (container) {
+        container.removeEventListener('wheel', handleWheel);
+      }
+    };
+  }, []);
 
   return (
-    <div className="flex-1 flex flex-col relative bg-app-bg overflow-hidden">
-      {!rightExpanded && (
-         <button 
-           onClick={() => setRightExpanded(true)}
-           className="absolute top-4 right-4 z-20 p-2 bg-app-sidebar border border-app-border text-app-muted hover:text-app-text rounded-md shadow-lg transition-colors"
-           title="Open Properties"
-         >
-           <PanelRightOpen size={18} />
-         </button>
-      )}
-      
+    <div className="flex-1 flex flex-col relative bg-app-bg overflow-hidden focus:outline-none w-full h-full">
       <div ref={containerRef} className="flex-1 overflow-auto flex flex-col items-center justify-center bg-transparent relative p-8">
-        <div 
-          className={(elementOverrides['__canvas']?.bgEnabled === false || (!elementOverrides['__canvas']?.bgColor && !template.canvas.backgroundColor) || elementOverrides['__canvas']?.bgColor === 'transparent' || template.canvas.backgroundColor === 'transparent') ? "bg-checkerboard" : ""}
-          style={{ 
-            width: template.canvas.width * scale, 
-            height: template.canvas.height * scale,
-            backgroundColor: elementOverrides['__canvas']?.bgEnabled === false ? 'transparent' : (elementOverrides['__canvas']?.bgColor || template.canvas.backgroundColor || 'transparent'),
-            boxShadow: '0 0 40px rgba(0,0,0,0.2)',
-            border: '1px solid var(--app-border)',
-            position: 'relative'
-          }}
-        >
+        {!template ? (
+          <div className="flex flex-col items-center justify-center text-app-muted p-8">
+            <p>Select a template to open the editor.</p>
+          </div>
+        ) : (
+          <div 
+            className={(elementOverrides['__canvas']?.bgEnabled === false || (!elementOverrides['__canvas']?.bgColor && !template.canvas.backgroundColor) || elementOverrides['__canvas']?.bgColor === 'transparent' || template.canvas.backgroundColor === 'transparent') ? "bg-checkerboard" : ""}
+            style={{ 
+              width: template.canvas.width * scale, 
+              height: template.canvas.height * scale,
+              backgroundColor: elementOverrides['__canvas']?.bgEnabled === false ? 'transparent' : (elementOverrides['__canvas']?.bgColor || template.canvas.backgroundColor || 'transparent'),
+              boxShadow: '0 0 40px rgba(0,0,0,0.2)',
+              border: '1px solid var(--app-border)',
+              position: 'relative'
+            }}
+          >
           <Stage 
             ref={stageRef}
             width={template.canvas.width * scale} 
@@ -550,14 +574,44 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
             </Layer>
           </Stage>
         </div>
+      )}
+      </div>
 
-        <div className="absolute bottom-[24px] bg-app-card backdrop-blur-md rounded-[100px] px-6 py-2.5 flex gap-5 border border-app-border text-[13.5px] text-app-text font-medium items-center shadow-2xl">
-          <div className="flex items-center gap-2">
-            <button className="hover:text-app-accent transition-colors p-1" onClick={() => setScale(s => s * 0.9)}><ZoomOut size={16} /></button>
-            <span className="text-app-muted uppercase font-medium tracking-tight text-[11px] mt-0.5">Zoom</span> <span className="text-app-text w-12 text-center text-[13.5px]">{Math.round(scale * 100)}%</span>
-            <button className="hover:text-app-accent transition-colors p-1" onClick={() => setScale(s => s * 1.1)}><ZoomIn size={16} /></button>
+      {/* Toolbar - Fixed bottom-center for best screen compatibility */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center bg-app-card/90 backdrop-blur-xl border border-app-border rounded-full shadow-2xl px-2 py-1 gap-1 divide-x divide-app-border/40">
+        <div className="flex items-center">
+          <button 
+            className="hover:bg-app-accent/10 hover:text-app-accent h-8 w-8 flex items-center justify-center transition-colors disabled:opacity-30 disabled:hover:bg-transparent rounded-full" 
+            onClick={() => setScale(s => Math.max(0.05, s * 0.8))}
+            disabled={scale <= 0.05}
+            title="Zoom Out"
+          >
+            <ZoomOut size={15} />
+          </button>
+          
+          <div className="px-2 min-w-[56px] text-center">
+            <span className="text-[12px] font-mono font-medium text-app-text">
+              {Math.round(scale * 100)}%
+            </span>
           </div>
+
+          <button 
+            className="hover:bg-app-accent/10 hover:text-app-accent h-8 w-8 flex items-center justify-center transition-colors disabled:opacity-30 disabled:hover:bg-transparent rounded-full" 
+            onClick={() => setScale(s => Math.min(5, s * 1.2))}
+            disabled={scale >= 5}
+            title="Zoom In"
+          >
+            <ZoomIn size={15} />
+          </button>
         </div>
+
+        <button 
+          className="px-4 py-1.5 hover:bg-app-accent/10 hover:text-app-accent text-[11px] font-medium transition-colors uppercase tracking-wider disabled:opacity-30 disabled:hover:bg-transparent rounded-r-full"
+          onClick={fitToScreen}
+          disabled={!template}
+        >
+          Fit
+        </button>
       </div>
     </div>
   );

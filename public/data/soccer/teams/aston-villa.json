@@ -1,0 +1,16 @@
+{
+	"id": "aston-villa",
+	"name": "Aston Villa",
+	"shortName": "AVL",
+	"colors": {
+		"primary": "#670E36",
+		"onPrimary": "#FFFFFF",
+		"secondary": "#95BFE5",
+		"onSecondary": "#670E36",
+		"tertiary": "#FEE505",
+		"onTertiary": "#670E36"
+	},
+	"assets": {
+		"logo": "@global/soccer/teams/aston-villa/logo.svg"
+	}
+}

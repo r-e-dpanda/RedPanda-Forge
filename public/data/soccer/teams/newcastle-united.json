@@ -1,0 +1,16 @@
+{
+	"id": "newcastle-united",
+	"name": "Newcastle United",
+	"shortName": "NEW",
+	"colors": {
+		"primary": "#241F20",
+		"onPrimary": "#FFFFFF",
+		"secondary": "#FFFFFF",
+		"onSecondary": "#241F20",
+		"tertiary": "#F1BE48",
+		"onTertiary": "#241F20"
+	},
+	"assets": {
+		"logo": "@global/soccer/teams/newcastle-united/logo.svg"
+	}
+}

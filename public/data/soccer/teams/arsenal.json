@@ -1,0 +1,16 @@
+{
+	"id": "arsenal",
+	"name": "Arsenal",
+	"shortName": "ARS",
+	"colors": {
+		"primary": "#EF0107",
+		"onPrimary": "#FFFFFF",
+		"secondary": "#FFFFFF",
+		"onSecondary": "#EF0107",
+		"tertiary": "#063672",
+		"onTertiary": "#FFFFFF"
+	},
+	"assets": {
+		"logo": "@global/soccer/teams/arsenal/logo.svg"
+	}
+}

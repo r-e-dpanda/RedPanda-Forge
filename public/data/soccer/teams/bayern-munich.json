@@ -1,13 +1,16 @@
 {
-  "id": "bayern-munich",
-  "name": "Bayern Munich",
-  "shortName": "BAY",
-  "colors": {
-    "primary": "#DC052D",
-    "secondary": "#0066B2",
-    "accent": "#FFFFFF"
-  },
-  "assets": {
-    "logo": "@global/soccer/teams/bayern-munich/logo.svg"
-  }
+	"id": "bayern-munich",
+	"name": "Bayern Munich",
+	"shortName": "FCB",
+	"colors": {
+		"primary": "#DC052D",
+		"onPrimary": "#FFFFFF",
+		"secondary": "#FFFFFF",
+		"onSecondary": "#DC052D",
+		"tertiary": "#0066B2",
+		"onTertiary": "#FFFFFF"
+	},
+	"assets": {
+		"logo": "@global/soccer/teams/bayern-munich/logo.svg"
+	}
 }

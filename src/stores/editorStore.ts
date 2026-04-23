@@ -256,7 +256,7 @@ export const useEditorStore = create<EditorState>((set, get) => {
     }),
 
     undo: () => updateActiveSession((sess) => {
-      if (sess.historyIndex >= 0) {
+      if (sess && sess.historyIndex >= 0) {
         const newIndex = sess.historyIndex - 1;
         if (newIndex >= 0) {
           const prevState = sess.history[newIndex];
@@ -279,7 +279,7 @@ export const useEditorStore = create<EditorState>((set, get) => {
     }),
 
     redo: () => updateActiveSession((sess) => {
-      if (sess.historyIndex < sess.history.length - 1) {
+      if (sess && sess.historyIndex < sess.history.length - 1) {
         const newIndex = sess.historyIndex + 1;
         const nextState = sess.history[newIndex];
         return {
