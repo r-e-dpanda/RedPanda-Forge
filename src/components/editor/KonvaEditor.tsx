@@ -203,7 +203,7 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
 
   return (
     <div className="flex-1 flex flex-col relative bg-app-bg overflow-hidden focus:outline-none w-full h-full">
-      <div ref={containerRef} className="flex-1 overflow-auto flex flex-col items-center justify-center bg-transparent relative p-8">
+      <div ref={containerRef} className="flex-1 overflow-auto flex flex-col items-center justify-center bg-transparent relative p-8 pb-32">
         {!template ? (
           <div className="flex flex-col items-center justify-center text-app-muted p-8">
             <p>Select a template to open the editor.</p>

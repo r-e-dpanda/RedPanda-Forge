@@ -128,12 +128,16 @@ To provide clarity between data engine values and manual overrides, the Design t
 
 ### Interaction Rules
 
-- **Sport Switching**: Changing the sport dropdown must **NOT** close the current tab.
-  1. It first searches for an existing tab for the chosen sport (where match or template matches).
-  2. If none found, it searches for an existing **Empty Tab** ("Untouched" session: no match, no template, no history) to reuse.
-  3. Only if no suitable tab is found does it create a new "Untitled Graphic" session.
+- **Sport Switching**: Changing the sport dropdown updates the **active tab's sport**.
+  1. It no longer searches for or creates tabs automatically; it modifies the current session's context.
+  2. The sidebar (Matches/Templates) filters content based on the active tab's sport.
 - **Active Tab Sync**: Changing the Active Tab automatically updates the Sport Dropdown to match the active tab's context.
 - **Scaling**: `KonvaEditor` calculates a dynamic scale to fit the canvas while maintaining aspect ratio (Desktop-first).
+- **Ratio & Template Filtering**:
+  - When the user changes the "Ratio" filter:
+    - If there are no templates for the selected Sport and the new Ratio, the Template dropdown must be **disabled**.
+    - The `activeTemplate` must **not be cleared** or changed automatically when the filter results in an empty list. It should remain active until specifically changed by the user.
+- **New Session**: A "+" button in the editor tab bar allows creating a new "Untitled Graphic" session, which inherits the current sport selection by default.
 - **Safety (Dirty Checks)**:
   - Switching templates or closing a session triggers a confirmation dialog if the session is "dirty" (i.e., has unsaved manual overrides or unsynced history).
 

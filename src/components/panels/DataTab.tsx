@@ -31,208 +31,86 @@ export const DataTab: React.FC<DataTabProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="p-4 overflow-y-auto w-full h-full pb-10 flex flex-col gap-5">
+    <div className="flex flex-col gap-5">
       {match ? (
         <>
-          {/* Single Context Card built using table-style layout */}
-          <div className="flex flex-col bg-app-card rounded-xl border border-app-border overflow-hidden shadow-sm">
-            {/* Competition Header */}
-            <div className="flex items-center gap-2 px-3 py-2 border-b border-app-border/40 bg-black/[0.02] dark:bg-white/[0.02]">
-              <span className="bg-app-accent/15 text-app-accent px-1.5 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-widest shrink-0">
-                {match.sport}
-              </span>
-              {match.competition?.logo && (
-                <div className="w-4 h-4 flex items-center justify-center shrink-0 rounded-[3px] bg-black/5 dark:bg-white/5 border border-app-border/40 overflow-hidden shadow-sm">
-                  <img 
-                    src={resolveAssetPath(match.competition.logo, { packId: "", templateId: "" })} 
-                    className="w-full h-full object-contain" 
-                    alt="" 
-                  />
+          {/* Competition Header (Optional, but user image 1 shows a clean card) */}
+          <div className="flex flex-col gap-2">
+            {/* Match Info Card: MUN vs MCI style */}
+            <div className="flex flex-col bg-app-card rounded-2xl border border-app-border overflow-hidden shadow-sm aspect-video">
+              <div className="flex-1 flex flex-col items-center justify-center pt-2">
+                <div className="flex items-center justify-between w-full px-8 flex-1">
+                  {/* Home Team */}
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-14 h-14 flex items-center justify-center">
+                      {(match.homeTeam?.assets?.logo || match.homeTeam?.logo || (match.sport === 'tennis' && match.player1?.flag)) && (
+                        <img 
+                          src={resolveAssetPath(match.sport === 'tennis' ? match.player1?.flag || "" : match.homeTeam?.assets?.logo || match.homeTeam?.logo || "", { packId: "", templateId: "" })} 
+                          className="w-full h-full object-contain drop-shadow-md" 
+                          alt="" 
+                        />
+                      )}
+                    </div>
+                    <span className="text-[14px] font-bold text-app-text tracking-widest uppercase">
+                      {match.sport === 'tennis' ? match.player1?.name : (match.homeTeam?.shortName || match.homeTeam?.id)}
+                    </span>
+                  </div>
+
+                  {/* Center Info */}
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="text-[32px] font-bold text-app-text leading-none tracking-tight">
+                      {match.status === 'NS' || !match.status ? match.time : (typeof match.score === 'object' ? `${match.score?.ft?.[0]}:${match.score?.ft?.[1]}` : match.score)}
+                    </span>
+                    <span className="text-[12px] text-app-muted font-bold mt-2 uppercase tracking-[0.2em]">
+                      {new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+
+                  {/* Away Team */}
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-14 h-14 flex items-center justify-center">
+                      {(match.awayTeam?.assets?.logo || match.awayTeam?.logo || (match.sport === 'tennis' && match.player2?.flag)) && (
+                        <img 
+                          src={resolveAssetPath(match.sport === 'tennis' ? match.player2?.flag || "" : match.awayTeam?.assets?.logo || match.awayTeam?.logo || "", { packId: "", templateId: "" })} 
+                          className="w-full h-full object-contain drop-shadow-md" 
+                          alt="" 
+                        />
+                      )}
+                    </div>
+                    <span className="text-[14px] font-bold text-app-text tracking-widest uppercase">
+                      {match.sport === 'tennis' ? match.player2?.name : (match.awayTeam?.shortName || match.awayTeam?.id)}
+                    </span>
+                  </div>
                 </div>
-              )}
-              <span className="font-semibold text-[11px] text-app-text truncate">
-                {match.competition?.name || match.league}
-              </span>
-              {(match.competition?.flag || '') && (
-                <img 
-                  src={resolveAssetPath(match.competition.flag || '', { packId: "", templateId: "" })} 
-                  className="w-[14px] h-[10px] object-cover rounded-[1px] opacity-85 shadow-[0_0_0_1px_rgba(0,0,0,0.1)] shrink-0 ml-auto" 
-                  alt="" 
-                />
-              )}
+              </div>
+
+              {/* Card Footer */}
+              <div className="h-[2.75rem] border-t border-app-border/40 px-5 flex items-center justify-between bg-black/[0.01] dark:bg-white/[0.01]">
+                <span className="text-[11px] font-bold text-app-muted tracking-wider">{match.round}</span>
+                <span className="text-[11px] font-medium text-app-muted truncate max-w-[60%]">{match.venue}</span>
+              </div>
             </div>
 
-            {/* Match Info Area */}
-            {match.sport === 'football' && match.homeTeam && match.awayTeam && (
-              <div className="flex relative">
-                <div className="flex flex-col gap-2 p-3 flex-1 min-w-0 pr-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                        {(match.homeTeam.assets?.logo || match.homeTeam.logo) && (
-                          <img 
-                            src={resolveAssetPath(match.homeTeam.assets?.logo || match.homeTeam.logo || "", { packId: "", templateId: "" })} 
-                            className="w-full h-full object-contain drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]" 
-                            alt="" 
-                          />
-                        )}
-                      </div>
-                      <span className="text-[13px] font-medium text-app-text truncate">
-                        {match.homeTeam.name || match.homeTeam.id}
-                      </span>
-                    </div>
-                    {(match.status !== 'NS' && match.score) && (
-                      <span className="font-bold text-[15px] text-app-text shrink-0">
-                        {typeof match.score === 'object' ? match.score?.ft?.[0] : match.score?.split('-')[0]?.trim()}
-                      </span>
-                    )}
+            <div className="mt-2">
+              <h3 className="text-ui-xs text-app-muted font-normal mb-1 pb-1.5 border-b border-app-border/30">{t.panels.fields.details}</h3>
+              <div className="flex flex-col">
+                {match.venue && (
+                  <div className="flex justify-between items-center py-2.5 border-b border-app-border/10">
+                    <span className="text-ui-xs text-app-muted">{t.panels.fields.venue}</span>
+                    <span className="text-ui-xs text-app-text font-medium text-right max-w-[60%] truncate">{match.venue}</span>
                   </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                        {(match.awayTeam.assets?.logo || match.awayTeam.logo) && (
-                          <img 
-                            src={resolveAssetPath(match.awayTeam.assets?.logo || match.awayTeam.logo || "", { packId: "", templateId: "" })} 
-                            className="w-full h-full object-contain drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]" 
-                            alt="" 
-                          />
-                        )}
-                      </div>
-                      <span className="text-[13px] font-medium text-app-text truncate">
-                        {match.awayTeam.name || match.awayTeam.id}
-                      </span>
-                    </div>
-                    {(match.status !== 'NS' && match.score) && (
-                      <span className="font-bold text-[15px] text-app-text shrink-0">
-                        {typeof match.score === 'object' ? match.score?.ft?.[1] : match.score?.split('-')[1]?.trim()}
-                      </span>
-                    )}
+                )}
+                <div className="flex justify-between items-center py-2.5 border-b border-app-border/10">
+                  <span className="text-ui-xs text-app-muted">{t.panels.fields.date}</span>
+                  <span className="text-ui-xs text-app-text font-medium">{new Date(match.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                </div>
+                {(match.time || match.date) && (
+                  <div className="flex justify-between items-center py-2.5">
+                    <span className="text-ui-xs text-app-muted">{t.panels.fields.kickoff}</span>
+                    <span className="text-ui-xs text-app-text font-medium">{match.time ? `${match.time}` : `${new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}</span>
                   </div>
-                </div>
-
-                <div className="flex flex-col items-center justify-center p-3 w-[6rem] shrink-0 text-center border-l border-app-border/40 bg-black/[0.02] dark:bg-white/[0.02]">
-                  {match.round && (
-                    <span className="text-[9px] font-medium text-app-muted truncate w-full mb-1">{match.round}</span>
-                  )}
-                  {match.status === 'NS' || !match.score ? (
-                    <>
-                      <span className="text-[13px] font-semibold text-app-text leading-tight">{match.time || '-:-'}</span>
-                      <span className="text-[10px] font-medium text-app-muted mt-0.5 text-center leading-tight">
-                        {new Date(match.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-[10px] font-medium text-app-muted text-center mb-0.5 leading-tight">
-                        {new Date(match.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                      </span>
-                      <span className={cn(
-                        "text-[11px] font-bold tracking-wide mt-0.5",
-                        (match.status === 'LIVE' || match.isLive) ? "text-red-500 uppercase" : "text-app-muted/80 uppercase"
-                      )}>
-                        {(match.status === 'LIVE' || match.isLive) ? 'LIVE' : (match.status === 'FINISHED' || match.status === 'FT' || match.status === 'Chung cuộc' ? 'FT' : match.status)}
-                      </span>
-                    </>
-                  )}
-                </div>
+                )}
               </div>
-            )}
-
-            {match.sport === 'tennis' && match.player1 && match.player2 && (
-              <div className="flex relative">
-                <div className="flex flex-col gap-2 p-3 flex-1 min-w-0 pr-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-5 h-4 flex items-center justify-center shrink-0 overflow-hidden rounded-[2px] shadow-[0_0_0_1px_rgba(0,0,0,0.1)]">
-                        {(match.player1.flag) && (
-                          <img 
-                            src={resolveAssetPath(match.player1.flag || "", { packId: "", templateId: "" })} 
-                            className="w-full h-full object-cover" 
-                            alt="" 
-                          />
-                        )}
-                      </div>
-                      <span className="text-[13px] font-medium text-app-text truncate">
-                        {match.player1.name || match.player1.id}
-                      </span>
-                    </div>
-                    {(match.status !== 'NS' && match.score) && (
-                      <span className="font-bold text-[14px] text-app-text shrink-0">
-                        {typeof match.score === 'string' ? match.score.split('-')[0]?.trim() : ''}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-5 h-4 flex items-center justify-center shrink-0 overflow-hidden rounded-[2px] shadow-[0_0_0_1px_rgba(0,0,0,0.1)]">
-                        {(match.player2.flag) && (
-                          <img 
-                            src={resolveAssetPath(match.player2.flag || "", { packId: "", templateId: "" })} 
-                            className="w-full h-full object-cover" 
-                            alt="" 
-                          />
-                        )}
-                      </div>
-                      <span className="text-[13px] font-medium text-app-text truncate">
-                        {match.player2.name || match.player2.id}
-                      </span>
-                    </div>
-                    {(match.status !== 'NS' && match.score) && (
-                      <span className="font-bold text-[14px] text-app-text shrink-0">
-                        {typeof match.score === 'string' ? match.score.split('-')[1]?.trim() : ''}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center justify-center p-3 w-[6rem] shrink-0 text-center border-l border-app-border/40 bg-black/[0.02] dark:bg-white/[0.02]">
-                  {match.round && (
-                    <span className="text-[9px] font-medium text-app-muted truncate w-full mb-1">{match.round}</span>
-                  )}
-                  {match.status === 'NS' || !match.score ? (
-                    <>
-                      <span className="text-[13px] font-semibold text-app-text leading-tight">{match.time || '-:-'}</span>
-                      <span className="text-[10px] font-medium text-app-muted mt-0.5 text-center leading-tight">
-                        {new Date(match.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-[10px] font-medium text-app-muted text-center mb-0.5 leading-tight">
-                        {new Date(match.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                      </span>
-                      <span className={cn(
-                        "text-[11px] font-bold tracking-wide mt-0.5",
-                        (match.status === 'LIVE' || match.isLive) ? "text-red-500 uppercase" : "text-app-muted/80 uppercase"
-                      )}>
-                        {(match.status === 'LIVE' || match.isLive) ? 'LIVE' : (match.status === 'FINISHED' || match.status === 'FT' || match.status === 'Chung cuộc' ? 'FT' : match.status)}
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div>
-            <h3 className="text-ui-xs text-app-muted font-normal mb-2.5 pb-2 border-b border-app-border/30">{t.panels.fields.details}</h3>
-            <div className="flex flex-col gap-0">
-              {match.venue && (
-                <div className="flex justify-between items-center py-2.5 border-b border-app-border/20">
-                  <span className="text-ui-xs text-app-muted">{t.panels.fields.venue}</span>
-                  <span className="text-ui-xs text-app-text font-medium text-right max-w-[60%] truncate">{match.venue}</span>
-                </div>
-              )}
-              <div className="flex justify-between items-center py-2.5 border-b border-app-border/20">
-                <span className="text-ui-xs text-app-muted">{t.panels.fields.date}</span>
-                <span className="text-ui-xs text-app-text font-medium">{new Date(match.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-              </div>
-              {(match.time || match.date) && (
-                <div className="flex justify-between items-center py-2.5">
-                  <span className="text-ui-xs text-app-muted">{t.panels.fields.kickoff}</span>
-                  <span className="text-ui-xs text-app-text font-medium">{match.time ? `${match.time} ${match.timezone || ''}` : `${new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} GMT`}</span>
-                </div>
-              )}
             </div>
           </div>
         </>
@@ -289,12 +167,12 @@ export const DataTab: React.FC<DataTabProps> = ({
                 onMouseEnter={() => setHoveredElementId(element.id)}
                 onMouseLeave={() => setHoveredElementId(null)}
               >
-                <div className="flex justify-between items-center">
-                  <span className="text-app-muted font-mono text-ui-xs whitespace-nowrap overflow-hidden text-ellipsis mr-2">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-app-muted font-mono text-[10px] truncate" title={`{{${element.dataKey}}}`}>
                     {`{{${element.dataKey}}}`}
                   </span>
                   {isAuto && (
-                    <span className="text-app-accent text-ui-xs font-medium text-right truncate max-w-[120px]" title={displayVal}>
+                    <span className="text-app-accent text-ui-sm font-bold truncate" title={displayVal}>
                       {displayVal || "N/A"}
                     </span>
                   )}

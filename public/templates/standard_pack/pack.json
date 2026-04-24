@@ -1,0 +1,13 @@
+{
+  "id": "standard_pack",
+  "name": "Standard Forge Pack",
+  "version": "1.0.0",
+  "description": "Standard set of soccer and tennis templates",
+  "author": "RedPanda Forge",
+  "templates": [
+    "tpl_fb_16x9_1",
+    "tpl_fb_9x16_2",
+    "tpl_tennis_9x16_1",
+    "tpl_tennis_16x9_1"
+  ]
+}

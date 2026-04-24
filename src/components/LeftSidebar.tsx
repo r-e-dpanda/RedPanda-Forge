@@ -2,14 +2,17 @@ import React from "react";
 import { useEditorStore } from "../stores/editorStore";
 import { Check, LayoutTemplate } from "lucide-react";
 import { cn } from "../lib/utils";
-import { MOCK_MATCHES, MOCK_TEMPLATES } from "../lib/mockData";
+import { MOCK_MATCHES } from "../lib/mockData";
 import { Sport, Ratio, Match, Template } from "../types/template";
 import { useTranslation } from "../lib/i18n";
 import { resolveAssetPath } from "../lib/assetResolver";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { MatchCard } from "./MatchCard";
+
 interface LeftSidebarProps {
   selectedSport: Sport;
+  onSportChange: (sport: Sport) => void;
   selectedRatio: Ratio | "All";
   selectedLeague: string;
   activeLeftTab: 'matches' | 'templates';
@@ -25,6 +28,7 @@ interface LeftSidebarProps {
 
 export const LeftSidebar = ({
   selectedSport,
+  onSportChange,
   selectedRatio,
   selectedLeague,
   activeLeftTab,
@@ -42,8 +46,50 @@ export const LeftSidebar = ({
     m.sport === selectedSport &&
     (selectedLeague === "All" || m.league === selectedLeague)
   );
-  const filteredTemplates = templates.filter((t: any) => t.sport === selectedSport && (selectedRatio === "All" || t.ratio === selectedRatio));
-  const tab2Templates = templates.filter((t: any) => t.sport === selectedSport);
+  const filteredTemplates = templates.filter((t: any) => {
+    if (!t.sport) return false;
+    const tSport = t.sport.trim().toLowerCase();
+    const sSport = selectedSport.trim().toLowerCase();
+    
+    // Normal match
+    if (tSport === sSport) return true;
+    
+    // Aliases for transition
+    if ((tSport === 'soccer' && sSport === 'football') || (tSport === 'football' && sSport === 'soccer')) return true;
+    
+    return false;
+  }).filter(t => selectedRatio === "All" || t.ratio?.trim() === selectedRatio.trim());
+
+  const tab2Templates = templates.filter((t: any) => {
+    if (!t.sport) return false;
+    const tSport = t.sport.trim().toLowerCase();
+    const sSport = selectedSport.trim().toLowerCase();
+    
+    // Normal match
+    if (tSport === sSport) return true;
+    
+    // Aliases for transition
+    if ((tSport === 'soccer' && sSport === 'football') || (tSport === 'football' && sSport === 'soccer')) return true;
+    
+    return false;
+  });
+
+  const groupedMatches = React.useMemo(() => {
+    const groups: Record<string, { competition: any; matches: Match[] }> = {};
+    
+    filteredMatches.forEach(m => {
+      const compId = m.competition?.id || m.league || 'other';
+      if (!groups[compId]) {
+        groups[compId] = {
+          competition: m.competition || { id: compId, name: m.league },
+          matches: []
+        };
+      }
+      groups[compId].matches.push(m);
+    });
+    
+    return Object.entries(groups).map(([id, group]) => ({ id, ...group }));
+  }, [filteredMatches]);
 
   return (
     <div className="w-[17.5rem] bg-app-sidebar border-r border-app-border flex flex-col shrink-0 z-10 font-sans relative">
@@ -83,6 +129,21 @@ export const LeftSidebar = ({
             {/* Filters */}
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5 w-full">
+                <span className="text-ui-xs text-app-muted font-normal">{t.common.sport || "Sport"}</span>
+                <Select value={selectedSport} onValueChange={(val) => onSportChange(val as Sport)}>
+                  <SelectTrigger className="w-full bg-app-card capitalize">
+                    <SelectValue placeholder="Select sport..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="soccer">Soccer</SelectItem>
+                    <SelectItem value="basketball">Basketball</SelectItem>
+                    <SelectItem value="tennis">Tennis</SelectItem>
+                    <SelectItem value="esports">Esports</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col gap-1.5 w-full">
                 <span className="text-ui-xs text-app-muted font-normal">{t.sidebar.filters.ratio}</span>
                 <Select value={selectedRatio} onValueChange={(val) => setSelectedRatio(val as Ratio | "All")}>
                   <SelectTrigger className="w-full bg-app-card">
@@ -98,18 +159,35 @@ export const LeftSidebar = ({
               </div>
 
               <div className="flex flex-col gap-1.5 w-full">
-                <span className="text-ui-xs text-app-muted font-normal">{t.sidebar.filters.template}</span>
+                <span className={cn(
+                  "text-ui-xs font-normal transition-colors",
+                  !activeTemplate ? "text-app-accent animate-pulse" : "text-app-muted"
+                )}>
+                  {t.sidebar.filters.template} {!activeTemplate && "*"}
+                </span>
                 <Select 
-                  value={filteredTemplates.some((t: any) => t.id === activeTemplate?.id) ? (activeTemplate?.id || "") : ""} 
+                  key={`${selectedSport}-${selectedRatio}`}
+                  value={activeTemplate?.id || ""} 
                   onValueChange={(val) => {
                     const tpl = templates.find((t: any) => t.id === val);
                     if (tpl) setEditorTemplate(tpl);
                   }}
-                  disabled={filteredTemplates.length === 0}
+                  disabled={
+                    filteredTemplates.length === 0 || 
+                    (activeTemplate && selectedRatio !== "All" && activeTemplate.ratio !== selectedRatio)
+                  }
                 >
-                  <SelectTrigger className="w-full bg-app-card">
-                    <SelectValue placeholder={filteredTemplates.length === 0 ? "No template found" : "Select template..."}>
-                      {activeTemplate ? `${activeTemplate.name} (${activeTemplate.ratio})` : undefined}
+                  <SelectTrigger 
+                    disabled={
+                      filteredTemplates.length === 0 || 
+                      (activeTemplate && selectedRatio !== "All" && activeTemplate.ratio !== selectedRatio)
+                    }
+                    className={cn(
+                    "w-full bg-app-card transition-all",
+                    !activeTemplate && "border-app-accent/50 ring-1 ring-app-accent/10"
+                  )}>
+                    <SelectValue>
+                      {activeTemplate ? `${activeTemplate.name} (${activeTemplate.ratio})` : (templates.length === 0 ? "Loading templates..." : (filteredTemplates.length === 0 ? t.sidebar.filters.noTemplates : t.sidebar.filters.selectTemplate))}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -133,94 +211,40 @@ export const LeftSidebar = ({
                 )}
               </div>
 
-              <div className={cn("flex flex-col gap-2", !activeTemplate && "opacity-40 grayscale pointer-events-none select-none")}>
-                {filteredMatches.length === 0 ? (
+              <div className={cn("flex flex-col gap-5", !activeTemplate && "opacity-40 grayscale pointer-events-none select-none")}>
+                {groupedMatches.length === 0 ? (
                   <div className="p-6 text-center border border-dashed border-app-border rounded-lg">
                     <p className="text-app-muted text-ui-xs">{t.sidebar.matches.noMatchesFound}</p>
                   </div>
                 ) : (
-                  filteredMatches.map(m => (
-                    <div
-                      key={m.id}
-                      onClick={() => activeTemplate && setEditorMatch(m)}
-                      className={cn(
-                        "flex flex-col bg-app-card rounded-xl border overflow-hidden transition-all cursor-pointer shadow-sm hover:shadow-md h-24 shrink-0",
-                        activeMatch?.id === m.id ? "border-app-accent ring-1 ring-app-accent/20" : "border-app-border"
-                      )}
-                    >
-                      {/* Main Matchup Area */}
-                      <div className="flex items-center justify-between px-3 h-[4.25rem] w-full">
-                        {/* Home */}
-                        <div className="flex flex-col items-center justify-center gap-1.5 flex-1 min-w-0">
-                          <div className="w-8 h-8 shrink-0 flex items-center justify-center">
-                            {m.homeTeam?.assets?.logo || m.homeTeam?.logo || m.sport === 'tennis' && m.player1?.flag ? (
-                              <img src={resolveAssetPath(m.sport === 'tennis' ? m.player1?.flag || "" : m.homeTeam?.assets?.logo || m.homeTeam?.logo || "", { packId: "", templateId: "" })} className="w-full h-full object-contain drop-shadow-sm" alt="" />
-                            ) : null}
-                          </div>
-                          <span className="text-[11px] font-semibold text-app-text truncate w-full text-center">
-                            {m.sport === 'tennis' ? m.player1?.name : (m.homeTeam?.shortName || m.homeTeam?.name || m.homeTeam?.id)}
-                          </span>
-                        </div>
-
-                        {/* Center: Score / Time */}
-                        <div className="flex flex-col items-center justify-center px-0.5 shrink-0 w-[5.5rem]">
-                          {m.status === 'NS' || !m.status ? (
-                            <>
-                              <span className="text-[22px] font-bold text-app-text leading-none tracking-tight">{m.time || '-:-'}</span>
-                              <span className="text-[10px] text-app-muted font-medium mt-1 text-center leading-tight lowercase">
-                                {new Date(m.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <div className="flex items-center justify-center gap-2 text-[22px] font-bold text-app-text leading-none tracking-tight">
-                                <span>{typeof m.score === 'object' ? m.score?.ft?.[0] : m.score?.split('-')[0]?.trim() || "-"}</span>
-                                <span className="text-app-muted/40 font-medium text-[16px] mb-0.5">-</span>
-                                <span>{typeof m.score === 'object' ? m.score?.ft?.[1] : m.score?.split('-')[1]?.trim() || "-"}</span>
-                              </div>
-                              <span className={cn(
-                                "text-[9px] font-medium mt-1.5 text-center leading-tight", 
-                                (m.status === 'LIVE' || m.isLive) ? "text-red-500 font-bold uppercase" : "text-app-muted/80 lowercase"
-                              )}>
-                                {
-                                  (m.status === 'LIVE' || m.isLive) ? "LIVE" :
-                                  (m.status === 'FT' || m.status === 'FINISHED' || m.status === 'Finished' || m.status === 'Chung cuộc') ? 
-                                    `${new Date(m.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }).replace(',', '')} - FT` : 
-                                    m.status
-                                }
-                              </span>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Away */}
-                        <div className="flex flex-col items-center justify-center gap-1.5 flex-1 min-w-0">
-                          <div className="w-8 h-8 shrink-0 flex items-center justify-center">
-                            {m.awayTeam?.assets?.logo || m.awayTeam?.logo || m.sport === 'tennis' && m.player2?.flag ? (
-                              <img src={resolveAssetPath(m.sport === 'tennis' ? m.player2?.flag || "" : m.awayTeam?.assets?.logo || m.awayTeam?.logo || "", { packId: "", templateId: "" })} className="w-full h-full object-contain drop-shadow-sm" alt="" />
-                            ) : null}
-                          </div>
-                          <span className="text-[11px] font-semibold text-app-text truncate w-full text-center">
-                            {m.sport === 'tennis' ? m.player2?.name : (m.awayTeam?.shortName || m.awayTeam?.name || m.awayTeam?.id)}
-                          </span>
-                        </div>
+                  groupedMatches.map(group => (
+                    <div key={group.id} className="flex flex-col gap-2">
+                      {/* Competition Header */}
+                      <div className="flex items-center gap-2 px-1">
+                        {group.competition.logo && (
+                          <img 
+                            src={resolveAssetPath(group.competition.logo, { packId: "", templateId: "" })} 
+                            className="w-4 h-4 object-contain opacity-80" 
+                            alt="" 
+                          />
+                        )}
+                        <span className="text-[10px] font-bold text-app-text tracking-wider uppercase">
+                          {group.competition.name || group.id}
+                        </span>
+                        <div className="flex-1 h-px bg-app-border/40 ml-1" />
                       </div>
 
-                      {/* Footer: Competition */}
-                      <div className="bg-black/[0.02] dark:bg-white/[0.02] border-t border-app-border/40 px-3 flex-1 flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                          {m.competition?.logo && (
-                            <img src={resolveAssetPath(m.competition.logo, { packId: "", templateId: "" })} className="w-3.5 h-3.5 object-contain opacity-70 shrink-0" alt="" />
-                          )}
-                          <span className="text-[9px] font-medium text-app-muted truncate" title={m.competition?.name || m.league}>
-                            {m.competition?.name || m.league}
-                          </span>
-                        </div>
-                        {m.round && (
-                          <span className="text-[9px] text-app-muted/60 font-medium shrink-0 ml-2 border-l border-app-border/30 pl-2">
-                            {m.round}
-                          </span>
-                        )}
+                      {/* Matches in this competition */}
+                      <div className="flex flex-col gap-2">
+                        {group.matches.map(m => (
+                          <MatchCard 
+                            key={m.id}
+                            match={m}
+                            activeTemplate={activeTemplate}
+                            activeMatch={activeMatch}
+                            setEditorMatch={setEditorMatch}
+                          />
+                        ))}
                       </div>
                     </div>
                   ))
@@ -233,6 +257,21 @@ export const LeftSidebar = ({
         {/* ── Templates tab ────────────────────────────────────────── */}
         {activeLeftTab === 'templates' && (
           <div className="p-4 flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5 w-full">
+              <span className="text-ui-xs text-app-muted font-normal">{t.common.sport || "Sport"}</span>
+              <Select value={selectedSport} onValueChange={(val) => onSportChange(val as Sport)}>
+                <SelectTrigger className="w-full bg-app-card capitalize">
+                  <SelectValue placeholder="Select sport..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="soccer">Soccer</SelectItem>
+                  <SelectItem value="basketball">Basketball</SelectItem>
+                  <SelectItem value="tennis">Tennis</SelectItem>
+                  <SelectItem value="esports">Esports</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <button
               onClick={() => setIsModalOpen(true)}
               className="w-full text-ui-xs font-medium text-app-accent border border-app-accent/30 hover:bg-app-accent/10 px-4 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2"

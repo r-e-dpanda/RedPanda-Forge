@@ -1,0 +1,240 @@
+{
+  "id": "tpl_tennis_9x16_1",
+  "name": "Tennis Match Story",
+  "version": "1.0",
+  "sport": "tennis",
+  "ratio": "9:16",
+  "thumbnail": "https://picsum.photos/seed/tennis_story/225/400",
+  "canvas": {
+    "width": 1080,
+    "height": 1920,
+    "backgroundColor": "#0A0A0A"
+  },
+  "layers": [
+    {
+      "id": "l_bg",
+      "type": "Group",
+      "name": "Background",
+      "visible": true,
+      "zIndex": 0,
+      "position": { "x": 0, "y": 0 },
+      "children": [
+        {
+          "id": "court_bg",
+          "type": "Image",
+          "name": "Tennis Court Image",
+          "src": "https://images.unsplash.com/photo-1622279457486-62fcc4a0c8f1?q=80&w=1080&auto=format&fit=crop",
+          "visible": true, "zIndex": 0, "position": { "x": 0, "y": 0 }, "size": { "width": 1080, "height": 1920 }, "rotation": 0, "opacity": 0.7, "objectFit": "cover"
+        },
+        {
+          "id": "player1_overlay",
+          "type": "Shape",
+          "name": "Player 1 Side Overlay",
+          "shapeType": "quad",
+          "style": { "fill": "#1E3A8A" },
+          "visible": true, "zIndex": 1, "position": { "x": 0, "y": 0 }, "size": { "width": 540, "height": 1920 }, "rotation": 0, "opacity": 0.5
+        },
+        {
+          "id": "player2_overlay",
+          "type": "Shape",
+          "name": "Player 2 Side Overlay",
+          "shapeType": "quad",
+          "style": { "fill": "#991B1B" },
+          "visible": true, "zIndex": 2, "position": { "x": 540, "y": 0 }, "size": { "width": 540, "height": 1920 }, "rotation": 0, "opacity": 0.5
+        },
+        {
+          "id": "match_day_bg",
+          "type": "Text",
+          "name": "MATCH DAY Huge Text",
+          "text": "MATCH DAY",
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 220, "fontWeight": "bold", "align": "center" },
+          "visible": true, "zIndex": 3, "position": { "x": 0, "y": 150 }, "size": { "width": 1080, "height": 250 }, "rotation": 0, "opacity": 0.3
+        }
+      ]
+    },
+    {
+      "id": "l_players",
+      "type": "Group",
+      "name": "Player Cutouts",
+      "visible": true,
+      "zIndex": 1,
+      "position": { "x": 0, "y": 0 },
+      "children": [
+        {
+          "id": "player1_cutout",
+          "type": "Image",
+          "name": "Player 1 Cutout",
+          "src": "{{player1.assets.cutout}}",
+          "visible": true, "zIndex": 1, "position": { "x": 20, "y": 350 }, "size": { "width": 480, "height": 640 }, "rotation": 0, "opacity": 0.95, "objectFit": "contain"
+        },
+        {
+          "id": "player2_cutout",
+          "type": "Image",
+          "name": "Player 2 Cutout",
+          "src": "{{player2.assets.cutout}}",
+          "visible": true, "zIndex": 2, "position": { "x": 580, "y": 350 }, "size": { "width": 480, "height": 640 }, "rotation": 0, "opacity": 0.95, "objectFit": "contain"
+        }
+      ]
+    },
+    {
+      "id": "l_foreground",
+      "type": "Group",
+      "name": "Typography & Info",
+      "visible": true,
+      "zIndex": 2,
+      "position": { "x": 0, "y": 0 },
+      "children": [
+        {
+          "id": "tournament_text",
+          "type": "Text",
+          "name": "Tournament Name",
+          "text": "{{match.tournament}}",
+          "formatters": ["uppercase"],
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 42, "fontWeight": "bold", "align": "center", "shadowColor": "#000", "shadowBlur": 10 },
+          "visible": true, "zIndex": 1, "position": { "x": 0, "y": 60 }, "size": { "width": 1080, "height": 60 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "round_text",
+          "type": "Text",
+          "name": "Round",
+          "text": "{{match.round}}",
+          "formatters": ["uppercase"],
+          "style": { "fill": "#CCCCCC", "fontFamily": "Inter", "fontSize": 32, "fontWeight": "normal", "align": "center" },
+          "visible": true, "zIndex": 2, "position": { "x": 0, "y": 120 }, "size": { "width": 1080, "height": 50 }, "rotation": 0, "opacity": 0.9
+        },
+        {
+          "id": "player1_name_box",
+          "type": "Shape",
+          "name": "Player 1 Name Box",
+          "shapeType": "quad",
+          "style": { "fill": "#1E3A8A" },
+          "visible": true, "zIndex": 3, "position": { "x": 60, "y": 1100 }, "size": { "width": 420, "height": 90 }, "rotation": 0, "opacity": 0.9
+        },
+        {
+          "id": "player1_name",
+          "type": "Text",
+          "name": "Player 1 Name",
+          "text": "{{player1.name}}",
+          "formatters": ["uppercase"],
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 38, "fontWeight": "bold", "align": "center" },
+          "visible": true, "zIndex": 4, "position": { "x": 60, "y": 1125 }, "size": { "width": 420, "height": 60 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "player2_name_box",
+          "type": "Shape",
+          "name": "Player 2 Name Box",
+          "shapeType": "quad",
+          "style": { "fill": "#991B1B" },
+          "visible": true, "zIndex": 5, "position": { "x": 600, "y": 1100 }, "size": { "width": 420, "height": 90 }, "rotation": 0, "opacity": 0.9
+        },
+        {
+          "id": "player2_name",
+          "type": "Text",
+          "name": "Player 2 Name",
+          "text": "{{player2.name}}",
+          "formatters": ["uppercase"],
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 38, "fontWeight": "bold", "align": "center" },
+          "visible": true, "zIndex": 6, "position": { "x": 600, "y": 1125 }, "size": { "width": 420, "height": 60 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "vs_text",
+          "type": "Text",
+          "name": "VS",
+          "text": "VS",
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 100, "fontWeight": "bold", "align": "center", "shadowColor": "#000", "shadowBlur": 20 },
+          "visible": true, "zIndex": 7, "position": { "x": 460, "y": 1080 }, "size": { "width": 160, "height": 120 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "player1_rank",
+          "type": "Text",
+          "name": "Player 1 ATP Rank",
+          "text": "ATP #{{player1.atpRanking}}",
+          "style": { "fill": "#FFD700", "fontFamily": "Inter", "fontSize": 28, "fontWeight": "bold", "align": "center" },
+          "visible": true, "zIndex": 8, "position": { "x": 60, "y": 1190 }, "size": { "width": 420, "height": 40 }, "rotation": 0, "opacity": 0.9
+        },
+        {
+          "id": "player2_rank",
+          "type": "Text",
+          "name": "Player 2 ATP Rank",
+          "text": "ATP #{{player2.atpRanking}}",
+          "style": { "fill": "#FFD700", "fontFamily": "Inter", "fontSize": 28, "fontWeight": "bold", "align": "center" },
+          "visible": true, "zIndex": 9, "position": { "x": 600, "y": 1190 }, "size": { "width": 420, "height": 40 }, "rotation": 0, "opacity": 0.9
+        },
+        {
+          "id": "player1_flag",
+          "type": "Image",
+          "name": "Player 1 Flag",
+          "src": "{{player1.assets.flag}}",
+          "visible": true, "zIndex": 10, "position": { "x": 200, "y": 1260 }, "size": { "width": 80, "height": 53 }, "rotation": 0, "opacity": 1, "objectFit": "contain"
+        },
+        {
+          "id": "player2_flag",
+          "type": "Image",
+          "name": "Player 2 Flag",
+          "src": "{{player2.assets.flag}}",
+          "visible": true, "zIndex": 11, "position": { "x": 800, "y": 1260 }, "size": { "width": 80, "height": 53 }, "rotation": 0, "opacity": 1, "objectFit": "contain"
+        },
+        {
+          "id": "match_time",
+          "type": "Text",
+          "name": "Kickoff Time",
+          "text": "{{match.date}}",
+          "formatters": ["date:HH:mm"],
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 100, "fontWeight": "bold", "align": "center" },
+          "visible": true, "zIndex": 12, "position": { "x": 340, "y": 1400 }, "size": { "width": 400, "height": 120 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "match_date",
+          "type": "Text",
+          "name": "Match Date",
+          "text": "{{match.date}}",
+          "formatters": ["date:EEEE, dd MMM yyyy", "uppercase"],
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 70, "fontWeight": "bold", "align": "center" },
+          "visible": true, "zIndex": 13, "position": { "x": 0, "y": 1600 }, "size": { "width": 1080, "height": 100 }, "rotation": 0, "opacity": 1
+        }
+      ]
+    },
+    {
+      "id": "l_footer",
+      "type": "Group",
+      "name": "Broadcaster Footer",
+      "visible": true,
+      "zIndex": 3,
+      "position": { "x": 0, "y": 0 },
+      "children": [
+        {
+          "id": "footer_bg",
+          "type": "Shape",
+          "name": "Footer Strip",
+          "shapeType": "quad",
+          "style": { "fill": "#444444" },
+          "visible": true, "zIndex": 1, "position": { "x": 0, "y": 1780 }, "size": { "width": 1080, "height": 140 }, "rotation": 0, "opacity": 0.6
+        },
+        {
+          "id": "live_on_txt",
+          "type": "Text",
+          "name": "Live On",
+          "text": "LIVE ON",
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 28, "fontWeight": "bold", "align": "left" },
+          "visible": true, "zIndex": 2, "position": { "x": 100, "y": 1820 }, "size": { "width": 150, "height": 40 }, "rotation": 0, "opacity": 0.8
+        },
+        {
+          "id": "broadcaster_fake_1",
+          "type": "Shape",
+          "name": "Broadcaster Logo 1",
+          "shapeType": "quad",
+          "style": { "fill": "#EAB308" },
+          "visible": true, "zIndex": 3, "position": { "x": 280, "y": 1810 }, "size": { "width": 130, "height": 50 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "broadcaster_fake_2",
+          "type": "Shape",
+          "name": "Broadcaster Logo 2",
+          "shapeType": "quad",
+          "style": { "fill": "#3B82F6" },
+          "visible": true, "zIndex": 4, "position": { "x": 480, "y": 1810 }, "size": { "width": 160, "height": 50 }, "rotation": 0, "opacity": 1
+        }
+      ]
+    }
+  ]
+}

@@ -12,7 +12,8 @@ export const strings: LocaleStrings = {
     delete: "Xóa",
     edit: "Sửa",
     untitled: "Untitled Graphic",
-    all: "Tất cả"
+    all: "Tất cả",
+    sport: "Môn thể thao"
   },
   settings: {
     header: "Cài đặt",
@@ -48,7 +49,9 @@ export const strings: LocaleStrings = {
     filters: {
       ratio: "Tỷ lệ",
       template: "Template",
-      allRatios: "Tất cả tỷ lệ"
+      allRatios: "Tất cả tỷ lệ",
+      selectTemplate: "Chọn template...",
+      noTemplates: "Không tìm thấy template"
     },
     matches: {
       header: "Các trận đấu",

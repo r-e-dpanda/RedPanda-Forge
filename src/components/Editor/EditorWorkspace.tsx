@@ -40,7 +40,8 @@ const EditorWorkspace = forwardRef((props, ref) => {
     closeSession, 
     undo, 
     redo,
-    renameSession
+    renameSession,
+    addSession
   } = useEditorStore();
 
   useImperativeHandle(ref, () => ({
@@ -108,7 +109,7 @@ const EditorWorkspace = forwardRef((props, ref) => {
                  onClick={() => setActiveSession(s.id)}
                  onDoubleClick={() => startRenaming(s.id, s.name)}
                  className={cn(
-                   "h-full px-4 text-ui-xs rounded-t-lg transition-colors flex items-center gap-3 relative min-w-[120px] max-w-[200px] group cursor-pointer",
+                   "h-full px-4 text-ui-micro rounded-t-lg transition-colors flex items-center gap-3 relative min-w-[120px] max-w-[200px] group cursor-pointer",
                    s.id === activeSessionId 
                      ? "bg-app-bg text-app-text font-medium border-t border-x border-app-border border-b-0 after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[1px] after:bg-app-bg" 
                      : "bg-transparent text-app-muted hover:bg-app-sidebar hover:text-app-text border-t border-x border-transparent"
@@ -125,11 +126,11 @@ const EditorWorkspace = forwardRef((props, ref) => {
                      onClick={(e) => e.stopPropagation()}
                    />
                  ) : (
-                   <span className="truncate flex-1 text-left">{s.name || "Untitled Session"}</span>
+                   <span className="truncate flex-1 text-left text-sm font-medium">{s.name || "Untitled Session"}</span>
                  )}
                  <span 
                    className={cn(
-                     "w-5 h-5 rounded-md flex items-center justify-center transition-colors text-[14px]",
+                     "w-5 h-5 rounded-md flex items-center justify-center transition-colors text-ui-xs",
                      s.id === activeSessionId ? "hover:bg-app-card opacity-100" : "opacity-0 group-hover:opacity-100 hover:bg-app-card"
                    )}
                    onClick={(e) => handleCloseSession(s.id, e)}
@@ -138,6 +139,15 @@ const EditorWorkspace = forwardRef((props, ref) => {
                   </span>
                </div>
             ))}
+            
+            <button 
+              onClick={() => addSession(undefined, activeSession?.sport)}
+              className="h-full px-4 flex items-center justify-center text-app-muted hover:text-app-accent transition-colors"
+              title="New Session"
+            >
+              <ImageIcon size={16} />
+              <span className="ml-1.5 text-ui-micro font-medium uppercase tracking-wider">+</span>
+            </button>
          </div>
 
          {/* Actions */}

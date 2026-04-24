@@ -1,11 +1,13 @@
 import { create } from 'zustand';
-import { Template, TemplateElement, Match } from '../types/template';
+import { Template, TemplateElement, Match, Sport } from '../types/template';
 import { v4 as uuidv4 } from 'uuid';
 import { normalizeTemplate } from '../lib/shapeUtils';
+import { templateRegistry } from '../lib/templateRegistry';
 
 export interface WorkflowSession {
   id: string;
   name: string;
+  sport: Sport;
   packId: string; // Context for asset resolution (e.g. "_default_pack" or "neo-theme")
   template: Template | null;
   match: Match | null;
@@ -26,13 +28,18 @@ interface EditorState {
   sessions: WorkflowSession[];
   activeSessionId: string | null;
   
+  templates: Template[];
+  isTemplatesLoaded: boolean;
+  loadTemplates: () => Promise<void>;
+  
   // Actions targeting ACTIVE SESSION
-  addSession: (name?: string) => string;
+  addSession: (name?: string, sport?: Sport) => string;
   createBatchSessions: (match: Match, templates: Template[]) => void;
   closeSession: (id: string) => void;
   renameSession: (id: string, name: string) => void;
   setActiveSession: (id: string) => void;
   
+  setSport: (sport: Sport) => void;
   setTemplate: (t: Template | null) => void;
   setMatch: (m: Match | null) => void;
   setSelectedElementId: (id: string | null) => void;
@@ -49,9 +56,10 @@ interface EditorState {
   canRedo: () => boolean;
 }
 
-const createDefaultSession = (name?: string): WorkflowSession => ({
+const createDefaultSession = (name?: string, sport: Sport = 'soccer'): WorkflowSession => ({
   id: uuidv4(),
   name: name || "Untitled graphic",
+  sport,
   packId: "_default_pack",
   template: null,
   match: null,
@@ -97,8 +105,20 @@ export const useEditorStore = create<EditorState>((set, get) => {
       }
     ],
     activeSessionId: initId,
+    
+    templates: [],
+    isTemplatesLoaded: false,
+    loadTemplates: async () => {
+      await templateRegistry.loadAllTemplates();
+      const allTemplates = templateRegistry.getAllTemplates();
+      
+      set({ 
+        templates: allTemplates,
+        isTemplatesLoaded: true
+      });
+    },
 
-    addSession: (name) => {
+    addSession: (name, sport) => {
       const state = get();
       let finalName = name || "Untitled graphic";
       
@@ -132,7 +152,7 @@ export const useEditorStore = create<EditorState>((set, get) => {
         }
       }
 
-      const newSession = createDefaultSession(finalName);
+      const newSession = createDefaultSession(finalName, sport);
       set((state) => ({
         sessions: [...state.sessions, newSession],
         activeSessionId: newSession.id
@@ -148,6 +168,7 @@ export const useEditorStore = create<EditorState>((set, get) => {
             ...createDefaultSession(),
             id: uuidv4(),
             name: `${template.name} - ${match.homeTeam?.shortName || match.player1?.name} vs ${match.awayTeam?.shortName || match.player2?.name}`,
+            sport: match.sport || 'soccer',
             template,
             match
           };
@@ -193,6 +214,17 @@ export const useEditorStore = create<EditorState>((set, get) => {
 
     setActiveSession: (id) => set({ activeSessionId: id }),
 
+    setSport: (sport) => updateActiveSession(() => ({ 
+      sport,
+      template: null,
+      match: null,
+      elementOverrides: {},
+      manualInputs: {},
+      history: [],
+      historyIndex: -1,
+      selectedElementId: null
+    })),
+
     setTemplate: (templateInput) => {
       const template = templateInput ? normalizeTemplate(templateInput) : null;
       updateActiveSession((sess) => {
@@ -210,6 +242,7 @@ export const useEditorStore = create<EditorState>((set, get) => {
         
         return {
           template,
+          sport: template?.sport || sess.sport,
           elementOverrides: {},
           manualInputs: {},
           expandedLayers: expanded,
@@ -221,7 +254,10 @@ export const useEditorStore = create<EditorState>((set, get) => {
       });
     },
 
-    setMatch: (match) => updateActiveSession(() => ({ match })),
+    setMatch: (match) => updateActiveSession((sess) => ({ 
+      match,
+      sport: match?.sport || sess.sport
+    })),
     setSelectedElementId: (id) => updateActiveSession(() => ({ selectedElementId: id })),
     setHoveredElementId: (id) => updateActiveSession(() => ({ hoveredElementId: id })),
     

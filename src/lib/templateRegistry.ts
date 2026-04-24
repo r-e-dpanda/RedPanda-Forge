@@ -4,20 +4,81 @@ import { AssetManager } from "./assetManager";
 export class TemplateRegistry {
   private templates = new Map<string, ForgeTemplate>();
   private assetManager: AssetManager;
+  private isLoaded = false;
+  private loadingPromise: Promise<void> | null = null;
 
   constructor(assetManager: AssetManager) {
     this.assetManager = assetManager;
-    // Load mock database temporarily for Web Preview
-    this._mockInit();
   }
 
   async loadAllTemplates(): Promise<void> {
-    // In Electron: Scan directory (fs.readdir), parse JSON files, and add to Map.
-    console.log("[TemplateRegistry] Scanned local templates directory...");
+    if (this.isLoaded) return;
+    if (this.loadingPromise) return this.loadingPromise;
+    
+    this.loadingPromise = (async () => {
+      try {
+        console.log("[TemplateRegistry] Loading templates from registry...");
+        
+        // Standard Pack is our default Unit of Distribution
+        console.log("[TemplateRegistry] Fetching pack.json from /templates/standard_pack/pack.json");
+        const packResponse = await fetch(`/templates/standard_pack/pack.json?t=${Date.now()}`);
+        if (!packResponse.ok) throw new Error(`Failed to load standard pack: ${packResponse.status} ${packResponse.statusText}`);
+        
+        const pack = await packResponse.json();
+        console.log("[TemplateRegistry] Pack loaded, templates to fetch:", pack.templates);
+        
+        // Fetch each template definition in the pack
+        const templatePromises = pack.templates.map(async (tplId: string) => {
+          try {
+            const tplUrl = `/templates/standard_pack/templates/${tplId}/template.json?t=${Date.now()}`;
+            const tplResponse = await fetch(tplUrl);
+            if (!tplResponse.ok) {
+              console.warn(`[TemplateRegistry] Template definition not found for ${tplId} at ${tplUrl}`);
+              return null;
+            }
+            const tpl = await tplResponse.json();
+            
+            // Validate minimal structure
+            if (!tpl.id || !tpl.sport) {
+              console.warn(`[TemplateRegistry] Invalid template JSON (missing id or sport) for ${tplId}`);
+              return null;
+            }
+            
+            console.log(`[TemplateRegistry] Successfully loaded template: ${tpl.id} (${tpl.sport})`);
+            return tpl;
+          } catch (e) {
+            console.error(`[TemplateRegistry] Failed to parse template ${tplId}:`, e);
+            return null;
+          }
+        });
+        
+        const loadedTemplates = await Promise.all(templatePromises);
+        
+        loadedTemplates.forEach(tpl => {
+          if (tpl) {
+            this.templates.set(tpl.id, tpl);
+          }
+        });
+        
+        this.isLoaded = true;
+        console.log(`[TemplateRegistry] Successfully loaded ${this.templates.size} templates.`);
+      } catch (error) {
+        console.error("[TemplateRegistry] Critical error loading templates:", error);
+        this.isLoaded = false; // Allow retry
+      } finally {
+        this.loadingPromise = null;
+      }
+    })();
+
+    return this.loadingPromise;
   }
 
   getTemplate(id: string): ForgeTemplate | undefined {
     return this.templates.get(id);
+  }
+
+  getAllTemplates(): ForgeTemplate[] {
+    return Array.from(this.templates.values());
   }
 
   getTemplatesBySport(sport: string, ratio?: string): ForgeTemplate[] {
@@ -34,24 +95,8 @@ export class TemplateRegistry {
 
   async reload(): Promise<void> {
     this.templates.clear();
+    this.isLoaded = false;
     await this.loadAllTemplates();
-  }
-  
-  private _mockInit() {
-    // Mock template từ câu lệnh của User
-    this.templates.set("football-16x9-standard-v1", {
-      id: "football-16x9-standard-v1",
-      name: "Standard Match Card",
-      version: "1.0",
-      sport: "football",
-      ratio: "16:9",
-      canvas: {
-        width: 1920,
-        height: 1080,
-        backgroundColor: "#0a0a0a"
-      },
-      layers: [] // Lược giản UI
-    } as any);
   }
 }
 

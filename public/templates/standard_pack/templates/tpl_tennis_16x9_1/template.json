@@ -1,0 +1,185 @@
+{
+  "id": "tpl_tennis_16x9_1",
+  "name": "Tennis Duel 16:9",
+  "version": "1.0",
+  "sport": "tennis",
+  "ratio": "16:9",
+  "thumbnail": "https://picsum.photos/seed/tennis_16x9/320/180",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "backgroundColor": "#0A0A0A"
+  },
+  "layers": [
+    {
+      "id": "l_bg",
+      "type": "Group",
+      "name": "Background",
+      "visible": true,
+      "zIndex": 0,
+      "position": { "x": 0, "y": 0 },
+      "children": [
+        {
+          "id": "court_bg",
+          "type": "Image",
+          "name": "Tennis Court",
+          "src": "https://www.sjengsports.nl/cdn/shop/articles/De_geschiedenis_van_wimbledon.jpg?v=1723026253&width=1920",
+          "visible": true, "zIndex": 0, "position": { "x": 0, "y": 0 }, "size": { "width": 1920, "height": 1080 }, "rotation": 0, "opacity": 0.5, "objectFit": "cover"
+        },
+        {
+          "id": "dark_overlay",
+          "type": "Shape",
+          "name": "Dark Overlay",
+          "shapeType": "quad",
+          "style": { "fill": "#000000" },
+          "visible": true, "zIndex": 1, "position": { "x": 0, "y": 0 }, "size": { "width": 1920, "height": 1080 }, "rotation": 0, "opacity": 0.4
+        }
+      ]
+    },
+    {
+      "id": "l_players",
+      "type": "Group",
+      "name": "Player Cutouts",
+      "visible": true,
+      "zIndex": 1,
+      "position": { "x": 0, "y": 0 },
+      "children": [
+        {
+          "id": "player1_cutout",
+          "type": "Image",
+          "name": "Player 1 Cutout",
+          "src": "{{player1.assets.cutout}}",
+          "visible": true, "zIndex": 1, "position": { "x": 80, "y": 180 }, "size": { "width": 720, "height": 720 }, "rotation": 0, "opacity": 1, "objectFit": "contain"
+        },
+        {
+          "id": "player2_cutout",
+          "type": "Image",
+          "name": "Player 2 Cutout",
+          "src": "{{player2.assets.cutout}}",
+          "visible": true, "zIndex": 2, "position": { "x": 1120, "y": 180 }, "size": { "width": 720, "height": 720 }, "rotation": 0, "opacity": 1, "objectFit": "contain"
+        }
+      ]
+    },
+    {
+      "id": "l_foreground",
+      "type": "Group",
+      "name": "Typography & Info",
+      "visible": true,
+      "zIndex": 2,
+      "position": { "x": 0, "y": 0 },
+      "children": [
+        {
+          "id": "tournament_text",
+          "type": "Text",
+          "name": "Tournament Name",
+          "text": "{{match.tournament}}",
+          "formatters": ["uppercase"],
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 64, "fontWeight": "bold", "align": "center", "shadowColor": "#000", "shadowBlur": 15 },
+          "visible": true, "zIndex": 1, "position": { "x": 0, "y": 40 }, "size": { "width": 1920, "height": 80 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "match_date",
+          "type": "Text",
+          "name": "Match Date",
+          "text": "{{match.date}}",
+          "formatters": ["date:dd/MM"],
+          "style": { "fill": "#CCCCCC", "fontFamily": "Inter", "fontSize": 44, "fontWeight": "normal", "align": "center" },
+          "visible": true, "zIndex": 2, "position": { "x": 0, "y": 120 }, "size": { "width": 1920, "height": 60 }, "rotation": 0, "opacity": 0.9
+        },
+        {
+          "id": "match_time",
+          "type": "Text",
+          "name": "Match Time",
+          "text": "{{match.date}}",
+          "formatters": ["date:HH:mm"],
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 56, "fontWeight": "bold", "align": "center" },
+          "visible": true, "zIndex": 3, "position": { "x": 0, "y": 180 }, "size": { "width": 1920, "height": 70 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "vs_text",
+          "type": "Text",
+          "name": "VS",
+          "text": "VS",
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 180, "fontWeight": "bold", "align": "center", "shadowColor": "#000", "shadowBlur": 30 },
+          "visible": true, "zIndex": 4, "position": { "x": 800, "y": 460 }, "size": { "width": 320, "height": 200 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "player1_name",
+          "type": "Text",
+          "name": "Player 1 Name",
+          "text": "{{player1.name}}",
+          "formatters": ["uppercase"],
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 62, "fontWeight": "bold", "align": "center", "letterSpacing": 2 },
+          "visible": true, "zIndex": 5, "position": { "x": 60, "y": 880 }, "size": { "width": 760, "height": 80 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "player2_name",
+          "type": "Text",
+          "name": "Player 2 Name",
+          "text": "{{player2.name}}",
+          "formatters": ["uppercase"],
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 62, "fontWeight": "bold", "align": "center", "letterSpacing": 2 },
+          "visible": true, "zIndex": 6, "position": { "x": 1100, "y": 880 }, "size": { "width": 760, "height": 80 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "player1_rank",
+          "type": "Text",
+          "name": "Player 1 ATP Rank",
+          "text": "ATP #{{player1.atpRanking}}",
+          "style": { "fill": "#FFD966", "fontFamily": "Inter", "fontSize": 40, "fontWeight": "bold", "align": "center" },
+          "visible": true, "zIndex": 7, "position": { "x": 60, "y": 960 }, "size": { "width": 760, "height": 50 }, "rotation": 0, "opacity": 0.9
+        },
+        {
+          "id": "player2_rank",
+          "type": "Text",
+          "name": "Player 2 ATP Rank",
+          "text": "ATP #{{player2.atpRanking}}",
+          "style": { "fill": "#FFD966", "fontFamily": "Inter", "fontSize": 40, "fontWeight": "bold", "align": "center" },
+          "visible": true, "zIndex": 8, "position": { "x": 1100, "y": 960 }, "size": { "width": 760, "height": 50 }, "rotation": 0, "opacity": 0.9
+        }
+      ]
+    },
+    {
+      "id": "l_footer",
+      "type": "Group",
+      "name": "Branding or Broadcaster",
+      "visible": true,
+      "zIndex": 3,
+      "position": { "x": 0, "y": 0 },
+      "children": [
+        {
+          "id": "footer_bg",
+          "type": "Shape",
+          "name": "Footer Strip",
+          "shapeType": "quad",
+          "style": { "fill": "#222222" },
+          "visible": true, "zIndex": 1, "position": { "x": 0, "y": 1020 }, "size": { "width": 1920, "height": 60 }, "rotation": 0, "opacity": 0.7
+        },
+        {
+          "id": "live_on_txt",
+          "type": "Text",
+          "name": "Live On",
+          "text": "LIVE ON",
+          "style": { "fill": "#FFFFFF", "fontFamily": "Inter", "fontSize": 28, "fontWeight": "bold", "align": "left" },
+          "visible": true, "zIndex": 2, "position": { "x": 100, "y": 1035 }, "size": { "width": 150, "height": 40 }, "rotation": 0, "opacity": 0.8
+        },
+        {
+          "id": "broadcaster_1",
+          "type": "Shape",
+          "name": "Broadcaster Logo 1",
+          "shapeType": "quad",
+          "style": { "fill": "#EAB308" },
+          "visible": true, "zIndex": 3, "position": { "x": 280, "y": 1030 }, "size": { "width": 120, "height": 40 }, "rotation": 0, "opacity": 1
+        },
+        {
+          "id": "broadcaster_2",
+          "type": "Shape",
+          "name": "Broadcaster Logo 2",
+          "shapeType": "quad",
+          "style": { "fill": "#3B82F6" },
+          "visible": true, "zIndex": 4, "position": { "x": 480, "y": 1030 }, "size": { "width": 160, "height": 40 }, "rotation": 0, "opacity": 1
+        }
+      ]
+    }
+  ]
+}

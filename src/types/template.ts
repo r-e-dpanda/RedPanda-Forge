@@ -1,6 +1,6 @@
 export type ExportFormat = "json" | "png" | "jpeg";
 
-export type Sport = "football" | "tennis" | "basketball" | "esports";
+export type Sport = "soccer" | "tennis" | "basketball" | "esports";
 export type Ratio = "16:9" | "9:16" | "1:1";
 
 // 1. Definition cho Data Engine
@@ -44,8 +44,13 @@ export interface Team {
 export interface Player {
   id: string;
   name: string;
+  atpRanking?: string;
   flag?: string;
-  image?: string; // added player image
+  image?: string; 
+  assets?: {
+    flag?: string;
+    cutout?: string;
+  };
 }
 
 export interface MatchCompetition {
@@ -73,6 +78,7 @@ export interface Match {
   id: string;
   sport: Sport;
   league: string;
+  tournament?: string;
   competition?: MatchCompetition; // structured competition
   round?: string;
   date: string; // Date string or ISO
@@ -82,6 +88,7 @@ export interface Match {
   isLive?: boolean;
   status?: string; // e.g. "NS", "FT"
   score?: string | MatchScore;
+  sets?: string[];
   liveBadge?: boolean;
   homeTeam?: Team;
   awayTeam?: Team;

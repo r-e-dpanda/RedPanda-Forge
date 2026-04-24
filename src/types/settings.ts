@@ -25,7 +25,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   defaultRatio: "16:9",
   uiScale: 1.0,
   autoSave: true,
-  lastUsedSport: "football",
+  lastUsedSport: "soccer",
   useCloudAssets: false,
   cdnEndpoint: "https://my-cdn.com/assets",
 };

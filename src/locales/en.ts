@@ -10,7 +10,8 @@ export const strings = {
     delete: "Delete",
     edit: "Edit",
     untitled: "Untitled graphic",
-    all: "All"
+    all: "All",
+    sport: "Sport"
   },
   settings: {
     header: "App Settings",
@@ -46,7 +47,9 @@ export const strings = {
     filters: {
       ratio: "Ratio",
       template: "Template",
-      allRatios: "All Ratios"
+      allRatios: "All Ratios",
+      selectTemplate: "Select template...",
+      noTemplates: "No template found"
     },
     matches: {
       header: "Matches",

@@ -170,44 +170,46 @@ const RightPanel: React.FC<RightPanelProps> = ({
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto w-[340px]">
-        {activeRightTab === 'data' && (
-          <DataTab 
-            match={match}
-            template={template}
-            activeSession={activeSession}
-            elementsWithBinding={elementsWithBinding}
-            manualInputs={manualInputs}
-            setManualInput={setManualInput}
-            setHoveredElementId={setHoveredElementId}
-            commitHistory={commitHistory}
-            elementOverrides={elementOverrides}
-          />
-        )}
+      <div className="flex-1 overflow-y-auto w-full">
+        <div className="p-4">
+          {activeRightTab === 'data' && (
+            <DataTab 
+              match={match}
+              template={template}
+              activeSession={activeSession}
+              elementsWithBinding={elementsWithBinding}
+              manualInputs={manualInputs}
+              setManualInput={setManualInput}
+              setHoveredElementId={setHoveredElementId}
+              commitHistory={commitHistory}
+              elementOverrides={elementOverrides}
+            />
+          )}
 
-        {activeRightTab === 'design' && (
-          <DesignTab 
-            template={template}
-            activeSession={activeSession}
-            selectedElementId={selectedElementId}
-            hoveredElementId={hoveredElementId}
-            flatElements={flatElements}
-            elementOverrides={elementOverrides}
-            expandedLayers={expandedLayers}
-            match={match}
-            manualInputs={manualInputs}
-            setSelectedElementId={setSelectedElementId}
-            setHoveredElementId={setHoveredElementId}
-            handleOverride={handleOverride}
-            toggleLayerExpanded={toggleLayerExpanded}
-            t={t}
-            ui={ui}
-            pendingFormatter={pendingFormatter}
-            setPendingFormatter={setPendingFormatter}
-            formatterInput={formatterInput}
-            setFormatterInput={setFormatterInput}
-          />
-        )}
+          {activeRightTab === 'design' && (
+            <DesignTab 
+              template={template}
+              activeSession={activeSession}
+              selectedElementId={selectedElementId}
+              hoveredElementId={hoveredElementId}
+              flatElements={flatElements}
+              elementOverrides={elementOverrides}
+              expandedLayers={expandedLayers}
+              match={match}
+              manualInputs={manualInputs}
+              setSelectedElementId={setSelectedElementId}
+              setHoveredElementId={setHoveredElementId}
+              handleOverride={handleOverride}
+              toggleLayerExpanded={toggleLayerExpanded}
+              t={t}
+              ui={ui}
+              pendingFormatter={pendingFormatter}
+              setPendingFormatter={setPendingFormatter}
+              formatterInput={formatterInput}
+              setFormatterInput={setFormatterInput}
+            />
+          )}
+        </div>
       </div>
     </aside>
   );

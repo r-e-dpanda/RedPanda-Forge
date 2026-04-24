@@ -5,7 +5,7 @@ export interface Asset {
   id: string; // e.g., "manutd_logo"
   type: AssetType;
   path: string; // Relative path inside assets folder
-  tags: string[]; // For basic search keywords like "football", "premier-league"
+  tags: string[]; // For basic search keywords like "soccer", "premier-league"
   usage: string[]; // e.g., "team.logo", "background"
 }
 

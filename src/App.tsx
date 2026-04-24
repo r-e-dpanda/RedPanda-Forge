@@ -4,7 +4,6 @@ import { LeftSidebar } from "./components/LeftSidebar";
 import EditorWorkspace from "./components/editor/EditorWorkspace";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import PasteTemplateModal from "./components/PasteTemplateModal";
-import { MOCK_TEMPLATES } from "./lib/mockData";
 import { Sport, Ratio } from "./types/template";
 import { 
   Settings, 
@@ -39,12 +38,13 @@ export default function App() {
   }, [settings.theme, settings.uiScale]);
 
   const [activeLeftTab, setActiveLeftTab] = useState<'matches' | 'templates'>('matches');
-  const [selectedSport, setSelectedSport] = useState<Sport>('football');
   const [selectedRatio, setSelectedRatio] = useState<Ratio | "All">('All');
   const [selectedLeague, setSelectedLeague] = useState("All");
   const [isImportOpen, setIsImportOpen] = useState(false);
   
   const [showConfirmRestart, setShowConfirmRestart] = useState<{ template: any } | null>(null);
+
+  const [showConfirmSport, setShowConfirmSport] = useState<Sport | null>(null);
 
   const { 
     sessions, 
@@ -52,44 +52,51 @@ export default function App() {
     setActiveSession, 
     addSession, 
     closeSession,
+    setSport,
     setTemplate,
-    setMatch
+    setMatch,
+    loadTemplates,
+    templates,
+    isTemplatesLoaded
   } = useEditorStore();
 
+  React.useEffect(() => {
+    loadTemplates();
+  }, []);
+
   const activeSession = sessions.find(s => s.id === activeSessionId);
+  const selectedSport = ((activeSession?.sport as any) === 'football' ? 'soccer' : activeSession?.sport) || 'soccer';
   const editorRef = useRef<any>(null);
 
   const handleSportChange = (sport: Sport) => {
-    setSelectedSport(sport);
-    
-    // Logic from AGENTS.md: Changing the sport dropdown must NOT close the current tab.
-    // 1. Search for an existing tab for the chosen sport (where match or template matches).
-    const existingSession = sessions.find(s => 
-      (s.template && s.template.sport === sport) || 
-      (s.match && s.match.sport === sport)
-    );
-    
-    if (existingSession) {
-      setActiveSession(existingSession.id);
-      return;
-    }
+    // If it's already the same sport, do nothing
+    if (sport === selectedSport) return;
 
-    // 2. Search for an existing Empty Tab ("Untouched" session: no match, no template, no history)
-    const emptySession = sessions.find(s => 
-      !s.template && 
-      !s.match && 
-      s.historyIndex === -1 && 
-      Object.keys(s.elementOverrides).length === 0
-    );
-    
-    if (emptySession) {
-      setActiveSession(emptySession.id);
-      return;
-    }
+    const state = useEditorStore.getState();
+    const current = state.sessions.find(s => s.id === state.activeSessionId);
 
-    // 3. Create a new "Untitled Graphic" session
-    const newId = addSession();
-    setActiveSession(newId);
+    if (!current) return;
+
+    // Logic from AGENTS.md: Changing the sport dropdown updates the active tab's sport.
+    // 1. If dirty, show custom confirm dialog.
+    const isDirty = Object.keys(current.elementOverrides).length > 0 || 
+                    current.historyIndex >= 0;
+
+    if (isDirty) {
+      setShowConfirmSport(sport);
+    } else {
+      performSportChange(sport);
+    }
+  };
+
+  const performSportChange = (sport: Sport) => {
+    // setSport already clears template, match, and overrides in the store
+    setSport(sport);
+    
+    // Reset local UI filters
+    setSelectedRatio('All');
+    setSelectedLeague("All");
+    setShowConfirmSport(null);
   };
 
   const handleSetTemplate = (template: any) => {
@@ -137,15 +144,6 @@ export default function App() {
     setMatch(match);
   };
 
-  // Sync sport dropdown when active session changes
-  React.useEffect(() => {
-    if (activeSession?.template?.sport) {
-      setSelectedSport(activeSession.template.sport);
-    } else if (activeSession?.match?.sport) {
-      setSelectedSport(activeSession.match.sport);
-    }
-  }, [activeSessionId, activeSession?.template?.id, activeSession?.match?.id]);
-
   // Apply theme when settings change
   React.useEffect(() => {
     applyTheme(settings.theme);
@@ -164,20 +162,6 @@ export default function App() {
               Redpanda <span className="text-app-accent font-semibold">Forge</span>
             </h1>
           </div>
-
-          <div className="flex items-center bg-app-bg px-3 rounded h-8 border border-app-border">
-            <Layout size={14} className="text-app-muted mr-2.5" />
-            <select 
-              value={selectedSport}
-              onChange={(e) => handleSportChange(e.target.value as Sport)}
-              className="bg-transparent text-ui-xs font-medium text-app-text outline-none cursor-pointer capitalize pr-1"
-            >
-              <option value="football">Football</option>
-              <option value="basketball">Basketball</option>
-              <option value="tennis">Tennis</option>
-              <option value="esports">Esports</option>
-            </select>
-          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -193,12 +177,13 @@ export default function App() {
       <div className="flex-1 flex overflow-hidden">
         <LeftSidebar 
           selectedSport={selectedSport}
+          onSportChange={handleSportChange}
           selectedRatio={selectedRatio}
           selectedLeague={selectedLeague}
           activeLeftTab={activeLeftTab}
           setActiveLeftTab={setActiveLeftTab}
           setSelectedRatio={setSelectedRatio}
-          templates={MOCK_TEMPLATES}
+          templates={templates}
           setEditorTemplate={handleSetTemplate}
           activeTemplate={activeSession?.template}
           activeMatch={activeSession?.match}
@@ -214,7 +199,7 @@ export default function App() {
         isOpen={isImportOpen} 
         onClose={() => setIsImportOpen(false)}
         onSave={(tpl) => handleSetTemplate(tpl)}
-        existingTemplates={MOCK_TEMPLATES}
+        existingTemplates={templates}
       />
 
       {/* Modern Confirmation Dialog for Template Switch */}
@@ -245,6 +230,36 @@ export default function App() {
               </button>
               <button 
                 onClick={() => setShowConfirmRestart(null)}
+                className="w-full bg-app-card hover:bg-app-bg text-app-muted hover:text-app-text border border-app-border font-medium py-2.5 rounded-lg transition-all text-ui-sm active:scale-[0.98]"
+              >
+                {t.common.cancel}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Sport Change Confirmation */}
+      {showConfirmSport && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-app-sidebar border border-app-border w-full max-w-[400px] p-6 rounded-xl shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 text-app-accent mb-4">
+              <AlertTriangle size={20} />
+              <h2 className="text-ui-base font-medium text-app-text">Change Sport</h2>
+            </div>
+            
+            <p className="text-app-muted text-ui-sm leading-relaxed mb-6">
+              Changing the sport will <span className="text-app-text font-medium">discard</span> all manual edits in the current session. Do you want to continue?
+            </p>
+
+            <div className="flex flex-col gap-2.5">
+              <button 
+                onClick={() => performSportChange(showConfirmSport)}
+                className="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg transition-all text-ui-sm active:scale-[0.98]"
+              >
+                Discard & Change Sport
+              </button>
+              <button 
+                onClick={() => setShowConfirmSport(null)}
                 className="w-full bg-app-card hover:bg-app-bg text-app-muted hover:text-app-text border border-app-border font-medium py-2.5 rounded-lg transition-all text-ui-sm active:scale-[0.98]"
               >
                 {t.common.cancel}

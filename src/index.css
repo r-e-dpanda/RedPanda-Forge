@@ -10,10 +10,13 @@
   --color-app-accent: var(--app-accent);
   --color-accent-foreground: var(--app-accent-content);
   
+  --font-ui-micro: var(--font-ui-micro);
   --font-ui-xs: var(--font-ui-xs);
   --font-ui-sm: var(--font-ui-sm);
   --font-ui-base: var(--font-ui-base);
+  --font-ui-md: var(--font-ui-md);
   --font-ui-lg: var(--font-ui-lg);
+  --font-ui-xl: var(--font-ui-xl);
   
   --radius-md: 8px;
   --radius-lg: 12px;
