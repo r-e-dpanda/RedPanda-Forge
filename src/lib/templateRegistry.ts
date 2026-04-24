@@ -21,7 +21,7 @@ export class TemplateRegistry {
         
         // Standard Pack is our default Unit of Distribution
         console.log("[TemplateRegistry] Fetching pack.json from /templates/standard_pack/pack.json");
-        const packResponse = await fetch(`/templates/standard_pack/pack.json?t=${Date.now()}`);
+        const packResponse = await fetch("/templates/standard_pack/pack.json");
         if (!packResponse.ok) throw new Error(`Failed to load standard pack: ${packResponse.status} ${packResponse.statusText}`);
         
         const pack = await packResponse.json();
@@ -30,7 +30,7 @@ export class TemplateRegistry {
         // Fetch each template definition in the pack
         const templatePromises = pack.templates.map(async (tplId: string) => {
           try {
-            const tplUrl = `/templates/standard_pack/templates/${tplId}/template.json?t=${Date.now()}`;
+            const tplUrl = `/templates/standard_pack/templates/${tplId}/template.json`;
             const tplResponse = await fetch(tplUrl);
             if (!tplResponse.ok) {
               console.warn(`[TemplateRegistry] Template definition not found for ${tplId} at ${tplUrl}`);

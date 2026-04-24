@@ -14,11 +14,12 @@ interface LeftSidebarProps {
   selectedSport: Sport;
   onSportChange: (sport: Sport) => void;
   selectedRatio: Ratio | "All";
-  selectedLeague: string;
+  selectedCompetition: string;
   activeLeftTab: 'matches' | 'templates';
   setActiveLeftTab: (val: 'matches' | 'templates') => void;
   setSelectedRatio: (val: Ratio | "All") => void;
   templates: Template[];
+  isTemplatesLoaded: boolean;
   setEditorTemplate: (template: Template) => void;
   activeTemplate: Template | null;
   activeMatch: Match | null;
@@ -30,11 +31,12 @@ export const LeftSidebar = ({
   selectedSport,
   onSportChange,
   selectedRatio,
-  selectedLeague,
+  selectedCompetition,
   activeLeftTab,
   setActiveLeftTab,
   setSelectedRatio,
   templates,
+  isTemplatesLoaded,
   setEditorTemplate,
   activeTemplate,
   activeMatch,
@@ -42,9 +44,19 @@ export const LeftSidebar = ({
   setIsModalOpen
 }: LeftSidebarProps) => {
   const { t } = useTranslation();
+  
+  // Logic for display messages in template selector
+  const getTemplateSelectorLabel = () => {
+    if (activeTemplate) return `${activeTemplate.name} (${activeTemplate.ratio})`;
+    if (!isTemplatesLoaded) return "Loading templates...";
+    if (templates.length === 0) return "No templates found";
+    if (filteredTemplates.length === 0) return t.sidebar.filters.noTemplates;
+    return t.sidebar.filters.selectTemplate;
+  };
+  
   const filteredMatches = MOCK_MATCHES.filter(m =>
     m.sport === selectedSport &&
-    (selectedLeague === "All" || m.league === selectedLeague)
+    (selectedCompetition === "All" || m.league === selectedCompetition)
   );
   const filteredTemplates = templates.filter((t: any) => {
     if (!t.sport) return false;
@@ -187,7 +199,7 @@ export const LeftSidebar = ({
                     !activeTemplate && "border-app-accent/50 ring-1 ring-app-accent/10"
                   )}>
                     <SelectValue>
-                      {activeTemplate ? `${activeTemplate.name} (${activeTemplate.ratio})` : (templates.length === 0 ? "Loading templates..." : (filteredTemplates.length === 0 ? t.sidebar.filters.noTemplates : t.sidebar.filters.selectTemplate))}
+                      {getTemplateSelectorLabel()}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>

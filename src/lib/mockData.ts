@@ -293,7 +293,7 @@ const RAW_MOCK_MATCHES: Match[] = [
     venue: "Amex Stadium",
     liveBadge: false,
     status: "FT",
-    score: "3-0",
+    score: "3 - 0",
     homeTeam: { id: "brighton" },
     awayTeam: { id: "chelsea" }
   },
@@ -316,7 +316,7 @@ const RAW_MOCK_MATCHES: Match[] = [
     venue: "Stamford Bridge",
     liveBadge: true,
     status: "FT",
-    score: "0-1",
+    score: "0 - 1",
     homeTeam: { id: "chelsea" },
     awayTeam: { id: "manchester-united" }
   },
@@ -339,7 +339,7 @@ const RAW_MOCK_MATCHES: Match[] = [
     venue: "Stamford Bridge",
     liveBadge: false,
     status: "FT",
-    score: "0-3",
+    score: "0 - 3",
     homeTeam: { id: "chelsea" },
     awayTeam: { id: "manchester-city" }
   },

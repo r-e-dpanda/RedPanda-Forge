@@ -39,7 +39,7 @@ export default function App() {
 
   const [activeLeftTab, setActiveLeftTab] = useState<'matches' | 'templates'>('matches');
   const [selectedRatio, setSelectedRatio] = useState<Ratio | "All">('All');
-  const [selectedLeague, setSelectedLeague] = useState("All");
+  const [selectedCompetition, setSelectedCompetition] = useState("All");
   const [isImportOpen, setIsImportOpen] = useState(false);
   
   const [showConfirmRestart, setShowConfirmRestart] = useState<{ template: any } | null>(null);
@@ -95,7 +95,7 @@ export default function App() {
     
     // Reset local UI filters
     setSelectedRatio('All');
-    setSelectedLeague("All");
+    setSelectedCompetition("All");
     setShowConfirmSport(null);
   };
 
@@ -179,11 +179,12 @@ export default function App() {
           selectedSport={selectedSport}
           onSportChange={handleSportChange}
           selectedRatio={selectedRatio}
-          selectedLeague={selectedLeague}
+          selectedCompetition={selectedCompetition}
           activeLeftTab={activeLeftTab}
           setActiveLeftTab={setActiveLeftTab}
           setSelectedRatio={setSelectedRatio}
           templates={templates}
+          isTemplatesLoaded={isTemplatesLoaded}
           setEditorTemplate={handleSetTemplate}
           activeTemplate={activeSession?.template}
           activeMatch={activeSession?.match}

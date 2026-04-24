@@ -77,9 +77,9 @@ export interface MatchScore {
 export interface Match {
   id: string;
   sport: Sport;
-  league: string;
+  league: string; // The display name (e.g. "Premier League")
   tournament?: string;
-  competition?: MatchCompetition; // structured competition
+  competition?: MatchCompetition; // The structured object
   round?: string;
   date: string; // Date string or ISO
   time?: string;

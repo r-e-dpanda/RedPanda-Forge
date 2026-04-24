@@ -58,9 +58,42 @@ export const DataTab: React.FC<DataTabProps> = ({
 
                   {/* Center Info */}
                   <div className="flex flex-col items-center justify-center">
-                    <span className="text-[32px] font-bold text-app-text leading-none tracking-tight">
-                      {match.status === 'NS' || !match.status ? match.time : (typeof match.score === 'object' ? `${match.score?.ft?.[0]}:${match.score?.ft?.[1]}` : match.score)}
-                    </span>
+                    {match.status === 'NS' || !match.status ? (
+                      <span className="text-[32px] font-bold text-app-text leading-none tracking-tight">
+                        {match.time}
+                      </span>
+                    ) : (
+                      <div className="flex items-center text-[32px] font-bold text-app-text leading-none tracking-tight">
+                        {(() => {
+                          let s1 = '0', s2 = '0';
+                          if (typeof match.score === 'object' && match.score?.ft) {
+                            s1 = String(match.score.ft[0]);
+                            s2 = String(match.score.ft[1]);
+                          } else if (typeof match.score === 'string') {
+                            const parts = match.score.split(/[-:]/).map((s: string) => s.trim());
+                            if (parts.length >= 2) {
+                              s1 = parts[0];
+                              s2 = parts[1];
+                            } else {
+                              s1 = match.score;
+                              s2 = '';
+                            }
+                          }
+                          
+                          return (
+                            <>
+                              <span>{s1}</span>
+                              {s2 !== '' && (
+                                <>
+                                  <span className="mx-3 text-[22px] font-medium text-app-muted/30 select-none">-</span>
+                                  <span>{s2}</span>
+                                </>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    )}
                     <span className="text-[12px] text-app-muted font-bold mt-2 uppercase tracking-[0.2em]">
                       {new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
