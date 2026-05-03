@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* Force sync */
 @theme {
   --color-app-bg: var(--app-bg);
   --color-app-sidebar: var(--app-sidebar);
