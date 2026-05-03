@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Template, TemplateElement, Match, Sport } from '../types/template';
 import { v4 as uuidv4 } from 'uuid';
 import { normalizeTemplate } from '../lib/shapeUtils';
@@ -72,9 +73,11 @@ const createDefaultSession = (name?: string, sport: Sport = 'soccer'): WorkflowS
   historyIndex: -1
 });
 
-export const useEditorStore = create<EditorState>((set, get) => {
-  
-  const updateActiveSession = (updater: (session: WorkflowSession) => Partial<WorkflowSession>) => {
+export const useEditorStore = create<EditorState>()(
+  persist(
+    (set, get) => {
+      
+      const updateActiveSession = (updater: (session: WorkflowSession) => Partial<WorkflowSession>) => {
     set((state) => {
       const activeId = state.activeSessionId;
       if (!activeId) return state;
@@ -337,4 +340,13 @@ export const useEditorStore = create<EditorState>((set, get) => {
       return sess ? sess.historyIndex < sess.history.length - 1 : false;
     },
   };
-});
+},
+    {
+      name: 'redpanda-forge-editor-storage',
+      partialize: (state) => ({
+        sessions: state.sessions,
+        activeSessionId: state.activeSessionId,
+      }),
+    }
+  )
+);
