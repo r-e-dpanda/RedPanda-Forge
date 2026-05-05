@@ -417,7 +417,7 @@ hmr: process.env.DISABLE_HMR !== 'true'
 ### Documentation Files in Project
 
 - **AGENTS.md**: Detailed developer guidelines, conventions, and architecture
-- **Claude.md**: Technical architecture overview
+- **CLAUDE.md**: Technical architecture overview
 - **ASSETS_STRUCTURE.md**: How assets are organized and loaded
 - **README.md**: Quick start and overview
 

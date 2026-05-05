@@ -2,6 +2,7 @@
   "id": "manchester-united",
   "name": "Manchester United",
   "shortName": "MUN",
+  "venueName": "Old Trafford",
   "colors": {
     "primary": "#DA291C",
     "onPrimary": "#FFFFFF",

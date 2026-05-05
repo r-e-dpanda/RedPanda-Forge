@@ -17,7 +17,7 @@ This folder contains comprehensive documentation and guides for the RedPanda For
 | **ARCHITECTURE_GUIDE.md** | System design, patterns, best practices | Developers |
 | **QUICK_REFERENCE.md** | Cheat sheet, code snippets, tips | Experienced devs |
 | **AGENTS.md** | Development guidelines & conventions | All developers |
-| **Claude.md** | Technical architecture overview | Architects |
+| **CLAUDE.md** | Technical architecture overview | Architects |
 | **ASSETS_STRUCTURE.md** | Asset organization & loading | Content creators |
 
 ---
@@ -378,7 +378,7 @@ See PROJECT_STATUS.md for full metrics.
 ### From Repository (Original)
 
 - `AGENTS.md` - Developer guidelines & conventions
-- `Claude.md` - Technical architecture
+- `CLAUDE.md` - Technical architecture
 - `ASSETS_STRUCTURE.md` - Asset organization
 
 ### New Guides (This Package)

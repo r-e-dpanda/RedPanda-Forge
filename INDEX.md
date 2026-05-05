@@ -193,7 +193,7 @@ Welcome to the RedPanda Forge documentation package. This index helps you naviga
 
 ---
 
-### 9. **Claude.md** (44 lines) - FROM REPOSITORY
+### 9. **CLAUDE.md** (44 lines) - FROM REPOSITORY
 
    **Purpose**: Technical architecture overview  
    **Audience**: Architects, lead developers  
@@ -436,7 +436,7 @@ Before you start coding, ensure you:
 | GIT_WORKFLOW.md | 1.0 | Apr 20, 2026 | ✅ |
 | AGENTS.md | (from repo) | - | ✅ |
 | ASSETS_STRUCTURE.md | (from repo) | - | ✅ |
-| Claude.md | (from repo) | - | ✅ |
+| CLAUDE.md | (from repo) | - | ✅ |
 
 ---
 

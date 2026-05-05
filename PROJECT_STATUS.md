@@ -406,7 +406,7 @@ APP_URL=http://localhost:3000
 - ARCHITECTURE_GUIDE.md - Technical details
 - QUICK_REFERENCE.md - Cheat sheet
 - AGENTS.md (in repo) - Development guidelines
-- Claude.md (in repo) - Architecture notes
+- CLAUDE.md (in repo) - Architecture notes
 
 ---
 
