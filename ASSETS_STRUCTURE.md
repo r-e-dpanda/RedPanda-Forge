@@ -179,34 +179,13 @@ Visual media files are stored systematically matching their data entity counterp
 │   │       └── 📁 venues/     # Stadium / arena photos
 │   │           └── stade-de-france.jpg
 │   │
-│   ├── 📁 common/       # Shared across all sports
-│   │   ├── 📁 countries/     # ISO alpha-2 flags
-│   │   │   ├── vn.png
-│   │   │   ├── us.png
-│   │   │   └── fr.png
-│   │   │
-│   │   ├── 📁 event-icons/     # Action icons
-│   │   │   ├── goal.svg     # Soccer goal
-│   │   │   ├── red-card.sv     # Soccer discipline
-│   │   │   ├── match-point.svg    # Tennis scoring
-│   │   │   ├── knockout.svg    # Combat result
-│   │   │   └── three-pointer.svg   # Basketball action
-│   │   │
-│   │   └── 📁 placeholders/    # Fallback assets
-│   │       ├── default-player.png
-│   │       ├── default-club.png
-│   │       └── default-competition.png
+│   ├── 📁 common/           # Shared across all sports
+│   │   ├── 📁 countries/    # ISO alpha-2 flags (vn.png, us.png)
+│   │   ├── 📁 event-icons/  # Action icons (goal.svg, red-card.svg)
+│   │   └── 📁 placeholders/ # Fallback assets
 │   │
-│   ├── 📁 ui-elements/      # Tool-level UI assets
-│   │   ├── 📁 badges/      # LIVE, REPLAY, EXCLUSIVE
-│   │   ├── 📁 fonts/      # Typography
-│   │   └── 📁 patterns/     # Textures / gradients
-│   │
-│   └── 📁 _system/       # Reserved (internal use)
-│       └── 📁 placeholders/
-│           ├── default-stadium.jpg
-│           ├── default-team.jpg
-│           └── default-player.png
+│   ├── 📁 ui-elements/      # Tool-level UI assets (badges, fonts, patterns)
+│   └── 📁 _system/          # Reserved (internal use)
 ```
 
 ### 2.3 The Templates Packs (`/public/templates/`)
