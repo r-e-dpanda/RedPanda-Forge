@@ -2,7 +2,7 @@
 
 ## Overview
 
-SportForge is a desktop-class React application (currently being migrated/setup for Electron) designed to generate high-quality sports graphics, matchday thumbnails, and social media assets. It combines a dynamic data-binding engine with a visual canvas editor.
+RedPanda Forge is a React-based sports graphics editor (currently being migrated/setup for Electron) with a modern UI, powerful template engine, and multi-session editing support. The project has been successfully cloned, analyzed, debugged, and prepared for development.
 
 ## Tech Stack
 
