@@ -303,16 +303,22 @@ export const resolveBoundData = (
     
     let overrideFillBindingPath = overrides?.fillBindingPath !== undefined ? overrides.fillBindingPath : undefined;
     if (overrideFillBindingPath !== undefined) {
-      resolvedElement.style.fill = processBinding('fill', overrideFillBindingPath);
+      const resolvedFill = processBinding('fill', overrideFillBindingPath);
+      resolvedElement.style.fill = resolvedFill;
+      resolvedElement.fill = resolvedFill;
     } else if (resolvedElement.style.fill) {
       resolvedElement.style.fill = processBinding('fill', resolvedElement.style.fill);
+      if (resolvedElement.fill) resolvedElement.fill = resolvedElement.style.fill;
     }
     
     let overrideStrokeBindingPath = overrides?.strokeBindingPath !== undefined ? overrides.strokeBindingPath : undefined;
     if (overrideStrokeBindingPath !== undefined) {
-      resolvedElement.style.stroke = processBinding('stroke', overrideStrokeBindingPath);
+      const resolvedStroke = processBinding('stroke', overrideStrokeBindingPath);
+      resolvedElement.style.stroke = resolvedStroke;
+      resolvedElement.stroke = resolvedStroke;
     } else if (resolvedElement.style.stroke) {
       resolvedElement.style.stroke = processBinding('stroke', resolvedElement.style.stroke);
+      if (resolvedElement.stroke) resolvedElement.stroke = resolvedElement.style.stroke;
     }
   }
 

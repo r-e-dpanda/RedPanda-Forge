@@ -102,6 +102,18 @@ export const DesignTab: React.FC<DesignTabProps> = ({
       templateId: template?.id || "fallback"
     };
     const resolved = resolveBoundData(el, match, manualInputs, overrides, resolverContext);
+    
+    const bindingValue = overrides.bindingPath !== undefined ? overrides.bindingPath :
+                        (overrides.dataKey !== undefined ? `{{${overrides.dataKey}}}` :
+                        ((el as any).dataKey ? `{{${(el as any).dataKey}}}` : (isText ? (el as any).text : (el as any).src)));
+    
+    const isDateTimeBinding = typeof bindingValue === 'string' && (
+      bindingValue.toLowerCase().includes('date') || 
+      bindingValue.toLowerCase().includes('time') ||
+      bindingValue.toLowerCase().includes('kickoff') ||
+      (el as any).dataType === 'date' ||
+      (el as any).dataType === 'time'
+    );
 
     return (
       <div className="animate-in fade-in slide-in-from-right-4 duration-200">
@@ -135,7 +147,7 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                     )
                   }
                 >
-                  {isText ? t.panels.fields.valueBindingPath : t.panels.fields.sourceBindingPath}
+                  {isText ? t.panels.fields.textBindingPath : t.panels.fields.imageBindingPath}
                 </FieldLabel>
                 <div className={cn(
                   "flex items-center bg-app-bg border rounded-md focus-within:border-app-accent overflow-hidden h-8 transition-all",
@@ -187,9 +199,14 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                 <div className="bg-app-card border border-app-border rounded-lg p-3 space-y-2.5">
                   <FieldLabel
                     action={
-                      activeFormatters.length > 0 && (
-                        <ResetLink onClick={() => handleOverride(el.id, { formatters: [] })} label={t.panels.fields.clear} />
-                      )
+                      <div className="flex gap-2">
+                        {overrides.formatters !== undefined && (
+                          <ResetLink onClick={() => handleOverride(el.id, { formatters: undefined })} label={t.panels.fields.reset} />
+                        )}
+                        {activeFormatters.length > 0 && (
+                          <ResetLink onClick={() => handleOverride(el.id, { formatters: [] })} label={t.panels.fields.clear} />
+                        )}
+                      </div>
                     }
                   >
                     {t.panels.fields.transform}
@@ -217,12 +234,20 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                       const val = e.target.value;
                       if (!val) return;
                       
+                      const isTimeField = bindingValue.toLowerCase().includes('time') || bindingValue.toLowerCase().includes('kickoff');
+                      
                       if (val === 'prefix:' || val === 'suffix:') {
                         setPendingFormatter({ type: val, label: val === 'prefix:' ? 'Prefix' : 'Suffix' });
                         setFormatterInput("");
                       } else if (val === 'shorten:') {
                         setPendingFormatter({ type: val, label: 'Max Length' });
                         setFormatterInput("10");
+                      } else if (val === 'date:') {
+                        setPendingFormatter({ type: val, label: 'Date Format' });
+                        setFormatterInput(isTimeField ? "HH:mm" : "dd/MM/yyyy");
+                      } else if (val === 'time:') {
+                        setPendingFormatter({ type: val, label: 'Time Format' });
+                        setFormatterInput("HH:mm");
                       } else {
                         handleOverride(el.id, { formatters: [...activeFormatters, val] });
                       }
@@ -243,18 +268,23 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                       <option value="prefix:">Add Prefix...</option>
                       <option value="suffix:">Add Suffix...</option>
                     </optgroup>
+
+                    {(isDateTimeBinding && !activeFormatters.some((f: string) => f.startsWith('date:') || f.startsWith('time:'))) && (
+                      <optgroup label="Date & Time">
+                        <option value="date:">Date Format (date-fns)...</option>
+                        <option value="time:">Time Format (date-fns)...</option>
+                      </optgroup>
+                    )}
                   </select>
 
                   {pendingFormatter && (
-                    <div className="bg-app-sidebar/50 border border-app-accent/30 rounded-md p-2 space-y-2 animate-in fade-in zoom-in-95 duration-150">
-                      <div className="flex items-center justify-between">
-                        <span className="text-ui-micro text-app-accent font-medium">{pendingFormatter.label}</span>
+                    <div className="bg-app-sidebar/50 border border-app-accent/30 rounded-md p-1.5 space-y-1.5 animate-in fade-in zoom-in-95 duration-150">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] text-app-accent font-bold uppercase tracking-tight">{pendingFormatter.label}</span>
                         <button 
                           onClick={() => setPendingFormatter(null)}
-                          className="text-app-muted hover:text-app-text text-ui-micro transition-colors"
-                        >
-                          Cancel
-                        </button>
+                          className="text-app-muted hover:text-app-text text-[10px] font-medium transition-colors"
+                        >Cancel</button>
                       </div>
                       <div className="flex gap-1.5">
                         <input
@@ -263,7 +293,11 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                           value={formatterInput}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
-                              handleOverride(el.id, { formatters: [...activeFormatters, pendingFormatter.type + formatterInput] });
+                              let newFormatters = [...activeFormatters];
+                              if (pendingFormatter.type === 'date:' || pendingFormatter.type === 'time:') {
+                                newFormatters = newFormatters.filter(f => !f.startsWith('date:') && !f.startsWith('time:'));
+                              }
+                              handleOverride(el.id, { formatters: [...newFormatters, pendingFormatter.type + formatterInput] });
                               setPendingFormatter(null);
                             }
                           }}
@@ -272,7 +306,11 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                         />
                         <button
                           onClick={() => {
-                            handleOverride(el.id, { formatters: [...activeFormatters, pendingFormatter.type + formatterInput] });
+                            let newFormatters = [...activeFormatters];
+                            if (pendingFormatter.type === 'date:' || pendingFormatter.type === 'time:') {
+                              newFormatters = newFormatters.filter(f => !f.startsWith('date:') && !f.startsWith('time:'));
+                            }
+                            handleOverride(el.id, { formatters: [...newFormatters, pendingFormatter.type + formatterInput] });
                             setPendingFormatter(null);
                           }}
                           className="bg-app-accent text-white px-2 rounded text-ui-micro font-medium hover:bg-app-accent-hover transition-colors"
@@ -294,7 +332,7 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                     )
                   }
                 >
-                  {isText ? t.panels.fields.value : t.panels.fields.source}
+                  {isText ? t.panels.fields.text : t.panels.fields.image}
                 </FieldLabel>
                 {isText ? (
                   <div className={cn(
@@ -400,17 +438,19 @@ export const DesignTab: React.FC<DesignTabProps> = ({
               </div>
             )}
 
-            <div>
-              <FieldLabel>{t.panels.fields.skewX}</FieldLabel>
-              <Input
-                type="number"
-                disabled={!isEditable('skewX')}
-                step={0.05}
-                value={overrides.skewX !== undefined ? overrides.skewX : (el.skewX || 0)}
-                onChange={e => handleOverride(el.id, { skewX: Number(e.target.value) })}
-                className="h-8 text-ui-xs bg-app-bg px-2.5"
-              />
-            </div>
+            {isShape && (
+              <div>
+                <FieldLabel>{t.panels.fields.skewX}</FieldLabel>
+                <Input
+                  type="number"
+                  disabled={!isEditable('skewX')}
+                  step={0.05}
+                  value={overrides.skewX !== undefined ? overrides.skewX : (el.skewX || 0)}
+                  onChange={e => handleOverride(el.id, { skewX: Number(e.target.value) })}
+                  className="h-8 text-ui-xs bg-app-bg px-2.5"
+                />
+              </div>
+            )}
 
             <div className="border-t border-app-border/30 pt-3">
               <FieldLabel>{t.panels.fields.mirroring}</FieldLabel>
@@ -605,7 +645,7 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                         <ResetLink onClick={() => handleOverride(el.id, { fillBindingPath: undefined })} />
                       )}
                     >
-                      {t.panels.fields.sourceBindingPath}
+                      {t.panels.fields.colorBindingPath}
                     </FieldLabel>
                     <div className={cn(
                       "flex items-center bg-app-bg border rounded-md focus-within:border-app-accent overflow-hidden h-8",
@@ -624,6 +664,24 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                         </div>
                       )}
                     </div>
+                    {/* Binding key pills for fill */}
+                    {(() => {
+                      const pathValue = overrides.fillBindingPath !== undefined ? overrides.fillBindingPath : ((el as any).style?.fill || "");
+                      const matches = typeof pathValue === 'string' ? pathValue.match(/{{([^}]+)}}/g) : null;
+                      if (!matches) return null;
+                      const bindings = matches.map((m: string) => m.replace('{{', '').replace('}}', '').trim());
+                      if (bindings.length === 0) return null;
+                      return (
+                        <div className="flex gap-1.5 items-center mt-2 flex-wrap">
+                          <span className="text-ui-xs text-app-muted">Keys:</span>
+                          {bindings.map((b: string, i: number) => (
+                            <span key={i} className="text-ui-xs bg-app-sidebar border border-app-border text-app-text px-2 py-0.5 rounded font-mono">
+                              {b.split('|')[0].trim()}
+                            </span>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   <UnifiedColorPicker

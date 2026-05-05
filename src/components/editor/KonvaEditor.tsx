@@ -9,18 +9,61 @@ import { exportHTMLZip, exportSVG } from "../../lib/exportUtils";
 
 const URLImage = ({ imageInfo, commonProps }: { imageInfo: any, commonProps: any }) => {
   const [img] = useImage(imageInfo.src || "", "anonymous");
+  
+  // Default to container size
+  let renderWidth = imageInfo.width;
+  let renderHeight = imageInfo.height;
+  let offsetX = imageInfo.width / 2;
+  let offsetY = imageInfo.height / 2;
+  let crop = undefined;
+
+  const objectFit = imageInfo.objectFit || 'fill';
+
+  if (img && objectFit === 'contain') {
+    const imgRatio = img.width / img.height;
+    const containerRatio = imageInfo.width / imageInfo.height;
+
+    if (imgRatio > containerRatio) {
+      renderWidth = imageInfo.width;
+      renderHeight = imageInfo.width / imgRatio;
+    } else {
+      renderHeight = imageInfo.height;
+      renderWidth = imageInfo.height * imgRatio;
+    }
+    offsetX = renderWidth / 2;
+    offsetY = renderHeight / 2;
+  } else if (img && objectFit === 'cover') {
+    const imgRatio = img.width / img.height;
+    const containerRatio = imageInfo.width / imageInfo.height;
+
+    let cw, ch, cx, cy;
+    if (imgRatio > containerRatio) {
+      // Image is wider than container, crop sides
+      ch = img.height;
+      cw = img.height * containerRatio;
+      cx = (img.width - cw) / 2;
+      cy = 0;
+    } else {
+      // Image is taller than container, crop top/bottom
+      cw = img.width;
+      ch = img.width / containerRatio;
+      cx = 0;
+      cy = (img.height - ch) / 2;
+    }
+    crop = { x: cx, y: cy, width: cw, height: ch };
+  }
+
   return (
     <Image
-      x={imageInfo.x}
-      y={imageInfo.y}
-      width={imageInfo.width}
-      height={imageInfo.height}
+      {...commonProps}
+      image={img}
+      width={renderWidth}
+      height={renderHeight}
+      offsetX={offsetX}
+      offsetY={offsetY}
+      crop={crop}
       rotation={imageInfo.rotation}
       opacity={imageInfo.opacity}
-      skewX={imageInfo.skewX || 0}
-      skewY={imageInfo.skewY || 0}
-      image={img}
-      {...commonProps}
     />
   );
 };
@@ -159,13 +202,10 @@ const KonvaEditor = forwardRef<EditorRef, KonvaEditorProps>(({ rightExpanded, se
   useEffect(() => {
     if (!containerRef.current || !template?.id) return;
     
-    // Force re-fit only when the template ID actually changes
-    if (lastTemplateIdRef.current === template.id) return;
-    lastTemplateIdRef.current = template.id;
-
-    const timer = setTimeout(fitToScreen, 200); // Slightly longer delay to allow flex layout to stabilize
+    // Fit when template changes OR when the right panel is toggled (layout change)
+    const timer = setTimeout(fitToScreen, 300); // 300ms matches the transition duration
     return () => clearTimeout(timer);
-  }, [template?.id, fitToScreen]);
+  }, [template?.id, rightExpanded, fitToScreen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

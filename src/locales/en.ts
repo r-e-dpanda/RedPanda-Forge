@@ -42,7 +42,11 @@ export const strings = {
   sidebar: {
     tabs: {
       matches: "Matches",
-      templates: "Templates"
+      library: "Library"
+    },
+    library: {
+      templates: "Templates",
+      database: "Database"
     },
     filters: {
       ratio: "Ratio",
@@ -57,7 +61,7 @@ export const strings = {
       noMatchesFound: "No matches found."
     },
     templates: {
-      importBtn: "Import JSON",
+      importBtn: "Import Pack",
       noTemplates: "No templates",
       useTemplate: "Use"
     }
@@ -106,10 +110,14 @@ export const strings = {
       layers: "Layers"
     },
     fields: {
-      sourceBindingPath: "Source Binding",
-      source: "Source",
-      valueBindingPath: "Value Binding",
-      value: "Value",
+      imageBindingPath: "Image Binding",
+      image: "Image",
+      textBindingPath: "Text Binding",
+      text: "Text",
+      colorBindingPath: "Color Binding",
+      color: "Color",
+      strokeBindingPath: "Stroke Binding",
+      stroke: "Stroke",
       transform: "Transform",
       clear: "Clear",
       addPipeline: "+ Pipeline",
@@ -118,7 +126,6 @@ export const strings = {
       opacity: "Opacity",
       width: "Width",
       height: "Height",
-      color: "Color",
       blur: "Blur",
       offsetX: "Offset X",
       offsetY: "Offset Y",

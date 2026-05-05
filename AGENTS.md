@@ -262,9 +262,9 @@ To clarify between data engine values and manual overrides:
   - Color bindings must display current HEX code (e.g., `#FF0000`) instead of `N/A`
 
 - **Placeholder Logic**:
-  - **Non-Text (Fill/Source)**: If bound, show `Bind to [resolvedValue]`
+  - **Non-Text (Fill/Source)**: If bound, show `[resolvedValue]`
   - **Text Elements**:
-    - If **Transformation Active** (formatters applied), show `Parsed as [transformedValue]`
+    - If **Transformation Active** (formatters applied), show `[transformedValue]`
     - If no transformation, show `[resolvedValue]` directly
   - **Static Value**: Context-aware (e.g., `#FFFFFF`, `Rendered value...`)
 

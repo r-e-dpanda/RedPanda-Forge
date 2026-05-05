@@ -157,7 +157,15 @@ export const DataTab: React.FC<DataTabProps> = ({
       <div>
         <h3 className="text-ui-xs text-app-muted font-normal mb-3">{t.panels.fields.dataSources}</h3>
         <div className="flex flex-col gap-2">
-          {elementsWithBinding.map(element => {
+          {(() => {
+            const uniqueKeys = new Set();
+            const uniqueElements = elementsWithBinding.filter(el => {
+              if (!el.dataKey || uniqueKeys.has(el.dataKey)) return false;
+              uniqueKeys.add(el.dataKey);
+              return true;
+            });
+            
+            return uniqueElements.map(element => {
             const resolverContext = {
               packId: activeSession?.packId || "_default_pack",
               templateId: template?.id || "fallback"
@@ -224,7 +232,7 @@ export const DataTab: React.FC<DataTabProps> = ({
                 )}
               </div>
             );
-          })}
+          })})()}
           {elementsWithBinding.length === 0 && (
             <div className="text-ui-xs text-app-muted italic text-center p-3">No bound variables in template</div>
           )}

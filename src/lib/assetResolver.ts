@@ -22,9 +22,9 @@ export function resolveAssetPath(src: string, context: ResolverContext): string 
     return src;
   }
 
-  // Set default configurable roots
-  const ASSET_ROOT = context.assetRoot || '/assets';
-  const TEMPLATE_ROOT = context.templateRoot || '/templates';
+  // Set default configurable roots (use relative paths for Electron support)
+  const ASSET_ROOT = context.assetRoot || './assets';
+  const TEMPLATE_ROOT = context.templateRoot || './templates';
   
   const ctxPack = context.packId || '_default_pack';
   const ctxTemplate = context.templateId || 'fallback';

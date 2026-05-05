@@ -4,12 +4,13 @@ import { LeftSidebar } from "./components/LeftSidebar";
 import EditorWorkspace from "./components/editor/EditorWorkspace";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import PasteTemplateModal from "./components/PasteTemplateModal";
+import { LibraryModal } from "./components/LibraryModal";
 import { Sport, Ratio } from "./types/template";
 import { 
   Settings, 
-  Layout, 
   ChevronDown,
-  AlertTriangle
+  AlertTriangle,
+  Library
 } from "lucide-react";
 import { useSettingsStore } from "./stores/settingsStore";
 import { applyTheme } from "./lib/themeUtils";
@@ -37,10 +38,10 @@ export default function App() {
     root.style.setProperty('--app-ui-scale', String(settings.uiScale));
   }, [settings.theme, settings.uiScale]);
 
-  const [activeLeftTab, setActiveLeftTab] = useState<'matches' | 'templates'>('matches');
   const [selectedRatio, setSelectedRatio] = useState<Ratio | "All">('All');
   const [selectedCompetition, setSelectedCompetition] = useState("All");
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   
   const [showConfirmRestart, setShowConfirmRestart] = useState<{ template: any } | null>(null);
 
@@ -78,7 +79,6 @@ export default function App() {
     if (!current) return;
 
     // Logic from AGENTS.md: Changing the sport dropdown updates the active tab's sport.
-    // 1. If dirty, show custom confirm dialog.
     const isDirty = Object.keys(current.elementOverrides).length > 0 || 
                     current.historyIndex >= 0;
 
@@ -90,17 +90,13 @@ export default function App() {
   };
 
   const performSportChange = (sport: Sport) => {
-    // setSport already clears template, match, and overrides in the store
     setSport(sport);
-    
-    // Reset local UI filters
     setSelectedRatio('All');
     setSelectedCompetition("All");
     setShowConfirmSport(null);
   };
 
   const handleSetTemplate = (template: any) => {
-    // 1. Get latest state
     const state = useEditorStore.getState();
     const current = state.sessions.find(s => s.id === state.activeSessionId);
 
@@ -109,7 +105,6 @@ export default function App() {
       return;
     }
 
-    // 2. Comprehensive dirty check
     const isModified = Object.keys(current.elementOverrides).length > 0 || 
                       Object.keys(current.manualInputs).length > 0 ||
                       current.historyIndex >= 0;
@@ -137,10 +132,6 @@ export default function App() {
   };
 
   const handleSetMatch = (match: any) => {
-    // Switching matches doesn't necessarily wipe overrides in the current logic, 
-    // but usually user wants a clean slate or at least to be aware.
-    // However, setMatch in store ONLY updates match. 
-    // If the user wants to switch context completely, they usually switch templates too.
     setMatch(match);
   };
 
@@ -166,6 +157,14 @@ export default function App() {
 
         <div className="flex items-center gap-2">
           <button 
+            onClick={() => setIsLibraryOpen(true)}
+            className="h-8 px-3 flex items-center gap-2 text-app-muted hover:text-app-text hover:bg-app-card rounded-md transition-all text-ui-xs font-medium"
+          >
+            <Library size={16} />
+            {t.sidebar.tabs.library}
+          </button>
+          <div className="w-px h-4 bg-app-border mx-1" />
+          <button 
             onClick={() => toggleModal(true)}
             className="w-8 h-8 flex items-center justify-center text-app-muted hover:text-app-text hover:bg-app-card rounded-md transition-colors"
           >
@@ -180,8 +179,6 @@ export default function App() {
           onSportChange={handleSportChange}
           selectedRatio={selectedRatio}
           selectedCompetition={selectedCompetition}
-          activeLeftTab={activeLeftTab}
-          setActiveLeftTab={setActiveLeftTab}
           setSelectedRatio={setSelectedRatio}
           templates={templates}
           isTemplatesLoaded={isTemplatesLoaded}
@@ -189,13 +186,21 @@ export default function App() {
           activeTemplate={activeSession?.template}
           activeMatch={activeSession?.match}
           setEditorMatch={handleSetMatch}
-          setIsModalOpen={setIsImportOpen}
         />
         
         <EditorWorkspace ref={editorRef} />
       </div>
 
       <SettingsModal />
+      <LibraryModal 
+        isOpen={isLibraryOpen}
+        onClose={() => setIsLibraryOpen(false)}
+        templates={templates}
+        onImport={() => {
+          setIsLibraryOpen(false);
+          setIsImportOpen(true);
+        }}
+      />
       <PasteTemplateModal 
         isOpen={isImportOpen} 
         onClose={() => setIsImportOpen(false)}

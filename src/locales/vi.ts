@@ -44,7 +44,11 @@ export const strings: LocaleStrings = {
   sidebar: {
     tabs: {
       matches: "Trận Đấu",
-      templates: "Templates"
+      library: "Thư Viện"
+    },
+    library: {
+      templates: "Templates",
+      database: "Cơ sở dữ liệu"
     },
     filters: {
       ratio: "Tỷ lệ",
@@ -59,7 +63,7 @@ export const strings: LocaleStrings = {
       noMatchesFound: "Không tìm thấy trận đấu nào."
     },
     templates: {
-      importBtn: "Nhập JSON",
+      importBtn: "Nhập Gói",
       noTemplates: "Không có template",
       useTemplate: "Sử dụng Template"
     }
@@ -108,10 +112,14 @@ export const strings: LocaleStrings = {
       layers: "Các lớp"
     },
     fields: {
-      sourceBindingPath: "Nguồn - Binding",
-      source: "Nguồn",
-      valueBindingPath: "Giá trị - Binding",
-      value: "Giá trị",
+      imageBindingPath: "Hình ảnh - Binding",
+      image: "Hình ảnh",
+      textBindingPath: "Văn bản - Binding",
+      text: "Văn bản",
+      colorBindingPath: "Màu sắc - Binding",
+      color: "Màu sắc",
+      strokeBindingPath: "Viền - Binding",
+      stroke: "Viền",
       transform: "Bộ lọc",
       clear: "Xóa",
       addPipeline: "+ Thêm bộ lọc...",
@@ -120,7 +128,6 @@ export const strings: LocaleStrings = {
       opacity: "Độ trong suốt",
       width: "Độ rộng",
       height: "Độ cao",
-      color: "Màu sắc",
       blur: "Độ mờ",
       offsetX: "Lệch X",
       offsetY: "Lệch Y",

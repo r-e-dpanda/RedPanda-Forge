@@ -238,13 +238,18 @@ const EditorWorkspace = forwardRef((props, ref) => {
            </div>
         </div>
         
-        {/* Right Panel Wrapper */}
-        <RightPanel 
-           rightExpanded={rightExpanded}
-           setRightExpanded={setRightExpanded}
-           activeRightTab={activeRightTab}
-           setActiveRightTab={setActiveRightTab}
-        />
+        {/* Right Panel Wrapper with smooth transition */}
+        <div className={cn(
+          "transition-all duration-300 ease-in-out overflow-hidden border-l border-app-border bg-app-sidebar shrink-0",
+          rightExpanded ? "w-[21.25rem]" : "w-0"
+        )}>
+          <RightPanel 
+            rightExpanded={rightExpanded}
+            setRightExpanded={setRightExpanded}
+            activeRightTab={activeRightTab}
+            setActiveRightTab={setActiveRightTab}
+          />
+        </div>
       </div>
 
       <AlertDialog open={!!sessionToClose} onOpenChange={(open) => !open && setSessionToClose(null)}>

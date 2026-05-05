@@ -40,7 +40,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
   } = useEditorStore();
 
   const activeSession = sessions.find(s => s.id === activeSessionId);
-  if (!rightExpanded) return null;
+  // Content will be hidden by parent container width + overflow-hidden
 
   const template = activeSession?.template || null;
   const match = activeSession?.match || null;
@@ -134,7 +134,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
   });
 
   return (
-    <aside className="w-[21.25rem] bg-app-sidebar border-l border-app-border flex flex-col shrink-0 h-full z-10 transition-all font-sans relative">
+    <aside className="w-full h-full flex flex-col shrink-0 z-10 font-sans relative">
 
       {/* ── Panel tab bar ─────────────────────────────────────────────── */}
       <div className="flex bg-app-sidebar h-[2.75rem] shrink-0 border-b border-app-border">
